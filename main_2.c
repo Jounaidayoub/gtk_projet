@@ -1,7 +1,29 @@
 #include <gtk/gtk.h>
 #include "global.h"
+#include "entry.h"
 // #include "Scale.h"
 // #include "scroll.h"
+
+// Global application data structure
+typedef struct {
+    GtkWidget *window;
+    GtkWidget *preview_area;     // The preview area where widgets are placed
+    GtkWidget *hierarchy_view;   // Tree view for widget hierarchy
+    GtkTreeStore *hierarchy_store; // Tree store for hierarchy
+    GtkWidget *properties_panel;  // Right panel for properties
+} AppData;
+
+// Forward declarations
+static void show_properties_dialog(GtkWidget *widget, gpointer data);
+static void on_drag_data_received(GtkWidget *widget, GdkDragContext *context, gint x, gint y,
+                          GtkSelectionData *data, guint info, guint time, gpointer user_data);
+static void export_to_xml(GtkWidget *widget, gpointer data);
+static void run_demo(GtkWidget *widget, gpointer data);
+static void add_basic_entry_clicked(GtkWidget *widget, gpointer data);
+static void add_password_entry_clicked(GtkWidget *widget, gpointer data);
+static void show_basic_entry_dialog(AppData *app_data);
+static void show_password_entry_dialog(AppData *app_data);
+static void add_to_hierarchy(AppData *app_data, const gchar *widget_type, GtkWidget *widget);
 
 // Function to show properties dialog
 void show_properties_dialog(GtkWidget *widget, gpointer data) {
@@ -66,163 +88,429 @@ void run_demo(GtkWidget *widget, gpointer data) {
     g_print("Run Demo\n");
 }
 
-// Function to draw a window inside the preview area
-void draw_window(GtkWidget *widget, gpointer data) {
-    GtkWidget *preview_grid = GTK_WIDGET(data);
-    GtkWidget *window_frame = gtk_frame_new("Window");
-    gtk_widget_set_size_request(window_frame, 200, 150);
-    gtk_grid_attach(GTK_GRID(preview_grid), window_frame, 0, 0, 1, 1);
-    gtk_widget_show_all(preview_grid);
+// Function to add an item to the hierarchy tree
+static void add_to_hierarchy(AppData *app_data, const gchar *widget_type, GtkWidget *widget) {
+    GtkTreeIter iter;
+    gtk_tree_store_append(app_data->hierarchy_store, &iter, NULL);
+    gtk_tree_store_set(app_data->hierarchy_store, &iter, 0, widget_type, 1, widget, -1);
+    
+    // Expand all rows to show the newly added item
+    gtk_tree_view_expand_all(GTK_TREE_VIEW(app_data->hierarchy_view));
+}
+
+// Function to show dialog for basic entry configuration
+static void show_basic_entry_dialog(AppData *app_data) {
+    GtkWidget *dialog;
+    GtkWidget *content_area;
+    GtkWidget *grid;
+    GtkWidget *x_label, *y_label, *width_label, *height_label;
+    GtkWidget *x_entry, *y_entry, *width_entry, *height_entry;
+    GtkWidget *editable_check, *visible_check;
+    GtkWidget *placeholder_label, *max_len_label, *default_text_label;
+    GtkWidget *placeholder_entry, *max_len_entry, *default_text_entry;
+    gint response;
+    
+    // Create dialog
+    dialog = gtk_dialog_new_with_buttons("Basic Entry Properties",
+                                        GTK_WINDOW(app_data->window),
+                                        GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                        "OK", GTK_RESPONSE_ACCEPT,
+                                        "Cancel", GTK_RESPONSE_CANCEL,
+                                        NULL);
+    
+    content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    
+    // Create grid for form layout
+    grid = gtk_grid_new();
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+    
+    // Position fields
+    x_label = gtk_label_new("X Position:");
+    y_label = gtk_label_new("Y Position:");
+    x_entry = gtk_entry_new();
+    y_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(x_entry), "10");
+    gtk_entry_set_text(GTK_ENTRY(y_entry), "10");
+    
+    // Size fields
+    width_label = gtk_label_new("Width:");
+    height_label = gtk_label_new("Height:");
+    width_entry = gtk_entry_new();
+    height_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(width_entry), "150");
+    gtk_entry_set_text(GTK_ENTRY(height_entry), "30");
+    
+    // Checkbox fields
+    editable_check = gtk_check_button_new_with_label("Editable");
+    visible_check = gtk_check_button_new_with_label("Visible");
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(editable_check), TRUE);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(visible_check), TRUE);
+    
+    // Text fields
+    placeholder_label = gtk_label_new("Placeholder Text:");
+    max_len_label = gtk_label_new("Max Length:");
+    default_text_label = gtk_label_new("Default Text:");
+    placeholder_entry = gtk_entry_new();
+    max_len_entry = gtk_entry_new();
+    default_text_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(placeholder_entry), "Enter text here...");
+    gtk_entry_set_text(GTK_ENTRY(max_len_entry), "0");
+    
+    // Add widgets to grid
+    gtk_grid_attach(GTK_GRID(grid), x_label, 0, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), x_entry, 1, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), y_label, 0, 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), y_entry, 1, 1, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), width_label, 0, 2, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), width_entry, 1, 2, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), height_label, 0, 3, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), height_entry, 1, 3, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), editable_check, 0, 4, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), visible_check, 0, 5, 2, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), placeholder_label, 0, 6, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), placeholder_entry, 1, 6, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), max_len_label, 0, 7, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), max_len_entry, 1, 7, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), default_text_label, 0, 8, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), default_text_entry, 1, 8, 1, 1);
+    
+    // Add grid to dialog
+    gtk_container_add(GTK_CONTAINER(content_area), grid);
+    gtk_widget_show_all(dialog);
+    
+    // Run dialog
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+    
+    if (response == GTK_RESPONSE_ACCEPT) {
+        // Get values from form
+        gint x = atoi(gtk_entry_get_text(GTK_ENTRY(x_entry)));
+        gint y = atoi(gtk_entry_get_text(GTK_ENTRY(y_entry)));
+        gint width = atoi(gtk_entry_get_text(GTK_ENTRY(width_entry)));
+        gint height = atoi(gtk_entry_get_text(GTK_ENTRY(height_entry)));
+        gboolean is_editable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(editable_check));
+        gboolean is_visible = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(visible_check));
+        const gchar *placeholder = gtk_entry_get_text(GTK_ENTRY(placeholder_entry));
+        gint max_len = atoi(gtk_entry_get_text(GTK_ENTRY(max_len_entry)));
+        const gchar *default_text = gtk_entry_get_text(GTK_ENTRY(default_text_entry));
+        
+        // Create basic entry
+        entry_type_basic *entry_basic = Init_Entry_Basic(
+            dim(width, height),   // Using the dimension macro
+            is_editable,
+            is_visible,
+            placeholder,
+            max_len,
+            default_text,
+            app_data->preview_area,
+            cord(x, y)            // Using the coordinates macro
+        );
+        
+        if (entry_basic != NULL) {
+            GtkWidget *entry_widget = creer_entry_basic(entry_basic);
+            add_to_hierarchy(app_data, "Basic Entry", entry_widget);
+            gtk_widget_show_all(app_data->preview_area);
+        }
+    }
+    
+    gtk_widget_destroy(dialog);
+}
+
+// Function to show dialog for password entry configuration
+static void show_password_entry_dialog(AppData *app_data) {
+    GtkWidget *dialog;
+    GtkWidget *content_area;
+    GtkWidget *grid;
+    GtkWidget *x_label, *y_label, *width_label, *height_label;
+    GtkWidget *x_entry, *y_entry, *width_entry, *height_entry;
+    GtkWidget *placeholder_label, *invisible_char_label;
+    GtkWidget *placeholder_entry, *invisible_char_entry;
+    gint response;
+    
+    // Create dialog
+    dialog = gtk_dialog_new_with_buttons("Password Entry Properties",
+                                        GTK_WINDOW(app_data->window),
+                                        GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                        "OK", GTK_RESPONSE_ACCEPT,
+                                        "Cancel", GTK_RESPONSE_CANCEL,
+                                        NULL);
+    
+    content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    
+    // Create grid for form layout
+    grid = gtk_grid_new();
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+    
+    // Position fields
+    x_label = gtk_label_new("X Position:");
+    y_label = gtk_label_new("Y Position:");
+    x_entry = gtk_entry_new();
+    y_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(x_entry), "10");
+    gtk_entry_set_text(GTK_ENTRY(y_entry), "50");  // Different default Y from basic entry
+    
+    // Size fields
+    width_label = gtk_label_new("Width:");
+    height_label = gtk_label_new("Height:");
+    width_entry = gtk_entry_new();
+    height_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(width_entry), "150");
+    gtk_entry_set_text(GTK_ENTRY(height_entry), "30");
+    
+    // Password-specific fields
+    placeholder_label = gtk_label_new("Placeholder Text:");
+    invisible_char_label = gtk_label_new("Mask Character:");
+    placeholder_entry = gtk_entry_new();
+    invisible_char_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(placeholder_entry), "Enter password...");
+    gtk_entry_set_text(GTK_ENTRY(invisible_char_entry), "*");
+    gtk_entry_set_max_length(GTK_ENTRY(invisible_char_entry), 1);  // Only one character
+    
+    // Add widgets to grid
+    gtk_grid_attach(GTK_GRID(grid), x_label, 0, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), x_entry, 1, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), y_label, 0, 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), y_entry, 1, 1, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), width_label, 0, 2, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), width_entry, 1, 2, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), height_label, 0, 3, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), height_entry, 1, 3, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), placeholder_label, 0, 4, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), placeholder_entry, 1, 4, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), invisible_char_label, 0, 5, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), invisible_char_entry, 1, 5, 1, 1);
+    
+    // Add grid to dialog
+    gtk_container_add(GTK_CONTAINER(content_area), grid);
+    gtk_widget_show_all(dialog);
+    
+    // Run dialog
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+    
+    if (response == GTK_RESPONSE_ACCEPT) {
+        // Get values from form
+        gint x = atoi(gtk_entry_get_text(GTK_ENTRY(x_entry)));
+        gint y = atoi(gtk_entry_get_text(GTK_ENTRY(y_entry)));
+        gint width = atoi(gtk_entry_get_text(GTK_ENTRY(width_entry)));
+        gint height = atoi(gtk_entry_get_text(GTK_ENTRY(height_entry)));
+        const gchar *placeholder = gtk_entry_get_text(GTK_ENTRY(placeholder_entry));
+        const gchar *invisible_char_text = gtk_entry_get_text(GTK_ENTRY(invisible_char_entry));
+        
+        // Default to '*' if no character is provided
+        gchar invisible_char = (invisible_char_text && invisible_char_text[0]) ? invisible_char_text[0] : '*';
+        
+        // Create password entry
+        entry_type_password *entry_password = Init_Entry_Password(
+            dim(width, height),  // Using the dimension macro
+            placeholder,
+            invisible_char,
+            app_data->preview_area,
+            cord(x, y)           // Using the coordinates macro
+        );
+        
+        if (entry_password != NULL) {
+            GtkWidget *entry_widget = creer_entry_pass(entry_password);
+            add_to_hierarchy(app_data, "Password Entry", entry_widget);
+            gtk_widget_show_all(app_data->preview_area);
+        }
+    }
+    
+    gtk_widget_destroy(dialog);
+}
+
+// Function to handle basic entry button click
+static void add_basic_entry_clicked(GtkWidget *widget, gpointer data) {
+    AppData *app_data = (AppData *)data;
+    show_basic_entry_dialog(app_data);
+}
+
+// Function to handle password entry button click
+static void add_password_entry_clicked(GtkWidget *widget, gpointer data) {
+    AppData *app_data = (AppData *)data;
+    show_password_entry_dialog(app_data);
 }
 
 int main(int argc, char *argv[]) {
     // Initialisation de GTK
     gtk_init(&argc, &argv);
+    
+    // App data structure to hold our widgets
+    AppData app_data;
 
     // Dimensions et coordonnées de la fenêtre
-    dimension dim = {400, 900}; // Largeur: 800px, Hauteur: 600px
-    coordonnees cord = {400, 250}; // Position: x=200, y=100
+    dimension dim = {900, 700}; // Increased size
+    coordonnees cord = {400, 250};
 
     // Couleur de fond
-    HexColor *bg_color = hex_color_init("#ffffff"); // Couleur rose
+    HexColor *bg_color = hex_color_init("#ffffff");
 
     // Image de fond
     MonImage bg_img = {
-           .path ="ex_img.jpg" , // Remplacez par le chemin de votre image
+           .path ="ex_img.jpg",
              .dim = dim,
            .cord = cord
     };
 
     // Initialisation de la fenêtre
-    Mywindow *maFenetre = init_window("                                             Presentation Ordinateur", "icon1.png",
-            dim,                       // Dimensions
-            0,                        // Bordure
-            FALSE,                      // Redimensionnable
-            GTK_WIN_POS_CENTER,        // Position: Centrée
-            cord,                      // Coordonnées
-            *bg_color,                 // Couleur de fond
-            bg_img                     // Image de fond
+    Mywindow *maFenetre = init_window("GTK UI Builder", "icon1.png",
+            dim,
+            0,
+            TRUE,                      // Make window resizable
+            GTK_WIN_POS_CENTER,
+            cord,
+            *bg_color,
+            bg_img
     );
+    app_data.window = maFenetre->window;
 
     // Création de la fenêtre
     create_window(maFenetre);
 
-    // Create main horizontal box to hold side panel, content, and right panel
-    GtkWidget *main_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    // Create main horizontal box
+    GtkWidget *main_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     gtk_container_add(GTK_CONTAINER(maFenetre->window), main_box);
-
-    // Create side panel (left vertical box)
-    GtkWidget *side_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    gtk_widget_set_size_request(side_panel, 200, -1);  // Fixed width for side panel
-
-    // Top section: Container buttons
-    GtkWidget *container_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    gtk_box_pack_start(GTK_BOX(container_box), gtk_label_new("Containers"), FALSE, FALSE, 5);
-
+    
+    // Create left panel with fixed width
+    GtkWidget *left_panel_scroll = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(left_panel_scroll),
+                                  GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+    gtk_widget_set_size_request(left_panel_scroll, 220, -1);
+    
+    GtkWidget *left_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    gtk_container_add(GTK_CONTAINER(left_panel_scroll), left_panel);
+    
+    // Create sections in left panel
+    GtkWidget *widgets_frame = gtk_frame_new("Widgets");
+    GtkWidget *widgets_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    gtk_container_set_border_width(GTK_CONTAINER(widgets_box), 5);
+    gtk_container_add(GTK_CONTAINER(widgets_frame), widgets_box);
+    
+    // Add standard widget buttons to widget box
+    const char *widget_labels[] = {"Label", "Button", "Entry", "ComboBox", "Scale", "Checkbox"};
+    for (int i = 0; i < 6; i++) {
+        GtkWidget *button = gtk_button_new_with_label(widget_labels[i]);
+        g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog), &app_data);
+        gtk_box_pack_start(GTK_BOX(widgets_box), button, FALSE, FALSE, 2);
+    }
+    
+    // Add custom entries section
+    GtkWidget *entries_frame = gtk_frame_new("Custom Entries");
+    GtkWidget *entries_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    gtk_container_set_border_width(GTK_CONTAINER(entries_box), 5);
+    gtk_container_add(GTK_CONTAINER(entries_frame), entries_box);
+    
+    // Add the two entry type buttons
+    GtkWidget *basic_entry_btn = gtk_button_new_with_label("Add Basic Entry");
+    GtkWidget *password_entry_btn = gtk_button_new_with_label("Add Password Entry");
+    
+    g_signal_connect(basic_entry_btn, "clicked", G_CALLBACK(add_basic_entry_clicked), &app_data);
+    g_signal_connect(password_entry_btn, "clicked", G_CALLBACK(add_password_entry_clicked), &app_data);
+    
+    gtk_box_pack_start(GTK_BOX(entries_box), basic_entry_btn, FALSE, FALSE, 2);
+    gtk_box_pack_start(GTK_BOX(entries_box), password_entry_btn, FALSE, FALSE, 2);
+    
+    // Add containers section
+    GtkWidget *containers_frame = gtk_frame_new("Containers");
+    GtkWidget *containers_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    gtk_container_set_border_width(GTK_CONTAINER(containers_box), 5);
+    gtk_container_add(GTK_CONTAINER(containers_frame), containers_box);
+    
     // Add container buttons
-    const char *container_labels[] = {"Fixed", "Box", "Frame", "ScrolledWindow"};
+    const char *container_labels[] = {"Box", "Frame", "Grid", "ScrolledWindow"};
     for (int i = 0; i < 4; i++) {
-        btn* container_btn = creer_button(btnNormalFixed(container_labels[i], container_labels[i], 
-            "Add container", side_panel, cord(5, 30*i), dim(190, 25), NULL));
-        gtk_box_pack_start(GTK_BOX(container_box), container_btn->button, FALSE, FALSE, 0);
+        GtkWidget *button = gtk_button_new_with_label(container_labels[i]);
+        gtk_box_pack_start(GTK_BOX(containers_box), button, FALSE, FALSE, 2);
     }
-    gtk_box_pack_start(GTK_BOX(side_panel), container_box, FALSE, FALSE, 5);
-
-    // Middle section: Widget buttons
-    GtkWidget *widget_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    gtk_box_pack_start(GTK_BOX(widget_box), gtk_label_new("Widgets"), FALSE, FALSE, 5);
-
-    // Add widget buttons
-    const char *widget_labels[] = {"Label", "Button", "Entry", "ComboBox", "Scale"};
-    for (int i = 0; i < 5; i++) {
-        btn* widget_btn = creer_button(btnNormalFixed(widget_labels[i], widget_labels[i],
-            "Add widget", side_panel, cord(5, 30*i), dim(190, 25), NULL));
-        g_signal_connect(widget_btn->button, "clicked", G_CALLBACK(show_properties_dialog), maFenetre->window);
-        gtk_box_pack_start(GTK_BOX(widget_box), widget_btn->button, FALSE, FALSE, 0);
-
-        // Enable drag and drop for widget buttons
-        gtk_drag_source_set(widget_btn->button, GDK_BUTTON1_MASK, NULL, 0, GDK_ACTION_COPY);
-        gtk_drag_source_add_text_targets(widget_btn->button);
-        g_signal_connect(widget_btn->button, "drag-data-get", G_CALLBACK(gtk_selection_data_set_text), (gpointer)widget_labels[i]);
-    }
-    gtk_box_pack_start(GTK_BOX(side_panel), widget_box, FALSE, FALSE, 5);
-
-    // Bottom section: Tree view
-    GtkWidget *tree_scroll = gtk_scrolled_window_new(NULL, NULL);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(tree_scroll),
-                                 GTK_POLICY_AUTOMATIC,
-                                 GTK_POLICY_AUTOMATIC);
-
-    GtkTreeStore *tree_store = gtk_tree_store_new(1, G_TYPE_STRING);
-    GtkWidget *tree_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(tree_store));
-
+    
+    // Add all sections to left panel
+    gtk_box_pack_start(GTK_BOX(left_panel), widgets_frame, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(left_panel), entries_frame, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(left_panel), containers_frame, FALSE, FALSE, 0);
+    
+    // Create hierarchy section
+    GtkWidget *hierarchy_frame = gtk_frame_new("UI Hierarchy");
+    GtkWidget *hierarchy_scroll = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(hierarchy_scroll),
+                                  GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+    gtk_widget_set_size_request(hierarchy_scroll, -1, 250);
+    
+    // Create tree view for hierarchy
+    app_data.hierarchy_store = gtk_tree_store_new(2, G_TYPE_STRING, G_TYPE_POINTER);
+    app_data.hierarchy_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(app_data.hierarchy_store));
+    
     GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
     GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(
-        "Widget Hierarchy", renderer, "text", 0, NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(tree_view), column);
-
-    // Add root items
+        "Widget Tree", renderer, "text", 0, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(app_data.hierarchy_view), column);
+    
+    // Add root node for UI
     GtkTreeIter iter;
-    gtk_tree_store_append(tree_store, &iter, NULL);
-    gtk_tree_store_set(tree_store, &iter, 0, "Main Window", -1);
-
-    gtk_container_add(GTK_CONTAINER(tree_scroll), tree_view);
-    gtk_box_pack_start(GTK_BOX(side_panel), tree_scroll, TRUE, TRUE, 5);
-
-    // Add side panel to main box
-    gtk_box_pack_start(GTK_BOX(main_box), side_panel, FALSE, FALSE, 0);
-
-    // Create fixed container for main content
-    fixedo *fixed = init_fixed("principal", dim);
-    creer_fixed(fixed);
-
-    // Create preview area with frame and grid
+    gtk_tree_store_append(app_data.hierarchy_store, &iter, NULL);
+    gtk_tree_store_set(app_data.hierarchy_store, &iter, 0, "UI Root", -1);
+    
+    gtk_container_add(GTK_CONTAINER(hierarchy_scroll), app_data.hierarchy_view);
+    gtk_container_add(GTK_CONTAINER(hierarchy_frame), hierarchy_scroll);
+    gtk_box_pack_end(GTK_BOX(left_panel), hierarchy_frame, TRUE, TRUE, 0);
+    
+    // Pack left panel into main box
+    gtk_box_pack_start(GTK_BOX(main_box), left_panel_scroll, FALSE, FALSE, 0);
+    
+    // Create central preview area with frame
     GtkWidget *preview_frame = gtk_frame_new("Preview Area");
-    gtk_widget_set_size_request(preview_frame, 400, 600);
-    GtkWidget *preview_grid = gtk_grid_new();
-    gtk_container_add(GTK_CONTAINER(preview_frame), preview_grid);
-    fixed_add_widget(fixed, preview_frame, 200, 0);
-
-    // Enable drag and drop for preview grid
-    gtk_drag_dest_set(preview_grid, GTK_DEST_DEFAULT_ALL, NULL, 0, GDK_ACTION_COPY);
-    gtk_drag_dest_add_text_targets(preview_grid);
-    g_signal_connect(preview_grid, "drag-data-received", G_CALLBACK(on_drag_data_received), NULL);
-
-    // Add fixed container to main box
-    gtk_box_pack_start(GTK_BOX(main_box), fixed->fixed_container, TRUE, TRUE, 0);
-
-    // Create right panel for properties preview
-    GtkWidget *right_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    gtk_widget_set_size_request(right_panel, 200, -1);  // Fixed width for right panel
-    gtk_box_pack_start(GTK_BOX(right_panel), gtk_label_new("Properties"), FALSE, FALSE, 5);
-
-    // Add right panel to main box
-    gtk_box_pack_start(GTK_BOX(main_box), right_panel, FALSE, FALSE, 0);
-
-    // Bottom right buttons container
-    GtkWidget *button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    app_data.preview_area = gtk_fixed_new();
+    gtk_container_add(GTK_CONTAINER(preview_frame), app_data.preview_area);
+    gtk_box_pack_start(GTK_BOX(main_box), preview_frame, TRUE, TRUE, 0);
+    
+    // Create right properties panel
+    app_data.properties_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    gtk_widget_set_size_request(app_data.properties_panel, 200, -1);
+    
+    GtkWidget *properties_frame = gtk_frame_new("Properties");
+    GtkWidget *properties_scroll = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(properties_scroll),
+                                  GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+    
+    GtkWidget *properties_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    gtk_container_set_border_width(GTK_CONTAINER(properties_box), 5);
+    
+    // Add placeholder content for properties panel
+    gtk_box_pack_start(GTK_BOX(properties_box), gtk_label_new("Select a widget to edit properties"), FALSE, FALSE, 5);
+    
+    // Add action buttons at bottom
+    GtkWidget *button_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    gtk_container_set_border_width(GTK_CONTAINER(button_box), 5);
+    
     GtkWidget *export_button = gtk_button_new_with_label("Export XML");
     GtkWidget *run_button = gtk_button_new_with_label("Run Demo");
     GtkWidget *exit_button = gtk_button_new_with_label("Exit");
-
-    g_signal_connect(export_button, "clicked", G_CALLBACK(export_to_xml), NULL);
-    g_signal_connect(run_button, "clicked", G_CALLBACK(run_demo), NULL);
+    
+    g_signal_connect(export_button, "clicked", G_CALLBACK(export_to_xml), &app_data);
+    g_signal_connect(run_button, "clicked", G_CALLBACK(run_demo), &app_data);
     g_signal_connect(exit_button, "clicked", G_CALLBACK(gtk_main_quit), NULL);
-
-    gtk_box_pack_start(GTK_BOX(button_box), export_button, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(button_box), run_button, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(button_box), exit_button, FALSE, FALSE, 0);
-
-    gtk_box_pack_end(GTK_BOX(main_box), button_box, FALSE, FALSE, 5);
-
-    // Add button to draw a window inside the preview area
-    GtkWidget *draw_window_button = gtk_button_new_with_label("Draw Window");
-    g_signal_connect(draw_window_button, "clicked", G_CALLBACK(draw_window), preview_grid);
-    gtk_box_pack_start(GTK_BOX(right_panel), draw_window_button, FALSE, FALSE, 5);
-
+    
+    gtk_box_pack_start(GTK_BOX(button_box), export_button, FALSE, FALSE, 2);
+    gtk_box_pack_start(GTK_BOX(button_box), run_button, FALSE, FALSE, 2);
+    gtk_box_pack_start(GTK_BOX(button_box), exit_button, FALSE, FALSE, 2);
+    
+    gtk_container_add(GTK_CONTAINER(properties_scroll), properties_box);
+    gtk_container_add(GTK_CONTAINER(properties_frame), properties_scroll);
+    
+    gtk_box_pack_start(GTK_BOX(app_data.properties_panel), properties_frame, TRUE, TRUE, 0);
+    gtk_box_pack_end(GTK_BOX(app_data.properties_panel), button_box, FALSE, FALSE, 0);
+    
+    gtk_box_pack_start(GTK_BOX(main_box), app_data.properties_panel, FALSE, FALSE, 0);
+    
     // Show all widgets
     gtk_widget_show_all(maFenetre->window);
     gtk_main();
-
+    
     return 0;
 }
