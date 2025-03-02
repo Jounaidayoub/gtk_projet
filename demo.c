@@ -7,6 +7,8 @@
 #include "property_panel.h"
 #include "dialogs.h"
 #include "callbacks.h"
+#include "menu.h"          // Add the menu.h include
+#include "menu_dialog.h"   // Add the new menu_dialog.h include
 #include "entry_editing.h"  // Include this new header last
 
 int main(int argc, char *argv[]) {
@@ -112,6 +114,11 @@ int main(int argc, char *argv[]) {
         
         gtk_box_pack_start(GTK_BOX(containers_box), button, FALSE, FALSE, 2);
     }
+    
+    // Add menu bar button
+    GtkWidget *menu_bar_btn = gtk_button_new_with_label("Add Menu Bar");
+    g_signal_connect(menu_bar_btn, "clicked", G_CALLBACK(add_menu_bar_clicked), &app_data);
+    gtk_box_pack_start(GTK_BOX(containers_box), menu_bar_btn, FALSE, FALSE, 2);
     
     // Add all sections to left panel
     gtk_box_pack_start(GTK_BOX(left_panel), widgets_frame, FALSE, FALSE, 0);
