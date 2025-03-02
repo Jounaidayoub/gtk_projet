@@ -8,6 +8,10 @@
 #include "global.h"
 #include "xml_utility.h"
 
+// Remove the forward declaration since app_data.h will be included before this
+// in files that use both headers
+// typedef struct _AppData AppData;
+
 typedef struct {
 
     GtkWidget *entry;
@@ -175,6 +179,12 @@ GtkWidget *creer_entry_pass(entry_type_password *entry_password) {
 
     return entry_password->entry;
 }
+
+// Extended functions for entry creation that register them for property editing
+// Function declaration - implementation will be elsewhere
+struct _AppData; // Forward declaration
+GtkWidget *creer_entry_basic_with_editing(entry_type_basic *entry_basic, struct _AppData *app_data);
+GtkWidget *creer_entry_pass_with_editing(entry_type_password *entry_password, struct _AppData *app_data);
 
 // adding tehs css to stylize the entriess
 void entry_set_css_class(GtkWidget *entry, const gchar *class_name) {

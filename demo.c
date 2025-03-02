@@ -1,11 +1,13 @@
 #include <gtk/gtk.h>
 #include "global.h"
+#include "app_data.h"     // Must come first
 #include "entry.h"
-#include "app_data.h"
 #include "hierarchy.h"
+#include "containers.h"   // Moved before property_panel.h
+#include "property_panel.h"
 #include "dialogs.h"
-#include "containers.h"
 #include "callbacks.h"
+#include "entry_editing.h"  // Include this new header last
 
 int main(int argc, char *argv[]) {
     // Initialisation de GTK
@@ -165,20 +167,19 @@ int main(int argc, char *argv[]) {
     gtk_container_add(GTK_CONTAINER(preview_frame), app_data.preview_area);
     gtk_box_pack_start(GTK_BOX(main_box), preview_frame, TRUE, TRUE, 0);
     
+    // Register background click handler for the preview area
+    g_signal_connect(app_data.preview_area, "button-press-event", 
+                    G_CALLBACK(on_preview_area_click), &app_data);
+    
     // Create right properties panel
     app_data.properties_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    gtk_widget_set_size_request(app_data.properties_panel, 200, -1);
+    gtk_widget_set_size_request(app_data.properties_panel, 250, -1);  // Make it a bit wider
     
-    GtkWidget *properties_frame = gtk_frame_new("Properties");
-    GtkWidget *properties_scroll = gtk_scrolled_window_new(NULL, NULL);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(properties_scroll),
-                                  GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+    // Initialize property panel (from property_panel.h)
+    init_property_panel(&app_data);
     
-    GtkWidget *properties_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    gtk_container_set_border_width(GTK_CONTAINER(properties_box), 5);
-    
-    // Add placeholder content for properties panel
-    gtk_box_pack_start(GTK_BOX(properties_box), gtk_label_new("Select a widget to edit properties"), FALSE, FALSE, 5);
+    // Create property-related event handlers
+    app_data.selected_widget = NULL;  // No widget selected initially
     
     // Add action buttons at bottom
     GtkWidget *button_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
@@ -196,10 +197,6 @@ int main(int argc, char *argv[]) {
     gtk_box_pack_start(GTK_BOX(button_box), run_button, FALSE, FALSE, 2);
     gtk_box_pack_start(GTK_BOX(button_box), exit_button, FALSE, FALSE, 2);
     
-    gtk_container_add(GTK_CONTAINER(properties_scroll), properties_box);
-    gtk_container_add(GTK_CONTAINER(properties_frame), properties_scroll);
-    
-    gtk_box_pack_start(GTK_BOX(app_data.properties_panel), properties_frame, TRUE, TRUE, 0);
     gtk_box_pack_end(GTK_BOX(app_data.properties_panel), button_box, FALSE, FALSE, 0);
     
     gtk_box_pack_start(GTK_BOX(main_box), app_data.properties_panel, FALSE, FALSE, 0);

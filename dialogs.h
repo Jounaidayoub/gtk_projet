@@ -178,7 +178,8 @@ static void show_basic_entry_dialog(AppData *app_data) {
         );
         
         if (entry_basic != NULL) {
-            GtkWidget *entry_widget = creer_entry_basic(entry_basic);
+            // Use the new function that registers for property editing
+            GtkWidget *entry_widget = creer_entry_basic_with_editing(entry_basic, app_data);
             
             // Add to hierarchy under the correct parent
             if (container_index > 0) {
@@ -353,7 +354,8 @@ static void show_password_entry_dialog(AppData *app_data) {
         );
         
         if (entry_password != NULL) {
-            GtkWidget *entry_widget = creer_entry_pass(entry_password);
+            // Use the new function that registers for property editing
+            GtkWidget *entry_widget = creer_entry_pass_with_editing(entry_password, app_data);
             
             // Add to hierarchy under the correct parent
             if (container_index > 0) {

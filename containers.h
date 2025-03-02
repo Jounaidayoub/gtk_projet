@@ -6,7 +6,7 @@
 #include "hierarchy.h"
 
 // Helper function to update container selection combo box
-static void update_container_combo(AppData *app_data) {
+void update_container_combo(AppData *app_data) {
     GtkComboBoxText *combo = GTK_COMBO_BOX_TEXT(app_data->container_combo);
     
     // Clear existing items
