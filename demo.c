@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
     // Add root node for UI
     GtkTreeIter iter;
     gtk_tree_store_append(app_data.hierarchy_store, &iter, NULL);
-    gtk_tree_store_set(app_data.hierarchy_store, &iter, 0, "UI Root", -1);
+    gtk_tree_store_set(app_data.hierarchy_store, &iter, 0, "Window", -1);
     
     gtk_container_add(GTK_CONTAINER(hierarchy_scroll), app_data.hierarchy_view);
     gtk_container_add(GTK_CONTAINER(hierarchy_frame), hierarchy_scroll);
@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
     // Pack left panel into main box
     gtk_box_pack_start(GTK_BOX(main_box), left_panel_scroll, FALSE, FALSE, 0);
     
-    // Create central preview area with frame
+    // Create central   w area with frame
     GtkWidget *preview_frame = gtk_frame_new("Preview Area");
     app_data.preview_area = gtk_fixed_new();
     gtk_container_add(GTK_CONTAINER(preview_frame), app_data.preview_area);
