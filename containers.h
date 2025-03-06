@@ -221,7 +221,7 @@ static void create_box_container(GtkWidget *widget, gpointer data) {
         
         // Add to both tree structures
         add_widget_to_both_trees(app_data, box, g_strdup_printf("Box: %s", name), 
-                               target_container, 1);
+                               target_container, TRUE, NULL);
         
         // Update container selection dropdown
         update_container_combo(app_data);

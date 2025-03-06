@@ -179,12 +179,13 @@ static void show_basic_entry_dialog(AppData *app_data) {
         );
         
         if (entry_basic != NULL) {
-            // Use the new function that registers for property editing
-            GtkWidget *entry_widget = creer_entry_basic_with_editing(entry_basic, app_data);
+            // Create the widget
+            GtkWidget *entry_widget = creer_entry_basic(entry_basic);
             
-            // Add to both tree structures
-            add_widget_to_both_trees(app_data, entry_widget, "Basic Entry", target_container, 0);
+            // Add to both tree structures, passing the structure
+            add_widget_to_both_trees(app_data, entry_widget, "Basic Entry", target_container, 0, entry_basic);
             
+            // Show all widgets
             gtk_widget_show_all(app_data->preview_area);
         }
     }
@@ -325,12 +326,13 @@ static void show_password_entry_dialog(AppData *app_data) {
         );
         
         if (entry_password != NULL) {
-            // Use the new function that registers for property editing
-            GtkWidget *entry_widget = creer_entry_pass_with_editing(entry_password, app_data);
+            // Create the widget
+            GtkWidget *entry_widget = creer_entry_pass(entry_password);
             
-            // Add to both tree structures
-            add_widget_to_both_trees(app_data, entry_widget, "Password Entry", target_container, 0);
+            // Add to both tree structures, passing the structure
+            add_widget_to_both_trees(app_data, entry_widget, "Password Entry", target_container, 0, entry_password);
             
+            // Show all widgets
             gtk_widget_show_all(app_data->preview_area);
         }
     }

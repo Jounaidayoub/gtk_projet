@@ -14,6 +14,9 @@ void populate_widget_properties(Arbre *node, void *widget_structure, WidgetType 
     // Store a pointer to the widget structure for later use
     node->widget_data = widget_structure;
     
+    g_print("Populating widget properties for node %s, type %s, data: %p\n", 
+           node->nom, widget_type_to_string(type), widget_structure);
+    
     // Process based on widget type
     switch (type) {
         case WIDGET_ENTRY_BASIC:

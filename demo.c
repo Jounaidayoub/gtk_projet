@@ -262,7 +262,7 @@ int main(int argc, char *argv[]) {
     GtkWidget *exit_button = gtk_button_new_with_label("Exit");
     
     g_signal_connect(export_button, "clicked", G_CALLBACK(export_to_xml), &app_data);
-    g_signal_connect(run_button, "clicked", G_CALLBACK(run_demo), &app_data);
+    // g_signal_connect(run_button, "clicked", G_CALLBACK(run_demo), &app_data);
     g_signal_connect(debug_button, "clicked", G_CALLBACK(on_show_arbre_clicked), &app_data);
     g_signal_connect(exit_button, "clicked", G_CALLBACK(gtk_main_quit), NULL);
     

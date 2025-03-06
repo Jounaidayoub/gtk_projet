@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "app_data.h"
 #include "widget_types.h"
+#include "entry.h"
 
 // Function to handle drag data received
 static void on_drag_data_received(GtkWidget *widget, GdkDragContext *context, gint x, gint y,
@@ -34,7 +35,7 @@ static void on_drag_data_received(GtkWidget *widget, GdkDragContext *context, gi
     gtk_drag_finish(context, TRUE, FALSE, time);
 }
 
-// Function to generate XML from the Arbre tree structure - updated to use enum types
+// Updated function to generate XML from structures stored in Arbre nodes
 void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
     if (!racine) return;
     
@@ -47,69 +48,114 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
         return;
     }
     
+    // Debug info
+    g_print("Processing node: %s, type: %s, has widget_data: %s\n", 
+           racine->nom, 
+           widget_type_to_string(racine->type),
+           racine->widget_data ? "YES" : "NO");
+    
     // Output indentation
     for (int i = 0; i < indent; i++) g_string_append(string, "  ");
     
     // Get widget type from the enum
     const char *widget_type = widget_type_to_string(racine->type);
     
-    // If type is unknown, fall back to the name
-    if (racine->type == WIDGET_UNKNOWN) {
-        // Try to infer type from the old widget_type string
-        if (strstr(racine->nom, "Box:") == racine->nom) {
-            widget_type = "box";
-        } else if (strstr(racine->nom, "Label:") == racine->nom) {
-            widget_type = "label";
-        } else if (strstr(racine->nom, "Button:") == racine->nom) {
-            widget_type = "button";
-        } else if (strstr(racine->nom, "Entry:") == racine->nom) {
-            widget_type = "entry";
-        } else {
-            widget_type = racine->nom;
-        }
-    }
-    
     // Output element start
     g_string_append_printf(string, "<%s>\n", widget_type);
     
-    // Output widget properties
+    // Output properties directly from structure based on widget type
+    if (racine->widget_data) {
+        switch (racine->type) {
+            case WIDGET_ENTRY_BASIC:
+            {
+                entry_type_basic *entry = (entry_type_basic*)racine->widget_data;
+                g_print("  Entry basic properties - w:%d h:%d x:%d y:%d\n", 
+                       entry->dim->width, entry->dim->height, 
+                       entry->cord->x, entry->cord->y);
+                
+                // Position and size properties
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"x\">%d</property>\n", entry->cord->x);
+                
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"y\">%d</property>\n", entry->cord->y);
+                
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"width\">%d</property>\n", entry->dim->width);
+                
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"height\">%d</property>\n", entry->dim->height);
+                
+                // Entry-specific properties
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"editable\">%d</property>\n", entry->is_editable);
+                
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"visibility\">%d</property>\n", entry->is_visible);
+                
+                if (entry->placeholder_text) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"placeholder\">%s</property>\n", 
+                                         entry->placeholder_text);
+                }
+                
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"maxCaracteres\">%d</property>\n", entry->maxlen);
+                
+                if (entry->default_text) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"default_text\">%s</property>\n", 
+                                         entry->default_text);
+                }
+                break;
+            }
+            
+            case WIDGET_ENTRY_PASSWORD:
+            {
+                entry_type_password *entry = (entry_type_password*)racine->widget_data;
+                g_print("  Entry password properties - w:%d h:%d x:%d y:%d\n", 
+                       entry->dim->width, entry->dim->height, 
+                       entry->cord->x, entry->cord->y);
+                
+                // Position and size properties
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"x\">%d</property>\n", entry->cord->x);
+                
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"y\">%d</property>\n", entry->cord->y);
+                
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"width\">%d</property>\n", entry->dim->width);
+                
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"height\">%d</property>\n", entry->dim->height);
+                
+                // Password entry-specific properties
+                if (entry->placeholder_text) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"placeholder\">%s</property>\n", 
+                                         entry->placeholder_text);
+                }
+                
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"invisible_char\">%c</property>\n", 
+                                     entry->invisible_char);
+                break;
+            }
+            
+            default:
+                g_print("  Unknown widget type: %d\n", racine->type);
+                break;
+        }
+    } else {
+        g_print("  No widget_data present\n");
+    }
+    
+    // Also output any properties directly stored in the Arbre node
     for (int i = 0; i < racine->prop_count; i++) {
         for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
         g_string_append_printf(string, "<property name=\"%s\">%s</property>\n", 
                               racine->properties[i].name, racine->properties[i].value);
-    }
-    
-    // Add x,y position if this is a widget in a fixed container
-    if (racine->widget && gtk_widget_get_parent(racine->widget) && 
-        GTK_IS_FIXED(gtk_widget_get_parent(racine->widget))) {
-        int x = 0, y = 0;
-        gtk_container_child_get(GTK_CONTAINER(gtk_widget_get_parent(racine->widget)), 
-                               racine->widget, "x", &x, "y", &y, NULL);
-        
-        // Add x position property
-        for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-        g_string_append_printf(string, "<property name=\"x\">%d</property>\n", x);
-        
-        // Add y position property
-        for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-        g_string_append_printf(string, "<property name=\"y\">%d</property>\n", y);
-    }
-    
-    // Get size properties
-    int width = 0, height = 0;
-    if (racine->widget) {
-        gtk_widget_get_size_request(racine->widget, &width, &height);
-        
-        // Only output if size has been explicitly set
-        if (width > 0 && height > 0) {
-            // Add width property
-            for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-            g_string_append_printf(string, "<property name=\"width\">%d</property>\n", width);
-            
-            // Add height property
-            for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-            g_string_append_printf(string, "<property name=\"height\">%d</property>\n", height);
-        }
     }
     
     // Output style properties if available
@@ -219,23 +265,13 @@ void export_to_xml(GtkWidget *widget, gpointer data) {
     // Free the GString
     g_string_free(xml_string, TRUE);
     
-    g_print("UI exported to XML tab\n");
-}
-
-// Run a demo based on the current UI - updated to handle more error conditions
-static void run_demo(GtkWidget *widget, gpointer data) {
-    AppData *app_data = (AppData *)data;
-    
-    // First export to demo.html
-    export_to_xml(widget, data);
-    
-    // Create a dialog to show progress
-    GtkWidget *dialog = gtk_message_dialog_new(
-        GTK_WINDOW(app_data->window),
-        GTK_DIALOG_MODAL,
+        GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(widget),
+        GTK_DIALOG_DESTROY_WITH_PARENT,
         GTK_MESSAGE_INFO,
         GTK_BUTTONS_OK,
-        "Running demo from demo.html...");
+        "Running demo from demo.html");
+        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
+            "Running demo from demo.html");
     
     // Show the dialog without running it yet
     gtk_widget_show(dialog);

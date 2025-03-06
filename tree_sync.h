@@ -75,10 +75,10 @@ void update_arbre_view(AppData *app_data) {
     }
 }
 
-// Add a widget to both tree structures (GtkTreeStore and Arbre)
+// Updated: Add a widget to both tree structures with widget structure reference
 void add_widget_to_both_trees(AppData *app_data, GtkWidget *widget, 
                              const gchar *widget_type_str, GtkWidget *parent_container, 
-                             gboolean is_container) {
+                             gboolean is_container, void *widget_structure) {
     // Generate a unique name for the widget
     gchar *widget_name = generate_widget_name(widget_type_str, widget);
     gtk_widget_set_name(widget, widget_name);
@@ -144,9 +144,13 @@ void add_widget_to_both_trees(AppData *app_data, GtkWidget *widget,
     // Set the widget type in the node
     new_node->type = widget_type;
     
-    // Store widget data and populate properties - pass NULL for widget_structure since we don't have it
-    // Fixed: Add the required third parameter (widget type)
-    populate_widget_properties(new_node, NULL, widget_type);
+    // Store the widget structure directly
+    new_node->widget_data = widget_structure;
+    
+    // Populate properties from the structure
+    if (widget_structure) {
+        populate_widget_properties(new_node, widget_structure, widget_type);
+    }
     
     app_data->widget_tree = insererArbre(app_data->widget_tree, new_node, parent_name);
     

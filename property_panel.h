@@ -59,8 +59,6 @@ static gboolean on_widget_button_press_select(GtkWidget *widget, GdkEventButton 
     return FALSE; // Propagate the event
 }
 
-
-
 // Function to clear the properties panel
 static void clear_properties_panel(AppData *app_data) {
     // Remove all children from the properties content area
@@ -86,10 +84,6 @@ static void clear_properties_panel(AppData *app_data) {
     gtk_widget_show_all(content);
 }
 
-
-
-
-
 // Clear selection when clicking on the preview area background
 static gboolean on_preview_area_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data) {
     AppData *app_data = (AppData *)user_data;
@@ -99,6 +93,12 @@ static gboolean on_preview_area_click(GtkWidget *widget, GdkEventButton *event, 
         // Clear selection
         app_data->selected_widget = NULL;
         
+        // Clear the property panel
+        // thsi need to be fixed to clear the properties panel correcly {commentd for later}
+        clear_properties_panel(app_data);
+        
+        // Disable buttons
+        gtk_widget_set_sensitive(app_data->apply_button, FALSE);
         // Clear the property panel
         // thsi need to be fixed to clear the properties panel correcly {commentd for later}
         clear_properties_panel(app_data);
