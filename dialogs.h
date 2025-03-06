@@ -5,6 +5,7 @@
 #include "app_data.h"
 #include "hierarchy.h"
 #include "entry.h"
+#include "tree_sync.h"
 
 // Function to show properties dialog
 static void show_properties_dialog(GtkWidget *widget, gpointer data) {
@@ -181,38 +182,8 @@ static void show_basic_entry_dialog(AppData *app_data) {
             // Use the new function that registers for property editing
             GtkWidget *entry_widget = creer_entry_basic_with_editing(entry_basic, app_data);
             
-            // Add to hierarchy under the correct parent
-            if (container_index > 0) {
-                // Find the tree iter for the container
-                GtkTreeIter parent_iter;
-                GtkTreeIter child_iter;
-                gboolean found = FALSE;
-                
-                // Find the container in the tree
-                if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(app_data->hierarchy_store), &parent_iter)) {
-                    do {
-                        GtkWidget *iter_widget;
-                        gtk_tree_model_get(GTK_TREE_MODEL(app_data->hierarchy_store), &parent_iter, 1, &iter_widget, -1);
-                        
-                        if (iter_widget == target_container) {
-                            found = TRUE;
-                            break;
-                        }
-                    } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(app_data->hierarchy_store), &parent_iter));
-                }
-                
-                if (found) {
-                    // Add as child of container
-                    gtk_tree_store_append(app_data->hierarchy_store, &child_iter, &parent_iter);
-                    gtk_tree_store_set(app_data->hierarchy_store, &child_iter, 0, "Basic Entry", 1, entry_widget, -1);
-                } else {
-                    // Fallback to root
-                    add_to_hierarchy(app_data, "Basic Entry", entry_widget);
-                }
-            } else {
-                // Add to root
-                add_to_hierarchy(app_data, "Basic Entry", entry_widget);
-            }
+            // Add to both tree structures
+            add_widget_to_both_trees(app_data, entry_widget, "Basic Entry", target_container, 0);
             
             gtk_widget_show_all(app_data->preview_area);
         }
@@ -357,38 +328,8 @@ static void show_password_entry_dialog(AppData *app_data) {
             // Use the new function that registers for property editing
             GtkWidget *entry_widget = creer_entry_pass_with_editing(entry_password, app_data);
             
-            // Add to hierarchy under the correct parent
-            if (container_index > 0) {
-                // Find the tree iter for the container
-                GtkTreeIter parent_iter;
-                GtkTreeIter child_iter;
-                gboolean found = FALSE;
-                
-                // Find the container in the tree
-                if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(app_data->hierarchy_store), &parent_iter)) {
-                    do {
-                        GtkWidget *iter_widget;
-                        gtk_tree_model_get(GTK_TREE_MODEL(app_data->hierarchy_store), &parent_iter, 1, &iter_widget, -1);
-                        
-                        if (iter_widget == target_container) {
-                            found = TRUE;
-                            break;
-                        }
-                    } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(app_data->hierarchy_store), &parent_iter));
-                }
-                
-                if (found) {
-                    // Add as child of container
-                    gtk_tree_store_append(app_data->hierarchy_store, &child_iter, &parent_iter);
-                    gtk_tree_store_set(app_data->hierarchy_store, &child_iter, 0, "Password Entry", 1, entry_widget, -1);
-                } else {
-                    // Fallback to root
-                    add_to_hierarchy(app_data, "Password Entry", entry_widget);
-                }
-            } else {
-                // Add to root
-                add_to_hierarchy(app_data, "Password Entry", entry_widget);
-            }
+            // Add to both tree structures
+            add_widget_to_both_trees(app_data, entry_widget, "Password Entry", target_container, 0);
             
             gtk_widget_show_all(app_data->preview_area);
         }

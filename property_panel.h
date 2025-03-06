@@ -4,6 +4,7 @@
 #include <gtk/gtk.h>
 #include "app_data.h"
 #include "hierarchy.h"
+#include "tree_sync.h"
 
 // Add forward declarations
 extern void update_container_combo(AppData *app_data);
@@ -527,44 +528,8 @@ static void on_remove_clicked(GtkButton *button, gpointer user_data) {
         return;
     }
     
-    // Find the widget in the hierarchy
-    GtkTreeModel *model = GTK_TREE_MODEL(app_data->hierarchy_store);
-    GtkTreeIter iter;
-    gboolean found = FALSE;
-    
-    // Check if there are any rows
-    if (gtk_tree_model_get_iter_first(model, &iter)) {
-        do {
-            GtkWidget *iter_widget;
-            gtk_tree_model_get(model, &iter, 1, &iter_widget, -1);
-            
-            if (iter_widget == widget) {
-                found = TRUE;
-                break;
-            }
-            
-            // Check children
-            if (gtk_tree_model_iter_has_child(model, &iter)) {
-                GtkTreeIter child;
-                if (gtk_tree_model_iter_children(model, &child, &iter)) {
-                    do {
-                        gtk_tree_model_get(model, &child, 1, &iter_widget, -1);
-                        if (iter_widget == widget) {
-                            found = TRUE;
-                            iter = child;
-                            break;
-                        }
-                    } while (gtk_tree_model_iter_next(model, &child));
-                }
-            }
-            
-        } while (!found && gtk_tree_model_iter_next(model, &iter));
-    }
-    
-    // If found, remove from hierarchy
-    if (found) {
-        gtk_tree_store_remove(app_data->hierarchy_store, &iter);
-    }
+    // Remove from both tree structures
+    remove_widget_from_both_trees(app_data, widget);
     
     // Remove the widget from its parent
     GtkWidget *parent = gtk_widget_get_parent(widget);

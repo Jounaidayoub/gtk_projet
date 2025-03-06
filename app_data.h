@@ -3,6 +3,7 @@
 
 #include <gtk/gtk.h>
 #include "global.h"
+#include "containers_list.h"  // Add this include
 
 // Define the AppData struct with the same name as forward declared elsewhere
 typedef struct _AppData {
@@ -18,6 +19,15 @@ typedef struct _AppData {
     GtkWidget *selected_widget;  // Currently selected widget for property editing
     GtkWidget *apply_button;     // Apply button for property changes
     GtkWidget *remove_button;    // Remove button for deleting widgets
+    Arbre *widget_tree;          // Root of the custom widget tree
+    
+    // New fields for the Arbre visualization
+    GtkWidget *arbre_view;       // Tree view for Arbre visualization
+    GtkWidget *arbre_scroll;     // Scrolled window containing the Arbre view
+    GtkWidget *arbre_frame;      // Frame containing the Arbre scroll
+    
+    // New field for XML display
+    GtkWidget *xml_text_view;    // TextView to display generated XML
 } AppData;
 
 // Function declaration to resolve circular dependency
