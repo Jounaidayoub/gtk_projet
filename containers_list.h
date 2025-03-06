@@ -8,14 +8,11 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "coordonnees.h"
 #include "dimension.h"
 #include "box.h"
-
-#include <gtk/gtk.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
+#include "widget_types.h"  // Add include for WidgetType enum
 
 #define MAX_NAME_LENGTH 256  // Définir une taille maximale pour le nom
 #define MAX_PROPS 20        // Maximum number of properties
@@ -46,8 +43,11 @@ typedef struct arbre {
     WidgetProperty style_props[MAX_PROPS]; /**< Tableau des propriétés de style */
     int style_prop_count;                /**< Nombre de propriétés de style */
     
-    // Type specific info
-    char widget_type[MAX_NAME_LENGTH];   /**< Type de widget (label, button, etc.) */
+    // Changed: Use enum for widget type instead of string
+    WidgetType type;                      /**< Type de widget (enum) */
+    
+    // Added: Pointer to the widget-specific structure
+    void *widget_data;                    /**< Pointeur vers la structure de données du widget */
 } Arbre;
 
 // Fonction pour ajouter une propriété à un noeud Arbre
@@ -68,9 +68,9 @@ void add_style_property_to_node(Arbre* node, const char* name, const char* value
     }
 }
 
-// Fonction pour définir le type de widget
-void set_widget_type(Arbre* node, const char* type) {
-    strncpy(node->widget_type, type, MAX_NAME_LENGTH-1);
+// Changed: Updated to set enum type instead of string
+void set_widget_type(Arbre* node, WidgetType type) {
+    node->type = type;
 }
 
 /**
@@ -100,7 +100,8 @@ Arbre* allouer_arbre(char* nom, GtkWidget* widget, Arbre* frere, Arbre* fils, bo
     // Initialize property counts
     nouveau_noeud->prop_count = 0;
     nouveau_noeud->style_prop_count = 0;
-    nouveau_noeud->widget_type[0] = '\0';
+    nouveau_noeud->type = WIDGET_UNKNOWN;  // Default to unknown type
+    nouveau_noeud->widget_data = NULL;     // Default to no widget data
 
     return nouveau_noeud;
 }

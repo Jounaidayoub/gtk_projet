@@ -7,6 +7,20 @@
 #include "radio_xml.h"
 #include "taha_template.h"
 #include "box.h"
+#include "app_data.h"
+#include "widget_types.h"
+#include "forms.h"
+#include "widget_props.h"
+#include "entry.h"
+#include "hierarchy.h"
+#include "containers.h"
+#include "property_panel.h"
+#include "dialogs.h"
+#include "callbacks.h"
+#include "menu.h"
+#include "menu_dialog.h"
+#include "tree_sync.h"
+#include "entry_editing.h"
 
 void on_open_file_button_clicked(GtkWidget *button, gpointer user_data) {
     GtkWidget *file_dialog;
@@ -37,12 +51,17 @@ void on_open_file_button_clicked(GtkWidget *button, gpointer user_data) {
     gtk_widget_destroy(file_dialog);
 }
 
-
-
-int maind(int argc, char *argv[]) {
-    // Initialisation de GTK
+int main(int argc, char *argv[]) {
+    // Initialize GTK
     gtk_init(&argc, &argv);
-////////////////////////////////---création de window---///////////////////////////////////////////////
+    
+    // App data structure to hold our widgets
+    AppData app_data;
+
+    // Initialize container management in AppData
+    app_data.containers = NULL;
+    app_data.selected_container = NULL;
+
     // Dimensions et coordonnées de la fenêtre
     dimension dim = {1000, 1500}; // Largeur: 800px, Hauteur: 600px
     coordonnees cord = {200, 100}; // Position: x=200, y=100
@@ -71,12 +90,10 @@ int maind(int argc, char *argv[]) {
     // Création de la fenêtre
     create_window(maFenetre);
 
-   // GtkWidget *fixed;
-   // fixed=gtk_fixed_new();
-  //  gtk_container_add(GTK_CONTAINER(maFenetre->window),fixed);
+    // Create main horizontal box
+    GtkWidget *main_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+    gtk_container_add(GTK_CONTAINER(maFenetre->window), main_box);
 
-
-  //  gtk_fixed_put(GTK_FIXED(fixed),maFenetre->bgImg.Image,0,0);
     // Affiche tous les widgets dans la fenêtre
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////:
 
@@ -89,9 +106,6 @@ fixed= init_fixed("principal",dim);
     gtk_container_add(GTK_CONTAINER(maFenetre->window),fixed->fixed_container);
 
     fixed_add_widget(fixed,maFenetre->bgImg.Image,0,0);//Appliquer l'arriere plan
-
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -115,7 +129,6 @@ fixed= init_fixed("principal",dim);
     // Définir l'élément actif (sélectionner l'option 1)
     elementActive(combo, 0);
 
-
 //////////////////////////////////---progressBar--/////////////////////////////////////////
     {
         // Initialiser les dimensions
@@ -129,7 +142,6 @@ fixed= init_fixed("principal",dim);
         // GtkWidget *pulse_widget = add_progressbar_Tpulse(pbar_pulse);
         // // Position dans le conteneur fixed
         // fixed_add_widget(fixed, pulse_widget, 500, 900);
-
 
         // // Créer une barre de progression fractionnée
 
@@ -202,11 +214,18 @@ fixed= init_fixed("principal",dim);
     //Button spin
     creer_button(btnSpinFixed("spin","spin","spin",dim(128,32), cord(1050,600), fixed->fixed_container, spinObj(5,2)));
 
-
 ////////////////////////////////////////////////////////////////////////////////////////
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Initialize the Arbre tree structure with preview area as root
+    app_data.widget_tree = allouer_arbre("preview_area", app_data.preview_area, NULL, NULL, 1);
+    
+    // Set the type of the preview area
+    app_data.widget_tree->type = WIDGET_FIXED;
+
+    // Initialize property panel
+    init_property_panel(&app_data);
+
     gtk_widget_show_all(maFenetre->window);
 
     // Boucle principale GTK
@@ -214,24 +233,8 @@ fixed= init_fixed("principal",dim);
 
     // Libération des ressources
 
-
     return 0;
 }
-
-
-int main(int argc, char *argv[]) {
-    // Initialisation de GTK
-    gtk_init(&argc, &argv);
-    FILE *file = fopen("tst.html", "r");
-    if (!file) {
-        printf("ERREUR d'ouverture du fichier !!");
-        return -1;
-    }
-    creer_object(file, 0);
-    gtk_main();
-    return 0;
-}
-
 
 void open_dialog(GtkWidget* widget, gpointer data){
     fixedo* fix = (fixedo*) data;
@@ -240,7 +243,7 @@ void open_dialog(GtkWidget* widget, gpointer data){
                       fix->fixed_container);
 }
 
-int mainf(int argc, char *argv[]){
+int maind(int argc, char *argv[]) {
     // Initialisation de GTK
     gtk_init(&argc, &argv);
 ////////////////////////////////---création de window---///////////////////////////////////////////////
@@ -596,8 +599,6 @@ int maine(int argc, char *argv[]) {
     // Définir l'élément actif (sélectionner l'option 1)
     elementActive(combo, 0);
 
-
-
     //////////////////////////////////liste des radios////////////////////
     {
         dimension diml = {10, 15}; // Largeur: 800px, Hauteur: 600px
@@ -636,8 +637,6 @@ int maine(int argc, char *argv[]) {
                                 8, -1, "ex_img.jpg", -1,
                                 -1);
         appliquer_style_button(bst, bb);
-
-
 
     //////////////////////////////////  Button ///////////////////////////////////////////////////////
     {

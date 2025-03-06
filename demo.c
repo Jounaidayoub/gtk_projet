@@ -7,13 +7,15 @@
 #include "property_panel.h"
 #include "dialogs.h"
 #include "callbacks.h"
-#include "menu.h"          // Add the menu.h include
-#include "menu_dialog.h"   // Add the new menu_dialog.h include
-#include "widget_props.h"  // Include the new widget properties header
-#include "entry_editing.h"  // Include this new header last
+#include "menu.h"
+#include "menu_dialog.h"
+#include "widget_types.h"  // Add the widget type enum header
+// #include "forms.h"         // Add the forms system header
+#include "widget_props.h"  // Add the widget properties header
+#include "entry_editing.h"  // Include this header last
 
 int main(int argc, char *argv[]) {
-    // Initialisation de GTK
+    // Initialize GTK
     gtk_init(&argc, &argv);
     
     // App data structure to hold our widgets
@@ -23,24 +25,24 @@ int main(int argc, char *argv[]) {
     app_data.containers = NULL;
     app_data.selected_container = NULL;
 
-    // Dimensions et coordonnées de la fenêtre
-    dimension dim = {900, 700}; // Increased size
+    // Window dimensions and coordinates
+    dimension dim = {900, 700};
     coordonnees cord = {400, 250};
 
-    // Couleur de fond
+    // Background color
     HexColor *bg_color = hex_color_init("#ffffff");
 
-    // Image de fond
+    // Background image
     MonImage bg_img = {
            .path ="ex_img.jpg",
-             .dim = dim,
+           .dim = dim,
            .cord = cord
     };
 
-    // Initialisation de la fenêtre
+    // Initialize the window
     Mywindow *maFenetre = init_window("GTK UI Builder", "icon1.png",
             dim,
-            1,  // Changed from 0 to 1 to set maximized state
+            1,  // Set maximized state
             TRUE,                      // Make window resizable
             GTK_WIN_POS_CENTER,
             cord,
@@ -49,10 +51,10 @@ int main(int argc, char *argv[]) {
     );
     app_data.window = maFenetre->window;
 
-    // Création de la fenêtre
+    // Create the window
     create_window(maFenetre);
     
-    // Explicitly maximize the window to ensure it starts maximized
+    // Maximize the window to ensure it starts maximized
     gtk_window_maximize(GTK_WINDOW(maFenetre->window));
 
     // Create main horizontal box
@@ -76,8 +78,12 @@ int main(int argc, char *argv[]) {
     
     // Add standard widget buttons to widget box
     const char *widget_labels[] = {"Label", "Button", "Entry", "ComboBox", "Scale", "Checkbox"};
+    WidgetType widget_types[] = {WIDGET_LABEL, WIDGET_BUTTON, WIDGET_ENTRY_BASIC, 
+                              WIDGET_COMBOBOX, WIDGET_SCALE, WIDGET_CHECKBOX};
+    
     for (int i = 0; i < 6; i++) {
         GtkWidget *button = gtk_button_new_with_label(widget_labels[i]);
+        g_object_set_data(G_OBJECT(button), "widget_type", GINT_TO_POINTER(widget_types[i]));
         g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog), &app_data);
         gtk_box_pack_start(GTK_BOX(widgets_box), button, FALSE, FALSE, 2);
     }
@@ -106,8 +112,11 @@ int main(int argc, char *argv[]) {
     
     // Add container buttons
     const char *container_labels[] = {"Box", "Frame", "Grid", "ScrolledWindow"};
+    WidgetType container_types[] = {WIDGET_BOX, WIDGET_FRAME, WIDGET_GRID, WIDGET_SCROLLED_WINDOW};
+    
     for (int i = 0; i < 4; i++) {
         GtkWidget *button = gtk_button_new_with_label(container_labels[i]);
+        g_object_set_data(G_OBJECT(button), "widget_type", GINT_TO_POINTER(container_types[i]));
         
         if (i == 0) { // "Box" is the first one
             g_signal_connect(button, "clicked", G_CALLBACK(create_box_container), &app_data);
@@ -145,15 +154,15 @@ int main(int argc, char *argv[]) {
     // Add root node for UI
     GtkTreeIter iter;
     gtk_tree_store_append(app_data.hierarchy_store, &iter, NULL);
-    gtk_tree_store_set(app_data.hierarchy_store, &iter, 0, "Window", -1);
+    gtk_tree_store_set(app_data.hierarchy_store, &iter, 0, "Window", 1, NULL, -1);
     
-    // Add the existing hierarchy view to the scrolled window and frame
+    // Add the hierarchy view to the scrolled window and frame
     gtk_container_add(GTK_CONTAINER(hierarchy_scroll), app_data.hierarchy_view);
     gtk_container_add(GTK_CONTAINER(hierarchy_frame), hierarchy_scroll);
     gtk_box_pack_start(GTK_BOX(left_panel), hierarchy_frame, TRUE, TRUE, 0);
     
-    // NEW CODE: Add Taha's Arbre view below the existing hierarchy view
-    GtkWidget *arbre_frame = gtk_frame_new("Taha Version Arbre");
+    // Add Arbre view section
+    GtkWidget *arbre_frame = gtk_frame_new("Arbre Structure");
     GtkWidget *arbre_scroll = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(arbre_scroll),
                                   GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -216,6 +225,9 @@ int main(int argc, char *argv[]) {
     // Initialize the Arbre tree structure with preview area as root
     app_data.widget_tree = allouer_arbre("preview_area", app_data.preview_area, NULL, NULL, 1);
     
+    // Set the widget type of the preview area
+    app_data.widget_tree->type = WIDGET_FIXED;
+    
     // Now replace the placeholder with the actual Arbre view
     if (GTK_IS_CONTAINER(arbre_scroll)) {
         GList *children = gtk_container_get_children(GTK_CONTAINER(arbre_scroll));
@@ -234,7 +246,7 @@ int main(int argc, char *argv[]) {
     app_data.properties_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     gtk_widget_set_size_request(app_data.properties_panel, 250, -1);  // Make it a bit wider
     
-    // Initialize property panel (from property_panel.h)
+    // Initialize property panel
     init_property_panel(&app_data);
     
     // Create property-related event handlers
@@ -270,10 +282,11 @@ int main(int argc, char *argv[]) {
     // Show all widgets
     gtk_widget_show_all(maFenetre->window);
     
-    // For testing: Print the initial tree structure
+    // Print the initial tree structure for debugging
     printf("Initial Arbre Tree Structure:\n");
     afficher_arbre(app_data.widget_tree, 0);
     
+    // Start main loop
     gtk_main();
     
     return 0;

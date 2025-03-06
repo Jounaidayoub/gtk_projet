@@ -2,7 +2,9 @@
 #define CALLBACKS_H
 
 #include <gtk/gtk.h>
+#include <stdio.h>
 #include "app_data.h"
+#include "widget_types.h"
 
 // Function to handle drag data received
 static void on_drag_data_received(GtkWidget *widget, GdkDragContext *context, gint x, gint y,
@@ -32,7 +34,7 @@ static void on_drag_data_received(GtkWidget *widget, GdkDragContext *context, gi
     gtk_drag_finish(context, TRUE, FALSE, time);
 }
 
-// Function to generate XML from the Arbre tree structure
+// Function to generate XML from the Arbre tree structure - updated to use enum types
 void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
     if (!racine) return;
     
@@ -48,18 +50,23 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
     // Output indentation
     for (int i = 0; i < indent; i++) g_string_append(string, "  ");
     
-    // Get widget type - use widget_type field if available, otherwise use node name
-    const char *widget_type = racine->widget_type[0] ? racine->widget_type : racine->nom;
+    // Get widget type from the enum
+    const char *widget_type = widget_type_to_string(racine->type);
     
-    // Handle special cases for widget types
-    if (strstr(widget_type, "Box:") == widget_type) {
-        widget_type = "box";
-    } else if (strstr(widget_type, "Label:") == widget_type) {
-        widget_type = "label";
-    } else if (strstr(widget_type, "Button:") == widget_type) {
-        widget_type = "button";
-    } else if (strstr(widget_type, "Entry:") == widget_type) {
-        widget_type = "entry";
+    // If type is unknown, fall back to the name
+    if (racine->type == WIDGET_UNKNOWN) {
+        // Try to infer type from the old widget_type string
+        if (strstr(racine->nom, "Box:") == racine->nom) {
+            widget_type = "box";
+        } else if (strstr(racine->nom, "Label:") == racine->nom) {
+            widget_type = "label";
+        } else if (strstr(racine->nom, "Button:") == racine->nom) {
+            widget_type = "button";
+        } else if (strstr(racine->nom, "Entry:") == racine->nom) {
+            widget_type = "entry";
+        } else {
+            widget_type = racine->nom;
+        }
     }
     
     // Output element start
@@ -199,18 +206,102 @@ void export_to_xml(GtkWidget *widget, gpointer data) {
     // Set the text in the buffer
     gtk_text_buffer_set_text(buffer, xml_string->str, -1);
     
+    // Save to file demo.html
+    FILE *file = fopen("demo.html", "w");
+    if (file) {
+        fputs(xml_string->str, file);
+        fclose(file);
+        g_print("XML exported to demo.html\n");
+    } else {
+        g_print("Error: Could not save to demo.html\n");
+    }
+    
     // Free the GString
     g_string_free(xml_string, TRUE);
     
     g_print("UI exported to XML tab\n");
 }
 
-// Run a demo based on the current UI
+// Run a demo based on the current UI - updated to handle more error conditions
 static void run_demo(GtkWidget *widget, gpointer data) {
     AppData *app_data = (AppData *)data;
     
-    // Placeholder for demo functionality
-    g_print("Running demo of the UI (not implemented yet)\n");
+    // First export to demo.html
+    export_to_xml(widget, data);
+    
+    // Create a dialog to show progress
+    GtkWidget *dialog = gtk_message_dialog_new(
+        GTK_WINDOW(app_data->window),
+        GTK_DIALOG_MODAL,
+        GTK_MESSAGE_INFO,
+        GTK_BUTTONS_OK,
+        "Running demo from demo.html...");
+    
+    // Show the dialog without running it yet
+    gtk_widget_show(dialog);
+    
+    // Allow the UI to update
+    while (gtk_events_pending())
+        gtk_main_iteration();
+    
+    // Check if demo.html exists
+    FILE *check = fopen("demo.html", "r");
+    if (!check) {
+        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
+                                               "Error: Could not find demo.html");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
+        return;
+    }
+    fclose(check);
+    
+    // Copy to tst.html
+    FILE *source = fopen("demo.html", "r");
+    FILE *dest = fopen("tst.html", "w");
+    
+    if (source && dest) {
+        char buffer[1024];
+        size_t bytes;
+        
+        // Copy the file content
+        while ((bytes = fread(buffer, 1, sizeof(buffer), source)) > 0) {
+            fwrite(buffer, 1, bytes, dest);
+        }
+        
+        fclose(source);
+        fclose(dest);
+        
+        // Run the script or main executable
+        int status;
+        if (g_file_test("run_demo.sh", G_FILE_TEST_EXISTS)) {
+            system("chmod +x run_demo.sh");
+            status = system("./run_demo.sh");
+        } else {
+            status = system("./build.sh xml_generator.c");
+            if (status != 0) {
+                status = system("./main.exe");
+            }
+        }
+        
+        if (status != 0) {
+            gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
+                                                   "Error: Demo execution failed");
+        } else {
+            gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
+                                                   "Demo executed successfully");
+        }
+    } else {
+        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
+                                               "Error: Could not copy demo.html to tst.html");
+        if (source) fclose(source);
+        if (dest) fclose(dest);
+    }
+    
+    // Wait for user acknowledgment
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    
+    // Destroy the dialog
+    gtk_widget_destroy(dialog);
 }
 
 // Update UI in response to a new container being selected

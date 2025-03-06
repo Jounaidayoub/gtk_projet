@@ -222,7 +222,7 @@ fixed= init_fixed("principal",dim);
 int main(int argc, char *argv[]) {
     // Initialisation de GTK
     gtk_init(&argc, &argv);
-    FILE *file = fopen("tst.html", "r");
+    FILE *file = fopen("data.html", "r");
     if (!file) {
         printf("ERREUR d'ouverture du fichier !!");
         return -1;

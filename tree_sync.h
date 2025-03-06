@@ -77,13 +77,13 @@ void update_arbre_view(AppData *app_data) {
 
 // Add a widget to both tree structures (GtkTreeStore and Arbre)
 void add_widget_to_both_trees(AppData *app_data, GtkWidget *widget, 
-                             const gchar *widget_type, GtkWidget *parent_container, 
+                             const gchar *widget_type_str, GtkWidget *parent_container, 
                              gboolean is_container) {
     // Generate a unique name for the widget
-    gchar *widget_name = generate_widget_name(widget_type, widget);
+    gchar *widget_name = generate_widget_name(widget_type_str, widget);
     gtk_widget_set_name(widget, widget_name);
     
-    // PART 1: Add to GtkTreeStore for visualization
+    // PART 1: Add to GtkTreeStore for visualization in hierarchy view
     GtkTreeIter parent_iter, new_iter;
     gboolean found = FALSE;
     
@@ -105,7 +105,7 @@ void add_widget_to_both_trees(AppData *app_data, GtkWidget *widget,
     
     // Set data in GtkTreeStore
     gtk_tree_store_set(app_data->hierarchy_store, &new_iter, 
-                      0, g_strdup_printf("%s", widget_type), 
+                      0, g_strdup_printf("%s", widget_type_str), 
                       1, widget, -1);
     
     // PART 2: Add to Arbre structure
@@ -123,8 +123,30 @@ void add_widget_to_both_trees(AppData *app_data, GtkWidget *widget,
     // Create new node and insert into Arbre
     Arbre *new_node = allouer_arbre(widget_name, widget, NULL, NULL, is_container);
     
-    // NEW CODE: Populate widget properties in the node
-    populate_widget_properties(new_node, widget);
+    // Determine widget type enum
+    WidgetType widget_type;
+    
+    // Convert string type to enum type
+    if (strstr(widget_type_str, "Basic Entry") != NULL) {
+        widget_type = WIDGET_ENTRY_BASIC;
+    } else if (strstr(widget_type_str, "Password Entry") != NULL) {
+        widget_type = WIDGET_ENTRY_PASSWORD;
+    } else if (strstr(widget_type_str, "Box") != NULL) {
+        widget_type = WIDGET_BOX;
+    } else if (strstr(widget_type_str, "Label") != NULL) {
+        widget_type = WIDGET_LABEL;
+    } else if (strstr(widget_type_str, "Button") != NULL) {
+        widget_type = WIDGET_BUTTON;
+    } else {
+        widget_type = WIDGET_UNKNOWN;
+    }
+    
+    // Set the widget type in the node
+    new_node->type = widget_type;
+    
+    // Store widget data and populate properties - pass NULL for widget_structure since we don't have it
+    // Fixed: Add the required third parameter (widget type)
+    populate_widget_properties(new_node, NULL, widget_type);
     
     app_data->widget_tree = insererArbre(app_data->widget_tree, new_node, parent_name);
     

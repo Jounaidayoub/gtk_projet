@@ -59,27 +59,7 @@ static gboolean on_widget_button_press_select(GtkWidget *widget, GdkEventButton 
     return FALSE; // Propagate the event
 }
 
-// Clear selection when clicking on the preview area background
-static gboolean on_preview_area_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data) {
-    AppData *app_data = (AppData *)user_data;
-    
-    // If click is directly on the preview area (not on a child widget)
-    if (event->window == gtk_widget_get_window(widget)) {
-        // Clear selection
-        app_data->selected_widget = NULL;
-        
-        // Clear the property panel
-        // clear_properties_panel(app_data);
-        
-        // Disable buttons
-        gtk_widget_set_sensitive(app_data->apply_button, FALSE);
-        gtk_widget_set_sensitive(app_data->remove_button, FALSE);
-        
-        g_print("Selection cleared\n");
-    }
-    
-    return FALSE; // Propagate the event
-}
+
 
 // Function to clear the properties panel
 static void clear_properties_panel(AppData *app_data) {
@@ -104,6 +84,33 @@ static void clear_properties_panel(AppData *app_data) {
     current_properties.container = label;
     
     gtk_widget_show_all(content);
+}
+
+
+
+
+
+// Clear selection when clicking on the preview area background
+static gboolean on_preview_area_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data) {
+    AppData *app_data = (AppData *)user_data;
+    
+    // If click is directly on the preview area (not on a child widget)
+    if (event->window == gtk_widget_get_window(widget)) {
+        // Clear selection
+        app_data->selected_widget = NULL;
+        
+        // Clear the property panel
+        // thsi need to be fixed to clear the properties panel correcly {commentd for later}
+        clear_properties_panel(app_data);
+        
+        // Disable buttons
+        gtk_widget_set_sensitive(app_data->apply_button, FALSE);
+        gtk_widget_set_sensitive(app_data->remove_button, FALSE);
+        
+        g_print("Selection cleared\n");
+    }
+    
+    return FALSE; // Propagate the event
 }
 
 // Create a labeled entry for properties
