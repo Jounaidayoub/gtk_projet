@@ -42,15 +42,17 @@ static PropertyFields current_properties;
 static gboolean on_widget_button_press_select(GtkWidget *widget, GdkEventButton *event, gpointer user_data) {
     AppData *app_data = (AppData *)user_data;
     
+    g_print("Widget clicked: %p\n", widget);
+    
     // Only handle left-click for selection
     if (event->button == 1) {
         // Update the selected widget
         app_data->selected_widget = widget;
         
+        g_print("Selected widget: %p, creating property form...\n", widget);
+        
         // Show the widget's properties
         create_property_form_for_widget(app_data, widget);
-        
-        g_print("Selected widget: %p\n", widget);
         
         // Return FALSE to allow the event to propagate (widget remains functional)
         return FALSE;
@@ -565,8 +567,9 @@ static void on_remove_clicked(GtkButton *button, gpointer user_data) {
     gtk_widget_set_sensitive(app_data->remove_button, FALSE);
 }
 
-// Register a widget for property editing
-static void register_widget_for_property_editing(GtkWidget *widget, AppData *app_data) {
+// Register a widget for property editing - make it extern so it can be called from other files
+void register_widget_for_property_editing(GtkWidget *widget, AppData *app_data) {
+    g_print("Registering widget %p for property editing\n", widget);
     g_signal_connect(widget, "button-press-event", G_CALLBACK(on_widget_button_press_select), app_data);
 }
 

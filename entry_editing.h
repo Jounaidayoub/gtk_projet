@@ -31,10 +31,13 @@ Arbre* find_arbre_node_by_widget(Arbre* root, GtkWidget* widget) {
 
 // Implementation of functions that were forward-declared in entry.h
 GtkWidget *creer_entry_basic_with_editing(entry_type_basic *entry_basic, struct _AppData *app_data) {
+    g_print("Creating basic entry with editing\n");
+    
     // Create the widget
     GtkWidget *entry_widget = creer_entry_basic(entry_basic);
     
     // Register for property editing
+    g_print("Registering entry widget %p for property editing\n", entry_widget);
     register_widget_for_property_editing(entry_widget, app_data);
     
     // Add to both tree structures with the structure reference
@@ -45,10 +48,13 @@ GtkWidget *creer_entry_basic_with_editing(entry_type_basic *entry_basic, struct 
 }
 
 GtkWidget *creer_entry_pass_with_editing(entry_type_password *entry_password, struct _AppData *app_data) {
+    g_print("Creating password entry with editing\n");
+    
     // Create the widget
     GtkWidget *entry_widget = creer_entry_pass(entry_password);
     
     // Register for property editing
+    g_print("Registering password widget %p for property editing\n", entry_widget);
     register_widget_for_property_editing(entry_widget, app_data);
     
     // Add to both tree structures with the structure reference

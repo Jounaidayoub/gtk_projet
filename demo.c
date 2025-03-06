@@ -242,9 +242,11 @@ int main(int argc, char *argv[]) {
         app_data.arbre_view = arbre_view;  // Store for later updates
     }
     
-    // Create right properties panel
+    // Create right properties panel with explicit size and frame
+    GtkWidget *properties_frame = gtk_frame_new("Properties");
     app_data.properties_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    gtk_widget_set_size_request(app_data.properties_panel, 250, -1);  // Make it a bit wider
+    gtk_widget_set_size_request(app_data.properties_panel, 250, -1);
+    gtk_container_add(GTK_CONTAINER(properties_frame), app_data.properties_panel);
     
     // Initialize property panel
     init_property_panel(&app_data);
@@ -277,7 +279,9 @@ int main(int argc, char *argv[]) {
     gtk_box_pack_start(GTK_BOX(button_box), test_functions_button, FALSE, FALSE, 2);
     
     gtk_box_pack_end(GTK_BOX(app_data.properties_panel), button_box, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(main_box), app_data.properties_panel, FALSE, FALSE, 0);
+    
+    // Add properties panel to the main box
+    gtk_box_pack_start(GTK_BOX(main_box), properties_frame, FALSE, FALSE, 0);
     
     // Show all widgets
     gtk_widget_show_all(maFenetre->window);
