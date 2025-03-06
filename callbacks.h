@@ -142,6 +142,8 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                                      entry->invisible_char);
                 break;
             }
+
+            /// add cases for ur widgets here
             
             default:
                 g_print("  Unknown widget type: %d\n", racine->type);
@@ -237,7 +239,7 @@ void export_to_xml(GtkWidget *widget, gpointer data) {
     
     // Generate XML for all widgets in the tree
     if (app_data->widget_tree) {
-        generate_xml_from_arbre(xml_string, app_data->widget_tree, 16);
+        generate_xml_from_arbre(xml_string, app_data->widget_tree, 4);
     }
     
     // Close the XML structure
@@ -252,92 +254,92 @@ void export_to_xml(GtkWidget *widget, gpointer data) {
     // Set the text in the buffer
     gtk_text_buffer_set_text(buffer, xml_string->str, -1);
     
-    // Save to file demo.html
-    FILE *file = fopen("demo.html", "w");
-    if (file) {
-        fputs(xml_string->str, file);
-        fclose(file);
-        g_print("XML exported to demo.html\n");
-    } else {
-        g_print("Error: Could not save to demo.html\n");
-    }
+    // // Save to file demo.html
+    // FILE *file = fopen("demo.html", "w");
+    // if (file) {
+    //     fputs(xml_string->str, file);
+    //     fclose(file);
+    //     g_print("XML exported to demo.html\n");
+    // } else {
+    //     g_print("Error: Could not save to demo.html\n");
+    // }
     
-    // Free the GString
-    g_string_free(xml_string, TRUE);
+    // // Free the GString
+    // g_string_free(xml_string, TRUE);
     
-        GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(widget),
-        GTK_DIALOG_DESTROY_WITH_PARENT,
-        GTK_MESSAGE_INFO,
-        GTK_BUTTONS_OK,
-        "Running demo from demo.html");
-        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
-            "Running demo from demo.html");
+    //     GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(widget),
+    //     GTK_DIALOG_DESTROY_WITH_PARENT,
+    //     GTK_MESSAGE_INFO,
+    //     GTK_BUTTONS_OK,
+    //     "Running demo from demo.html");
+    //     gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
+    //         "Running demo from demo.html");
     
-    // Show the dialog without running it yet
-    gtk_widget_show(dialog);
+    // // Show the dialog without running it yet
+    // gtk_widget_show(dialog);
     
-    // Allow the UI to update
-    while (gtk_events_pending())
-        gtk_main_iteration();
+    // // Allow the UI to update
+    // while (gtk_events_pending())
+    //     gtk_main_iteration();
     
-    // Check if demo.html exists
-    FILE *check = fopen("demo.html", "r");
-    if (!check) {
-        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
-                                               "Error: Could not find demo.html");
-        gtk_dialog_run(GTK_DIALOG(dialog));
-        gtk_widget_destroy(dialog);
-        return;
-    }
-    fclose(check);
+    // // Check if demo.html exists
+    // FILE *check = fopen("demo.html", "r");
+    // if (!check) {
+    //     gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
+    //                                            "Error: Could not find demo.html");
+    //     gtk_dialog_run(GTK_DIALOG(dialog));
+    //     gtk_widget_destroy(dialog);
+    //     return;
+    // }
+    // fclose(check);
     
-    // Copy to tst.html
-    FILE *source = fopen("demo.html", "r");
-    FILE *dest = fopen("tst.html", "w");
+    // // Copy to tst.html
+    // // FILE *source = fopen("demo.html", "r");
+    // // FILE *dest = fopen("tst.html", "w");
     
-    if (source && dest) {
-        char buffer[1024];
-        size_t bytes;
+    // // if (source && dest) {
+    // //     char buffer[1024];
+    // //     size_t bytes;
         
-        // Copy the file content
-        while ((bytes = fread(buffer, 1, sizeof(buffer), source)) > 0) {
-            fwrite(buffer, 1, bytes, dest);
-        }
+    // //     // Copy the file content
+    // //     while ((bytes = fread(buffer, 1, sizeof(buffer), source)) > 0) {
+    // //         fwrite(buffer, 1, bytes, dest);
+    // //     }
         
-        fclose(source);
-        fclose(dest);
+    //     // fclose(source);
+    //     // fclose(dest);
         
-        // Run the script or main executable
-        int status;
-        if (g_file_test("run_demo.sh", G_FILE_TEST_EXISTS)) {
-            system("chmod +x run_demo.sh");
-            status = system("./run_demo.sh");
-        } else {
-            status = system("./build.sh xml_generator.c");
-            if (status != 0) {
-                status = system("./main.exe");
-            }
-        }
+    //     // Run the script or main executable
+    //     // int status;
+    //     // if (g_file_test("run_demo.sh", G_FILE_TEST_EXISTS)) {
+    //     //     system("chmod +x run_demo.sh");
+    //     //     status = system("./run_demo.sh");
+    //     // } else {
+    //     //     status = system("./build.sh xml_generator.c");
+    //     //     if (status != 0) {
+    //     //         status = system("./main.exe");
+    //     //     }
+    //     // }
         
-        if (status != 0) {
-            gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
-                                                   "Error: Demo execution failed");
-        } else {
-            gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
-                                                   "Demo executed successfully");
-        }
-    } else {
-        gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
-                                               "Error: Could not copy demo.html to tst.html");
-        if (source) fclose(source);
-        if (dest) fclose(dest);
-    }
+    //     // if (status != 0) {
+    //         // gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
+    // //                                                "Error: Demo execution failed");
+    // //     } else {
+    // //         gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
+    // //                                                "Demo executed successfully");
+    // //     }
+    // // } else {
+    // //     gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
+    // //                                            "Error: Could not copy demo.html to tst.html");
+    // //     if (source) fclose(source);
+    // //     if (dest) fclose(dest);
+    // // }
     
     // Wait for user acknowledgment
-    gtk_dialog_run(GTK_DIALOG(dialog));
+    // gtk_dialog_run(GTK_DIALOG(dialog));
     
     // Destroy the dialog
-    gtk_widget_destroy(dialog);
+    // gtk_widget_destroy(dialog);
 }
 
 // Update UI in response to a new container being selected

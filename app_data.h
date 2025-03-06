@@ -3,7 +3,7 @@
 
 #include <gtk/gtk.h>
 #include "global.h"
-#include "containers_list.h"  // Add this include
+#include "containers_list.h"  
 
 // Define the AppData struct with the same name as forward declared elsewhere
 typedef struct _AppData {

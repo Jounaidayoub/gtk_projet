@@ -44,13 +44,13 @@ void populate_widget_properties(Arbre *node, void *widget_structure, WidgetType 
                 add_property_to_node(node, "default_text", entry->default_text ? entry->default_text : "");
             }
             
-            add_property_to_node(node, "setFrame", "1");
+            // add_property_to_node(node, "setFrame", "1");
             
-            // Add style properties
-            add_style_property_to_node(node, "police", "Arial");
-            add_style_property_to_node(node, "color", "black");
-            add_style_property_to_node(node, "taille", "10");
-            add_style_property_to_node(node, "gras", "0");
+            // // Add style properties
+            // add_style_property_to_node(node, "police", "Arial");
+            // add_style_property_to_node(node, "color", "black");
+            // add_style_property_to_node(node, "taille", "10");
+            // add_style_property_to_node(node, "gras", "0");
             break;
         }
         case WIDGET_ENTRY_PASSWORD:
@@ -82,13 +82,13 @@ void populate_widget_properties(Arbre *node, void *widget_structure, WidgetType 
                 add_property_to_node(node, "default_text", ""); // No default text for security
             }
             
-            add_property_to_node(node, "setFrame", "1");
+            // add_property_to_node(node, "setFrame", "1");
             
-            // Add style properties
-            add_style_property_to_node(node, "police", "Arial");
-            add_style_property_to_node(node, "color", "black");
-            add_style_property_to_node(node, "taille", "10");
-            add_style_property_to_node(node, "gras", "0");
+            // // Add style properties
+            // add_style_property_to_node(node, "police", "Arial");
+            // add_style_property_to_node(node, "color", "black");
+            // add_style_property_to_node(node, "taille", "10");
+            // add_style_property_to_node(node, "gras", "0");
             break;
         }
         // Add more cases for other widget types as needed
