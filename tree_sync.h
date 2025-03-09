@@ -9,7 +9,7 @@
 // Forward declaration for callback function
 static void on_show_arbre_clicked(GtkWidget *button, gpointer data);
 
-// Generate a unique name for a widget based on its type and pointer
+// Generate a unique name for a widget based on its type and pointer    
 static gchar* generate_widget_name(const gchar *widget_type, GtkWidget *widget) {
     gchar* name = g_malloc(MAX_NAME_LENGTH);
     g_snprintf(name, MAX_NAME_LENGTH, "%s_%p", widget_type, (void*)widget);

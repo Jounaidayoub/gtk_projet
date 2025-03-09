@@ -9,7 +9,7 @@
 #include "box.h"
 #include "app_data.h"
 #include "widget_types.h"
-#include "forms.h"
+// #include "forms.h"
 #include "widget_props.h"
 #include "entry.h"
 #include "hierarchy.h"

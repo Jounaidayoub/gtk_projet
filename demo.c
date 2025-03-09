@@ -77,31 +77,27 @@ int main(int argc, char *argv[]) {
     gtk_container_add(GTK_CONTAINER(widgets_frame), widgets_box);
     
     // Add standard widget buttons to widget box
-    const char *widget_labels[] = {"NOrmal", "Radio", "CHeckbox", "Toggle", "SPIN", "switch"};
-    // WidgetType widget_types[] = {WIDGET_LABEL, WIDGET_BUTTON, WIDGET_ENTRY_BASIC, 
-    //                           WIDGET_COMBOBOX, WIDGET_SCALE, WIDGET_CHECKBOX};
+    const char *widget_labels[] = {"Normal", "Radio", "Checkbox", "Toggle", "Spin", "Switch"};
     
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 6; i++) {
         GtkWidget *button = gtk_button_new_with_label(widget_labels[i]);
-        // g_object_set_data(G_OBJECT(button), "widget_type", GINT_TO_POINTER(widget_types[i]));
-    if (strcmp(widget_labels[i], "NOraml") == 0) {
-        g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog_btn_normal), &app_data);
-        g_print("Normal\n");
-    } else if (strcmp(widget_labels[i], "Radio") == 0) {
-        g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog_btn_radio), &app_data);
-    } else if (strcmp(widget_labels[i], "CHeckbox") == 0) {
-        g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog_btn_checkbox), &app_data);
-    } else if (strcmp(widget_labels[i], "Toggle") == 0) {
-        g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog_btn_toggle), &app_data);
-    } else if (strcmp(widget_labels[i], "SPIN") == 0) {
-        g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog_btn_spin), &app_data);
-    } else if (strcmp(widget_labels[i], "switch") == 0) {
-        g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog_btn_switch), &app_data);
-    }
-        // g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog), &app_data);
+        
+        if (strcmp(widget_labels[i], "Normal") == 0) {
+            g_signal_connect(button, "clicked", G_CALLBACK(add_btn_normal_clicked), &app_data);
+        } else if (strcmp(widget_labels[i], "Radio") == 0) {
+            g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog_btn_radio), &app_data);
+        } else if (strcmp(widget_labels[i], "Checkbox") == 0) {
+            g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog_btn_checkbox), &app_data);
+        } else if (strcmp(widget_labels[i], "Toggle") == 0) {
+            g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog_btn_toggle), &app_data);
+        } else if (strcmp(widget_labels[i], "Spin") == 0) {
+            g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog_btn_spin), &app_data);
+        } else if (strcmp(widget_labels[i], "Switch") == 0) {
+            g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog_btn_switch), &app_data);
+        }
+        
         gtk_box_pack_start(GTK_BOX(widgets_box), button, FALSE, FALSE, 2);
     }
-    
     // Add custom entries section
     GtkWidget *entries_frame = gtk_frame_new("Custom Entries");
     GtkWidget *entries_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
