@@ -31,6 +31,14 @@ static void show_properties_dialog(GtkWidget *widget, gpointer data) {
     gtk_widget_destroy(dialog);
 }
 
+// Functions for buttons
+static void show_properties_dialog_btn_normal(GtkWidget *widget, gpointer data){};
+static void show_properties_dialog_btn_radio(GtkWidget *widget, gpointer data){};
+static void show_properties_dialog_btn_checkbox(GtkWidget *widget, gpointer data){};
+static void show_properties_dialog_btn_toggle(GtkWidget *widget, gpointer data){};
+static void show_properties_dialog_btn_spin(GtkWidget *widget, gpointer data){};
+static void show_properties_dialog_btn_switch(GtkWidget *widget, gpointer data){};
+
 // Function to show dialog for basic entry configuration
 static void show_basic_entry_dialog(AppData *app_data) {
     GtkWidget *dialog;
