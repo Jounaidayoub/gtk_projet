@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
         if (strcmp(widget_labels[i], "Normal") == 0) {
             g_signal_connect(button, "clicked", G_CALLBACK(add_btn_normal_clicked), &app_data);
         } else if (strcmp(widget_labels[i], "Radio") == 0) {
-            g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog_btn_radio), &app_data);
+            g_signal_connect(button, "clicked", G_CALLBACK(add_btn_radio_clicked), &app_data);
         } else if (strcmp(widget_labels[i], "Checkbox") == 0) {
             g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog_btn_checkbox), &app_data);
         } else if (strcmp(widget_labels[i], "Toggle") == 0) {

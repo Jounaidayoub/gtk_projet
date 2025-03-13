@@ -6,7 +6,8 @@
 #include "hierarchy.h"
 #include "entry.h"
 #include "tree_sync.h"
-#include "entry_editing.h" // Add this include for widget editing functions
+#include "entry_editing.h" // For entry editing functions
+#include "button_editing.h" // Add this include for button editing functions
 
 // Function to show properties dialog
 static void show_properties_dialog(GtkWidget *widget, gpointer data)
@@ -228,11 +229,839 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
     gtk_widget_destroy(dialog);
 }
 
-static void show_properties_dialog_btn_radio(GtkWidget *widget, gpointer data) {};
-static void show_properties_dialog_btn_checkbox(GtkWidget *widget, gpointer data) {};
-static void show_properties_dialog_btn_toggle(GtkWidget *widget, gpointer data) {};
-static void show_properties_dialog_btn_spin(GtkWidget *widget, gpointer data) {};
-static void show_properties_dialog_btn_switch(GtkWidget *widget, gpointer data) {};
+static void show_properties_dialog_btn_radio(AppData *app_data){
+    // //create a froum dialog based on this macro     btn *radio1 = btnRadioFixed(
+    //     "radio1",
+    //     "Option 1",
+    //     "Select option 1",
+    //     fixed,
+    //     cord(20, 150),
+    //     NULL,
+    //     NULL
+    // );
+    // #define btnRadioFixed(nom, label, tooltip, container, pos, groupeMember, img) \
+    // initBtn(RADIO, nom, label,TRUE, tooltip,img, \
+    // dim(5,5), TRUE, pos, NULL, \
+    // TRUE, container, groupeMember,GTK_ALIGN_START,1, TRUE, NULL)
+
+    GtkWidget *dialog;
+    GtkWidget *content_area;
+    GtkWidget *grid;
+    GtkWidget *name_label, *label_label, *tooltip_label;
+    GtkWidget *name_entry, *label_entry, *tooltip_entry;
+    GtkWidget *x_label, *y_label, *width_label, *height_label;
+    GtkWidget *x_entry, *y_entry, *width_entry, *height_entry;
+    GtkWidget *group_label, *group_combo;
+    gint response;
+
+    // Create dialog
+    dialog = gtk_dialog_new_with_buttons("Radio Button Properties",
+                                         GTK_WINDOW(app_data->window),
+                                         GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                         "OK", GTK_RESPONSE_ACCEPT,
+                                         "Cancel", GTK_RESPONSE_CANCEL,
+                                         NULL);
+
+    content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+
+    // Create grid for form layout
+    grid = gtk_grid_new();
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+
+    // Add container selection at the top of the dialog
+    GtkWidget *container_label = gtk_label_new("Add to Container:");
+    GtkWidget *container_combo = gtk_combo_box_text_new();
+
+    // Add default option (preview area)
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(container_combo), "Window (Default)");
+
+    // Add all containers
+    GList *iter;
+    for (iter = app_data->containers; iter != NULL; iter = iter->next) {
+        GtkWidget *container = GTK_WIDGET(iter->data);
+        const gchar *name = gtk_widget_get_name(container);
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(container_combo), name);
+    }
+
+    // Select currently selected container
+    gint active_index = 0;
+    if (app_data->selected_container) {
+        active_index = g_list_index(app_data->containers, app_data->selected_container) + 1;
+    }
+    gtk_combo_box_set_active(GTK_COMBO_BOX(container_combo), active_index);
+
+    // Button identification fields
+    name_label = gtk_label_new("Button Name:");
+    name_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(name_entry), "radio1");
+
+    label_label = gtk_label_new("Button Label:");
+    label_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(label_entry), "Option 1");
+
+    tooltip_label = gtk_label_new("Tooltip Text:");
+    tooltip_entry = gtk_entry_new();
+
+    // Position fields
+    x_label = gtk_label_new("X Position:");
+    y_label = gtk_label_new("Y Position:");
+    x_entry = gtk_entry_new();
+    y_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(x_entry), "20");
+    gtk_entry_set_text(GTK_ENTRY(y_entry), "150");
+
+    // Group selection
+    group_label = gtk_label_new("Group:");
+    group_combo = gtk_combo_box_text_new();
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(group_combo), "None");
+    for (iter = app_data->radio_groups; iter != NULL; iter = iter->next) {
+        const gchar *group_name = (const gchar *)iter->data;
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(group_combo), group_name);
+    }
+    gtk_combo_box_set_active(GTK_COMBO_BOX(group_combo), 0);
+
+    // Add widgets to grid
+    int row = 0;
+    gtk_grid_attach(GTK_GRID(grid), container_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), container_combo, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), name_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), name_entry, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), label_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), label_entry, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), tooltip_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), tooltip_entry, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), x_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), x_entry, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), y_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), y_entry, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), group_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), group_combo, 1, row, 1, 1);
+
+    // Add grid to dialog
+    gtk_container_add(GTK_CONTAINER(content_area), grid);
+    gtk_widget_show_all(dialog);
+
+    // Run dialog
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+    if (response == GTK_RESPONSE_ACCEPT) {
+        // Get values from form
+        const gchar *name = gtk_entry_get_text(GTK_ENTRY(name_entry));
+        const gchar *label_text = gtk_entry_get_text(GTK_ENTRY(label_entry));
+        const gchar *tooltip = gtk_entry_get_text(GTK_ENTRY(tooltip_entry));
+        gint x = atoi(gtk_entry_get_text(GTK_ENTRY(x_entry)));
+        gint y = atoi(gtk_entry_get_text(GTK_ENTRY(y_entry)));
+        gint group_index = gtk_combo_box_get_active(GTK_COMBO_BOX(group_combo));
+        const gchar *group_name = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(group_combo));
+
+        // Get the selected container
+        gint container_index = gtk_combo_box_get_active(GTK_COMBO_BOX(container_combo));
+        GtkWidget *target_container = NULL;
+
+        if (container_index > 0) {
+            target_container = g_list_nth_data(app_data->containers, container_index - 1);
+        } else {
+            target_container = app_data->preview_area;
+        }
+
+        // Create radio button
+        btn *radio_button = btnRadioFixed(
+            (gchar*)name,             // Button name
+            (gchar*)label_text,       // Button label
+            (gchar*)tooltip,          // Tooltip
+            target_container,         // Container
+            cord(x, y),               // Position
+            NULL,               // Group name
+            NULL                      // Image (NULL for radio button)
+        );
+
+        if (radio_button != NULL) {
+            // Create the button widget
+            btn *created_button = creer_button(radio_button);
+
+            // Apply a default style
+            Style *default_style = init_style("Sans", NULL, 10, 0, NULL, 1, 5);
+            appliquer_style_button(default_style, created_button);
+
+            // Show all widgets
+            gtk_widget_show_all(app_data->preview_area);
+        }
+    }
+
+    gtk_widget_destroy(dialog);
+    
+    // c
+
+    
+    
+    
+
+};
+
+
+static void show_properties_dialog_btn_checkbox(GtkWidget *widget, gpointer data) {
+    AppData *app_data = (AppData *)data;
+    GtkWidget *dialog;
+    GtkWidget *content_area;
+    GtkWidget *grid;
+    GtkWidget *name_label, *label_label, *tooltip_label;
+    GtkWidget *name_entry, *label_entry, *tooltip_entry;
+    GtkWidget *x_label, *y_label;
+    GtkWidget *x_entry, *y_entry;
+    GtkWidget *checked_check;
+    gint response;
+
+    // Create dialog
+    dialog = gtk_dialog_new_with_buttons("Checkbox Properties",
+                                         GTK_WINDOW(app_data->window),
+                                         GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                         "OK", GTK_RESPONSE_ACCEPT,
+                                         "Cancel", GTK_RESPONSE_CANCEL,
+                                         NULL);
+
+    content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+
+    // Create grid for form layout
+    grid = gtk_grid_new();
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+
+    // Add container selection
+    GtkWidget *container_label = gtk_label_new("Add to Container:");
+    GtkWidget *container_combo = gtk_combo_box_text_new();
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(container_combo), "Window (Default)");
+    
+    // Add all containers
+    GList *iter;
+    for (iter = app_data->containers; iter != NULL; iter = iter->next) {
+        GtkWidget *container = GTK_WIDGET(iter->data);
+        const gchar *name = gtk_widget_get_name(container);
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(container_combo), name);
+    }
+    
+    // Select currently selected container
+    gint active_index = 0;
+    if (app_data->selected_container) {
+        active_index = g_list_index(app_data->containers, app_data->selected_container) + 1;
+    }
+    gtk_combo_box_set_active(GTK_COMBO_BOX(container_combo), active_index);
+
+    // Button identification fields
+    name_label = gtk_label_new("Checkbox Name:");
+    name_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(name_entry), "checkbox1");
+    
+    label_label = gtk_label_new("Checkbox Label:");
+    label_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(label_entry), "Check me");
+    
+    tooltip_label = gtk_label_new("Tooltip Text:");
+    tooltip_entry = gtk_entry_new();
+    
+    // Position fields
+    x_label = gtk_label_new("X Position:");
+    y_label = gtk_label_new("Y Position:");
+    x_entry = gtk_entry_new();
+    y_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(x_entry), "10");
+    gtk_entry_set_text(GTK_ENTRY(y_entry), "50");
+    
+    // Checked state
+    checked_check = gtk_check_button_new_with_label("Initially Checked");
+
+    // Add widgets to grid
+    int row = 0;
+    gtk_grid_attach(GTK_GRID(grid), container_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), container_combo, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), name_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), name_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), label_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), label_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), tooltip_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), tooltip_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), x_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), x_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), y_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), y_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), checked_check, 0, row, 2, 1);
+
+    // Add grid to dialog
+    gtk_container_add(GTK_CONTAINER(content_area), grid);
+    gtk_widget_show_all(dialog);
+    
+    // Run dialog
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+    
+    if (response == GTK_RESPONSE_ACCEPT) {
+        // Get values from form
+        const gchar *name = gtk_entry_get_text(GTK_ENTRY(name_entry));
+        const gchar *label_text = gtk_entry_get_text(GTK_ENTRY(label_entry));
+        const gchar *tooltip = gtk_entry_get_text(GTK_ENTRY(tooltip_entry));
+        gint x = atoi(gtk_entry_get_text(GTK_ENTRY(x_entry)));
+        gint y = atoi(gtk_entry_get_text(GTK_ENTRY(y_entry)));
+        gboolean is_checked = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checked_check));
+        
+        // Get the selected container
+        gint container_index = gtk_combo_box_get_active(GTK_COMBO_BOX(container_combo));
+        GtkWidget *target_container = NULL;
+        
+        if (container_index > 0) {
+            target_container = g_list_nth_data(app_data->containers, container_index - 1);
+        } else {
+            target_container = app_data->preview_area;
+        }
+        
+        // Create checkbox button
+        btn *checkbox_button = btnCheckFixed(
+            (gchar*)name,             // Button name
+            (gchar*)label_text,       // Button label
+            (gchar*)tooltip,          // Tooltip
+            cord(x, y),               // Position
+            target_container,         // Container
+            is_checked,               // Checked state
+            NULL                      // Image (NULL for checkbox)
+        );
+        
+        if (checkbox_button != NULL) {
+            // Create the button widget with editing capabilities
+            GtkWidget *created_button = create_checkbox_button_with_editing(checkbox_button, app_data);
+            
+            // Show all widgets
+            gtk_widget_show_all(app_data->preview_area);
+        }
+    }
+    
+    gtk_widget_destroy(dialog);
+}
+
+static void show_properties_dialog_btn_toggle(GtkWidget *widget, gpointer data) {
+    AppData *app_data = (AppData *)data;
+    GtkWidget *dialog;
+    GtkWidget *content_area;
+    GtkWidget *grid;
+    GtkWidget *name_label, *label_label, *tooltip_label;
+    GtkWidget *name_entry, *label_entry, *tooltip_entry;
+    GtkWidget *x_label, *y_label, *width_label, *height_label;
+    GtkWidget *x_entry, *y_entry, *width_entry, *height_entry;
+    GtkWidget *toggled_check;
+    gint response;
+
+    // Create dialog
+    dialog = gtk_dialog_new_with_buttons("Toggle Button Properties",
+                                         GTK_WINDOW(app_data->window),
+                                         GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                         "OK", GTK_RESPONSE_ACCEPT,
+                                         "Cancel", GTK_RESPONSE_CANCEL,
+                                         NULL);
+
+    content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+
+    // Create grid for form layout
+    grid = gtk_grid_new();
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+
+    // Add container selection
+    GtkWidget *container_label = gtk_label_new("Add to Container:");
+    GtkWidget *container_combo = gtk_combo_box_text_new();
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(container_combo), "Window (Default)");
+    
+    // Add all containers
+    GList *iter;
+    for (iter = app_data->containers; iter != NULL; iter = iter->next) {
+        GtkWidget *container = GTK_WIDGET(iter->data);
+        const gchar *name = gtk_widget_get_name(container);
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(container_combo), name);
+    }
+    
+    // Select currently selected container
+    gint active_index = 0;
+    if (app_data->selected_container) {
+        active_index = g_list_index(app_data->containers, app_data->selected_container) + 1;
+    }
+    gtk_combo_box_set_active(GTK_COMBO_BOX(container_combo), active_index);
+
+    // Button identification fields
+    name_label = gtk_label_new("Button Name:");
+    name_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(name_entry), "toggle1");
+    
+    label_label = gtk_label_new("Button Label:");
+    label_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(label_entry), "Toggle Me");
+    
+    tooltip_label = gtk_label_new("Tooltip Text:");
+    tooltip_entry = gtk_entry_new();
+    
+    // Position fields
+    x_label = gtk_label_new("X Position:");
+    y_label = gtk_label_new("Y Position:");
+    x_entry = gtk_entry_new();
+    y_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(x_entry), "10");
+    gtk_entry_set_text(GTK_ENTRY(y_entry), "100");
+    
+    // Size fields
+    width_label = gtk_label_new("Width:");
+    height_label = gtk_label_new("Height:");
+    width_entry = gtk_entry_new();
+    height_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(width_entry), "120");
+    gtk_entry_set_text(GTK_ENTRY(height_entry), "40");
+    
+    // Toggled state
+    toggled_check = gtk_check_button_new_with_label("Initially Toggled");
+
+    // Add widgets to grid
+    int row = 0;
+    gtk_grid_attach(GTK_GRID(grid), container_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), container_combo, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), name_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), name_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), label_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), label_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), tooltip_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), tooltip_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), x_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), x_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), y_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), y_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), width_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), width_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), height_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), height_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), toggled_check, 0, row, 2, 1);
+
+    // Add grid to dialog
+    gtk_container_add(GTK_CONTAINER(content_area), grid);
+    gtk_widget_show_all(dialog);
+    
+    // Run dialog
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+    
+    if (response == GTK_RESPONSE_ACCEPT) {
+        // Get values from form
+        const gchar *name = gtk_entry_get_text(GTK_ENTRY(name_entry));
+        const gchar *label_text = gtk_entry_get_text(GTK_ENTRY(label_entry));
+        const gchar *tooltip = gtk_entry_get_text(GTK_ENTRY(tooltip_entry));
+        gint x = atoi(gtk_entry_get_text(GTK_ENTRY(x_entry)));
+        gint y = atoi(gtk_entry_get_text(GTK_ENTRY(y_entry)));
+        gint width = atoi(gtk_entry_get_text(GTK_ENTRY(width_entry)));
+        gint height = atoi(gtk_entry_get_text(GTK_ENTRY(height_entry)));
+        gboolean is_toggled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggled_check));
+        
+        // Get the selected container
+        gint container_index = gtk_combo_box_get_active(GTK_COMBO_BOX(container_combo));
+        GtkWidget *target_container = NULL;
+        
+        if (container_index > 0) {
+            target_container = g_list_nth_data(app_data->containers, container_index - 1);
+        } else {
+            target_container = app_data->preview_area;
+        }
+        
+        // Create toggle button
+        btn *toggle_button = btnToggleFixed(
+            (gchar*)name,             // Button name
+            (gchar*)label_text,       // Button label
+            (gchar*)tooltip,          // Tooltip
+            target_container,         // Container
+            cord(x, y),               // Position
+            dim(width, height),       // Dimension
+            NULL                      // Image (NULL for toggle button)
+        );
+        
+        if (toggle_button != NULL) {
+            // Set initial toggle state
+            toggle_button->isChecked = is_toggled;
+            
+            // Create the button widget with editing capabilities
+            GtkWidget *created_button = create_toggle_button_with_editing(toggle_button, app_data);
+            
+            // Show all widgets
+            gtk_widget_show_all(app_data->preview_area);
+        }
+    }
+    
+    gtk_widget_destroy(dialog);
+}
+
+static void show_properties_dialog_btn_spin(GtkWidget *widget, gpointer data) {
+    AppData *app_data = (AppData *)data;
+    GtkWidget *dialog;
+    GtkWidget *content_area;
+    GtkWidget *grid;
+    GtkWidget *name_label, *tooltip_label;
+    GtkWidget *name_entry, *tooltip_entry;
+    GtkWidget *x_label, *y_label;
+    GtkWidget *x_entry, *y_entry;
+    GtkWidget *min_label, *max_label, *step_label, *digits_label, *value_label;
+    GtkWidget *min_entry, *max_entry, *step_entry, *digits_entry, *value_entry;
+    gint response;
+
+    // Create dialog
+    dialog = gtk_dialog_new_with_buttons("Spin Button Properties",
+                                         GTK_WINDOW(app_data->window),
+                                         GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                         "OK", GTK_RESPONSE_ACCEPT,
+                                         "Cancel", GTK_RESPONSE_CANCEL,
+                                         NULL);
+
+    content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+
+    // Create grid for form layout
+    grid = gtk_grid_new();
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+
+    // Add container selection
+    GtkWidget *container_label = gtk_label_new("Add to Container:");
+    GtkWidget *container_combo = gtk_combo_box_text_new();
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(container_combo), "Window (Default)");
+    
+    // Add all containers
+    GList *iter;
+    for (iter = app_data->containers; iter != NULL; iter = iter->next) {
+        GtkWidget *container = GTK_WIDGET(iter->data);
+        const gchar *name = gtk_widget_get_name(container);
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(container_combo), name);
+    }
+    
+    // Select currently selected container
+    gint active_index = 0;
+    if (app_data->selected_container) {
+        active_index = g_list_index(app_data->containers, app_data->selected_container) + 1;
+    }
+    gtk_combo_box_set_active(GTK_COMBO_BOX(container_combo), active_index);
+
+    // Button identification fields
+    name_label = gtk_label_new("Spin Button Name:");
+    name_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(name_entry), "spin1");
+    
+    tooltip_label = gtk_label_new("Tooltip Text:");
+    tooltip_entry = gtk_entry_new();
+    
+    // Position fields
+    x_label = gtk_label_new("X Position:");
+    y_label = gtk_label_new("Y Position:");
+    x_entry = gtk_entry_new();
+    y_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(x_entry), "10");
+    gtk_entry_set_text(GTK_ENTRY(y_entry), "150");
+    
+    // Spin button properties
+    min_label = gtk_label_new("Minimum Value:");
+    max_label = gtk_label_new("Maximum Value:");
+    step_label = gtk_label_new("Step Increment:");
+    digits_label = gtk_label_new("Digits (Decimals):");
+    value_label = gtk_label_new("Initial Value:");
+    
+    min_entry = gtk_entry_new();
+    max_entry = gtk_entry_new();
+    step_entry = gtk_entry_new();
+    digits_entry = gtk_entry_new();
+    value_entry = gtk_entry_new();
+    
+    gtk_entry_set_text(GTK_ENTRY(min_entry), "0");
+    gtk_entry_set_text(GTK_ENTRY(max_entry), "100");
+    gtk_entry_set_text(GTK_ENTRY(step_entry), "1");
+    gtk_entry_set_text(GTK_ENTRY(digits_entry), "0");
+    gtk_entry_set_text(GTK_ENTRY(value_entry), "0");
+
+    // Add widgets to grid
+    int row = 0;
+    gtk_grid_attach(GTK_GRID(grid), container_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), container_combo, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), name_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), name_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), tooltip_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), tooltip_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), x_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), x_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), y_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), y_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), min_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), min_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), max_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), max_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), step_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), step_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), digits_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), digits_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), value_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), value_entry, 1, row, 1, 1);
+
+    // Add grid to dialog
+    gtk_container_add(GTK_CONTAINER(content_area), grid);
+    gtk_widget_show_all(dialog);
+    
+    // Run dialog
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+    
+    if (response == GTK_RESPONSE_ACCEPT) {
+        // Get values from form
+        const gchar *name = gtk_entry_get_text(GTK_ENTRY(name_entry));
+        const gchar *tooltip = gtk_entry_get_text(GTK_ENTRY(tooltip_entry));
+        gint x = atoi(gtk_entry_get_text(GTK_ENTRY(x_entry)));
+        gint y = atoi(gtk_entry_get_text(GTK_ENTRY(y_entry)));
+        gdouble min_value = g_strtod(gtk_entry_get_text(GTK_ENTRY(min_entry)), NULL);
+        gdouble max_value = g_strtod(gtk_entry_get_text(GTK_ENTRY(max_entry)), NULL);
+        gdouble step_value = g_strtod(gtk_entry_get_text(GTK_ENTRY(step_entry)), NULL);
+        guint digits = atoi(gtk_entry_get_text(GTK_ENTRY(digits_entry)));
+        gdouble initial_value = g_strtod(gtk_entry_get_text(GTK_ENTRY(value_entry)), NULL);
+        
+        // Get the selected container
+        gint container_index = gtk_combo_box_get_active(GTK_COMBO_BOX(container_combo));
+        GtkWidget *target_container = NULL;
+        
+        if (container_index > 0) {
+            target_container = g_list_nth_data(app_data->containers, container_index - 1);
+        } else {
+            target_container = app_data->preview_area;
+        }
+        
+        // Create spin object
+        spinObj *sp = (spinObj*)malloc(sizeof(spinObj));
+        if (sp) {
+            sp->borneInf = min_value;
+            sp->borneSup = max_value;
+            sp->step = step_value;
+            sp->digits = digits;
+            sp->start = initial_value;
+            
+            // Create spin button
+            btn *spin_button = btnSpinFixed(
+                (gchar*)name,             // Button name
+                "",                       // Label (not used for spin button)
+                (gchar*)tooltip,          // Tooltip
+                dim(80, 30),              // Dimension
+                cord(x, y),               // Position
+                target_container,         // Container
+                sp                        // Spin object
+            );
+            
+            if (spin_button != NULL) {
+                // Create the button widget with editing capabilities
+                GtkWidget *created_button = create_spin_button_with_editing(spin_button, app_data);
+                
+                // Show all widgets
+                gtk_widget_show_all(app_data->preview_area);
+            }
+        }
+    }
+    
+    gtk_widget_destroy(dialog);
+}
+
+static void show_properties_dialog_btn_switch(GtkWidget *widget, gpointer data) {
+    AppData *app_data = (AppData *)data;
+    GtkWidget *dialog;
+    GtkWidget *content_area;
+    GtkWidget *grid;
+    
+    GtkWidget *name_label, *tooltip_label;
+    GtkWidget *name_entry, *tooltip_entry;
+    GtkWidget *x_label, *y_label;
+    GtkWidget *x_entry, *y_entry;
+    GtkWidget *active_check;
+    gint response;
+
+    // Create dialog
+    dialog = gtk_dialog_new_with_buttons("Switch Properties",
+                                         GTK_WINDOW(app_data->window),
+                                         GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                         "OK", GTK_RESPONSE_ACCEPT,
+                                         "Cancel", GTK_RESPONSE_CANCEL,
+                                         NULL);
+
+    content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+
+    // Create grid for form layout
+    grid = gtk_grid_new();
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+
+    // Add container selection
+    GtkWidget *container_label = gtk_label_new("Add to Container:");
+    GtkWidget *container_combo = gtk_combo_box_text_new();
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(container_combo), "Window (Default)");
+    
+    // Add all containers
+    GList *iter;
+    for (iter = app_data->containers; iter != NULL; iter = iter->next) {
+        GtkWidget *container = GTK_WIDGET(iter->data);
+        const gchar *name = gtk_widget_get_name(container);
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(container_combo), name);
+    }
+    
+    // Select currently selected container
+    gint active_index = 0;
+    if (app_data->selected_container) {
+        active_index = g_list_index(app_data->containers, app_data->selected_container) + 1;
+    }
+    gtk_combo_box_set_active(GTK_COMBO_BOX(container_combo), active_index);
+
+    // Switch identification fields
+    name_label = gtk_label_new("Switch Name:");
+    name_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(name_entry), "switch1");
+    
+    tooltip_label = gtk_label_new("Tooltip Text:");
+    tooltip_entry = gtk_entry_new();
+    
+    // Position fields
+    x_label = gtk_label_new("X Position:");
+    y_label = gtk_label_new("Y Position:");
+    x_entry = gtk_entry_new();
+    y_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(x_entry), "10");
+    gtk_entry_set_text(GTK_ENTRY(y_entry), "200");
+    
+    // Active state
+    active_check = gtk_check_button_new_with_label("Initially Active");
+
+    // Add widgets to grid
+    int row = 0;
+    gtk_grid_attach(GTK_GRID(grid), container_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), container_combo, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), name_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), name_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), tooltip_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), tooltip_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), x_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), x_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), y_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), y_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), active_check, 0, row, 2, 1);
+
+    // Add grid to dialog
+    gtk_container_add(GTK_CONTAINER(content_area), grid);
+    gtk_widget_show_all(dialog);
+    
+    // Run dialog
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+    
+    if (response == GTK_RESPONSE_ACCEPT) {
+        // Get values from form
+        const gchar *name = gtk_entry_get_text(GTK_ENTRY(name_entry));
+        const gchar *tooltip = gtk_entry_get_text(GTK_ENTRY(tooltip_entry));
+        gint x = atoi(gtk_entry_get_text(GTK_ENTRY(x_entry)));
+        gint y = atoi(gtk_entry_get_text(GTK_ENTRY(y_entry)));
+        gboolean is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(active_check));
+        
+        // Get the selected container
+        gint container_index = gtk_combo_box_get_active(GTK_COMBO_BOX(container_combo));
+        GtkWidget *target_container = NULL;
+        
+        if (container_index > 0) {
+            target_container = g_list_nth_data(app_data->containers, container_index - 1);
+        } else {
+            target_container = app_data->preview_area;
+        }
+        
+        // Create switch button
+        btn *switch_button = btnSwitchFixed(
+            (gchar*)name,             // Button name
+            "",
+            (gchar*)tooltip,          // Tooltip
+            target_container,         // Container
+            cord(x, y),               // Position
+            dim(80, 30),              // Dimension
+            NULL,                     // Image (NULL for switch button)
+            is_active                 // Active state
+        );
+        
+        if (switch_button != NULL) {
+            // Create the button widget with editing capabilities
+            GtkWidget *created_button = create_switch_button_with_editing(switch_button, app_data);
+            
+            // Show all widgets
+            gtk_widget_show_all(app_data->preview_area);
+        }
+    }
+    
+    gtk_widget_destroy(dialog);
+}
+
+// static void show_properties_dialog_btn_checkbox(GtkWidget *widget, gpointer data) {};
+// static void show_properties_dialog_btn_toggle(GtkWidget *widget, gpointer data) {};
+// static void show_properties_dialog_btn_spin(GtkWidget *widget, gpointer data) {};
+// static void show_properties_dialog_btn_switch(GtkWidget *widget, gpointer data) {};
 
 // Function to show dialog for basic entry configuration
 static void show_basic_entry_dialog(AppData *app_data)
@@ -561,6 +1390,12 @@ static void add_btn_normal_clicked(GtkWidget *widget, gpointer data)
 {
     AppData *app_data = (AppData *)data;
     show_properties_dialog_btn_normal(app_data);
+}
+
+static void add_btn_radio_clicked(GtkWidget *widget, gpointer data)
+{
+    AppData *app_data = (AppData *)data;
+    show_properties_dialog_btn_radio(app_data);
 }
 
 // Function to handle basic entry button click

@@ -20,6 +20,8 @@ typedef struct _AppData {
     GtkWidget *apply_button;     // Apply button for property changes
     GtkWidget *remove_button;    // Remove button for deleting widgets
     Arbre *widget_tree;          // Root of the custom widget tree
+    //add radio group combo
+    GList *radio_groups;
     
     // New fields for the Arbre visualization
     GtkWidget *arbre_view;       // Tree view for Arbre visualization
