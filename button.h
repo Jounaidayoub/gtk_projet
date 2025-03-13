@@ -463,7 +463,16 @@ void appliquer_style_button(Style *monStyle, btn *b) {
  * liste_radios(labels, style, box);
  */
 
-void liste_radios(char* labels[256], Style* st, StyledBox* bx) {
+btn** liste_radios(char* labels[256], Style* st, StyledBox* bx) {
+
+
+    int count = 0;
+    while (labels[count]) count++; // Count the number of labels
+
+    // Allocate memory for the array of buttons (NULL-terminated)
+    btn** buttons = malloc((count + 1) * sizeof(btn*));
+    if (!buttons) return NULL; // Check allocation failure
+
 
     //Creer le pere
     btn* pere = btnRadio(labels[0], labels[0], labels[0], bx->widget, margin(0, 0, 0, 0),
@@ -476,8 +485,17 @@ void liste_radios(char* labels[256], Style* st, StyledBox* bx) {
     //appliquer le style au bouton pere
     if(st)
         appliquer_style_button(st, pere);
-
+    buttons[0] = pere; // Store the parent button
     //Creer les autres boutons
+        // Create the child radio buttons
+        for (int j = 1; j < count; j++) {
+            btn* b = btnRadio(labels[j], labels[j], labels[j], bx->widget, margin(0, 0, 0, 0), pere->button, NULL);
+            creer_button(b);
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(b->button), FALSE);
+            if (st) appliquer_style_button(st, b);
+            buttons[j] = b; // Store the child button
+        }
+    /*
     int j = 0;//Commencer par le 2eme label
     char **i = labels;
     while(i[++j]){
@@ -494,8 +512,10 @@ void liste_radios(char* labels[256], Style* st, StyledBox* bx) {
         //gtk_box_pack_start(GTK_BOX(box), b->button, TRUE, TRUE, 0);
 
     }
+    */
+   buttons[count] = NULL; // NULL-terminate the array
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pere->button), TRUE); // Select the radio button
-
+        return buttons;
 }
 
 

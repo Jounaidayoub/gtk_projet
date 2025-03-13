@@ -229,26 +229,14 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
     gtk_widget_destroy(dialog);
 }
 
-static void show_properties_dialog_btn_radio(AppData *app_data){
-    // //create a froum dialog based on this macro     btn *radio1 = btnRadioFixed(
-    //     "radio1",
-    //     "Option 1",
-    //     "Select option 1",
-    //     fixed,
-    //     cord(20, 150),
-    //     NULL,
-    //     NULL
-    // );
-    // #define btnRadioFixed(nom, label, tooltip, container, pos, groupeMember, img) \
-    // initBtn(RADIO, nom, label,TRUE, tooltip,img, \
-    // dim(5,5), TRUE, pos, NULL, \
-    // TRUE, container, groupeMember,GTK_ALIGN_START,1, TRUE, NULL)
 
+
+static void show_properties_dialog_btn_radio(AppData *app_data){
     GtkWidget *dialog;
     GtkWidget *content_area;
-    GtkWidget *grid;
-    GtkWidget *name_label, *label_label, *tooltip_label;
-    GtkWidget *name_entry, *label_entry, *tooltip_entry;
+    GtkWidget *grid, *gras_check;
+    GtkWidget *taille_label, *color_label, *police_label, *labels, *labels_entry;
+    GtkWidget *taille_entry, *color_entry, *police_entry;
     GtkWidget *x_label, *y_label, *width_label, *height_label;
     GtkWidget *x_entry, *y_entry, *width_entry, *height_entry;
     GtkWidget *group_label, *group_combo;
@@ -292,17 +280,30 @@ static void show_properties_dialog_btn_radio(AppData *app_data){
     }
     gtk_combo_box_set_active(GTK_COMBO_BOX(container_combo), active_index);
 
-    // Button identification fields
-    name_label = gtk_label_new("Button Name:");
-    name_entry = gtk_entry_new();
-    gtk_entry_set_text(GTK_ENTRY(name_entry), "radio1");
 
-    label_label = gtk_label_new("Button Label:");
-    label_entry = gtk_entry_new();
-    gtk_entry_set_text(GTK_ENTRY(label_entry), "Option 1");
+    labels = gtk_label_new("Labels:");
+    labels_entry = gtk_entry_new();
+    // gtk_entry_set_text(GTK_ENTRY(name_entry), "radio1");
 
-    tooltip_label = gtk_label_new("Tooltip Text:");
-    tooltip_entry = gtk_entry_new();
+    // // Button identification fields
+    police_label = gtk_label_new("Buttons police:");
+    police_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(police_entry), "Sans");
+
+    color_label = gtk_label_new("Buttons color:");
+    color_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(color_entry), "#000");
+
+    taille_label = gtk_label_new("Buttons taille:");
+    taille_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(taille_entry), "12");
+
+    gras_check = gtk_check_button_new_with_label("Gras");
+
+    
+
+    // tooltip_label = gtk_label_new("Tooltip Text:");
+    // tooltip_entry = gtk_entry_new();
 
     // Position fields
     x_label = gtk_label_new("X Position:");
@@ -313,14 +314,14 @@ static void show_properties_dialog_btn_radio(AppData *app_data){
     gtk_entry_set_text(GTK_ENTRY(y_entry), "150");
 
     // Group selection
-    group_label = gtk_label_new("Group:");
-    group_combo = gtk_combo_box_text_new();
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(group_combo), "None");
-    for (iter = app_data->radio_groups; iter != NULL; iter = iter->next) {
-        const gchar *group_name = (const gchar *)iter->data;
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(group_combo), group_name);
-    }
-    gtk_combo_box_set_active(GTK_COMBO_BOX(group_combo), 0);
+    // group_label = gtk_label_new("Group:");
+    // group_combo = gtk_combo_box_text_new();
+    // gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(group_combo), "None");
+    // for (iter = app_data->radio_groups; iter != NULL; iter = iter->next) {
+    //     const gchar *group_name = (const gchar *)iter->data;
+    //     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(group_combo), group_name);
+    // }
+    // gtk_combo_box_set_active(GTK_COMBO_BOX(group_combo), 0);
 
     // Add widgets to grid
     int row = 0;
@@ -328,16 +329,16 @@ static void show_properties_dialog_btn_radio(AppData *app_data){
     gtk_grid_attach(GTK_GRID(grid), container_combo, 1, row, 1, 1);
     row++;
 
-    gtk_grid_attach(GTK_GRID(grid), name_label, 0, row, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), name_entry, 1, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), taille_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), taille_entry, 1, row, 1, 1);
     row++;
 
-    gtk_grid_attach(GTK_GRID(grid), label_label, 0, row, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), label_entry, 1, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), color_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), color_entry, 1, row, 1, 1);
     row++;
 
-    gtk_grid_attach(GTK_GRID(grid), tooltip_label, 0, row, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), tooltip_entry, 1, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), police_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), police_entry, 1, row, 1, 1);
     row++;
 
     gtk_grid_attach(GTK_GRID(grid), x_label, 0, row, 1, 1);
@@ -347,9 +348,13 @@ static void show_properties_dialog_btn_radio(AppData *app_data){
     gtk_grid_attach(GTK_GRID(grid), y_label, 0, row, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), y_entry, 1, row, 1, 1);
     row++;
+    //
+    gtk_grid_attach(GTK_GRID(grid), labels, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), labels_entry, 1, row, 1, 1);
+    row++;
 
-    gtk_grid_attach(GTK_GRID(grid), group_label, 0, row, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), group_combo, 1, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), gras_check, 0, row, 2, 1);
+
 
     // Add grid to dialog
     gtk_container_add(GTK_CONTAINER(content_area), grid);
@@ -360,14 +365,18 @@ static void show_properties_dialog_btn_radio(AppData *app_data){
 
     if (response == GTK_RESPONSE_ACCEPT) {
         // Get values from form
-        const gchar *name = gtk_entry_get_text(GTK_ENTRY(name_entry));
-        const gchar *label_text = gtk_entry_get_text(GTK_ENTRY(label_entry));
-        const gchar *tooltip = gtk_entry_get_text(GTK_ENTRY(tooltip_entry));
+        const gchar *police_text = gtk_entry_get_text(GTK_ENTRY(police_entry));
+        const int taille_int = atoi(gtk_entry_get_text(GTK_ENTRY(taille_entry)));
+        const gchar *color_text = gtk_entry_get_text(GTK_ENTRY(color_entry));
         gint x = atoi(gtk_entry_get_text(GTK_ENTRY(x_entry)));
         gint y = atoi(gtk_entry_get_text(GTK_ENTRY(y_entry)));
-        gint group_index = gtk_combo_box_get_active(GTK_COMBO_BOX(group_combo));
-        const gchar *group_name = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(group_combo));
 
+        gboolean is_gras = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(gras_check));
+
+        // gint group_index = gtk_combo_box_get_active(GTK_COMBO_BOX(group_combo));
+        // const gchar *group_name = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(group_combo));
+        //
+        char *labels_text = gtk_entry_get_text(GTK_ENTRY(labels_entry));
         // Get the selected container
         gint container_index = gtk_combo_box_get_active(GTK_COMBO_BOX(container_combo));
         GtkWidget *target_container = NULL;
@@ -378,36 +387,36 @@ static void show_properties_dialog_btn_radio(AppData *app_data){
             target_container = app_data->preview_area;
         }
 
-        // Create radio button
-        btn *radio_button = btnRadioFixed(
-            (gchar*)name,             // Button name
-            (gchar*)label_text,       // Button label
-            (gchar*)tooltip,          // Tooltip
-            target_container,         // Container
-            cord(x, y),               // Position
-            NULL,               // Group name
-            NULL                      // Image (NULL for radio button)
-        );
-
-        if (radio_button != NULL) {
-            // Create the button widget
-            btn *created_button = creer_button(radio_button);
-
-            // Apply a default style
-            Style *default_style = init_style("Sans", NULL, 10, 0, NULL, 1, 5);
-            appliquer_style_button(default_style, created_button);
+       // gchar *police, HexColor *color, gint taille, gint gras, char *bgcolor, int border, int border_radius
+        // creer le style
+        Style *default_style = init_style(police_text, hex_color_init(color_text), taille_int, is_gras, NULL, 0, 0);
+        // creer le box des boutons
+        StyledBox* bx = init_styled_box(0, 1, 8, "", "", "", "", cord(x, y), dim(100, 200), target_container);
+        create_styled_box(bx);
+        // convertir les labels en un tableau de chaines
+        gchar **array = g_strsplit(labels_text, " ", -1); // Split by space
+        // creer les radios
+        btn** liste = liste_radios(array, default_style, bx);
+        gtk_widget_show_all(bx->widget);
 
             // Show all widgets
             gtk_widget_show_all(app_data->preview_area);
+
+        // Add the box (radioList) to both trees
+        add_widget_to_both_trees(app_data, bx->widget, "radioList", bx->container, TRUE, bx);
+        //Add the radio buttons to trees
+        if (liste) {
+            for (int i = 0; liste[i]; i++) {
+                g_print("Button %d: %s\n", i, liste[i]->label);
+                add_widget_to_both_trees(app_data, liste[i]->button, "radio", bx->widget, FALSE, liste[i]);
+            }
         }
+        // }
     }
 
     gtk_widget_destroy(dialog);
     
     // c
-
-    
-    
     
 
 };

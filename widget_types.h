@@ -22,7 +22,8 @@ typedef enum {
     WIDGET_RADIO,
     WIDGET_SWITCH,
     WIDGET_SPINNER,
-    WIDGET_PROGRESS_BAR
+    WIDGET_PROGRESS_BAR,
+    WIDGET_RADIO_LIST
     // Add more as needed
 } WidgetType;
 
@@ -50,6 +51,7 @@ const char* widget_type_to_string(WidgetType type) {
         case WIDGET_SWITCH: return "switch";
         case WIDGET_SPINNER: return "spinner";
         case WIDGET_PROGRESS_BAR: return "progressbar";
+        case WIDGET_RADIO_LIST: return "radioList";
         default: return "unknown";
     }
 }
@@ -75,6 +77,7 @@ WidgetType string_to_widget_type(const char* string) {
     if (strcmp(string, "switch") == 0) return WIDGET_SWITCH;
     if (strcmp(string, "spinner") == 0) return WIDGET_SPINNER;
     if (strcmp(string, "progressbar") == 0) return WIDGET_PROGRESS_BAR;
+    if (strcmp(string, "radioList") == 0) return WIDGET_RADIO_LIST;
     
     return WIDGET_UNKNOWN;
 }
