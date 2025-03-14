@@ -61,10 +61,11 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
     const char *widget_type = widget_type_to_string(racine->type);
     
     // Output element start
-    g_string_append_printf(string, "<%s>\n", widget_type);
+    // g_string_append_printf(string, "<%s>\n", widget_type);
     
     // Output properties directly from structure based on widget type
     if (racine->widget_data) {
+        g_print("\n\n racine type: %d", racine->type);
         switch (racine->type) {
             case WIDGET_ENTRY_BASIC:
             {
@@ -143,6 +144,110 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                 break;
             }
 
+            case WIDGET_RADIO:
+                {
+                    g_print("\ndans le case du radio");
+                    btn *radio = (btn*)racine->widget_data;
+                    // g_print("\n\n\n==Radio widget %d", radio->dim->width);
+                    // g_print("Radio widget properties - text: %s, mnemonic: %d, police: %s, color: %s, taille: %d, gras: %d\n",
+                    //         radio->label, radio->hasMnemonic, radio->style->police, radio->style->color, radio->style->taille, radio->style->gras);
+                    
+                    // Open <radio> tag
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append(string, "<radio>\n");
+                    
+                    // Generate properties inside <radio>
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"text\">%s</property>\n", radio->label);
+            
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"mnemonic\">%d</property>\n", radio->hasMnemonic);
+            
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"police\">%s</property>\n", radio->police);
+            
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"color\">%s</property>\n", radio->color);
+            
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"taille\">%d</property>\n", radio->taille);
+            
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"gras\">%d</property>\n", radio->gras);
+
+                    // Close </radio> tag
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append(string, "</radio>\n");
+            
+
+            
+                    break;
+                }
+
+            case WIDGET_BUTTON:
+                {
+                    btn *button = (btn*)racine->widget_data;
+                    // // Open <button> tag
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append(string, "<button>\n");
+                    
+                    // Generate properties inside <button>
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"text\">%s</property>\n", button->label);
+            
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"mnemonic\">%d</property>\n", button->hasMnemonic);
+            
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"police\">%s</property>\n", button->police);
+
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"color\">%s</property>\n", button->color);
+            
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"taille\">%d</property>\n", button->taille);
+            
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"x\">%d</property>\n", button->pos->x);
+
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"y\">%d</property>\n", button->pos->y);
+
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"width\">%d</property>\n", button->dim->width);
+
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"height\">%d</property>\n", button->dim->height);
+
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"gras\">%d</property>\n", button->gras);
+
+                    // // Close </button> tag
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append(string, "</button>\n");
+            
+                    break;
+                }
+
+            case WIDGET_RADIO_LIST:
+                {
+                    StyledBox *radioList = (StyledBox*)racine->widget_data;
+                    
+                    // Generate the opening tag for <radioList> with x and y attributes
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<radioList x=\"%d\" y=\"%d\">\n", radioList->cord->x, radioList->cord->y);
+
+                    //generate the radio buttons
+                    generate_xml_from_arbre(string, racine->fils, indent + 4);
+
+
+                    // Close the <radioList> tag
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append(string, "</radioList>\n");
+
+                    break;
+                }
+
             /// add cases for ur widgets here
             
             default:
@@ -154,60 +259,61 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
     }
     
     // Also output any properties directly stored in the Arbre node
-    for (int i = 0; i < racine->prop_count; i++) {
-        for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-        g_string_append_printf(string, "<property name=\"%s\">%s</property>\n", 
-                              racine->properties[i].name, racine->properties[i].value);
-    }
+    // for (int i = 0; i < racine->prop_count; i++) {
+    //     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+    //     g_string_append_printf(string, "<property name=\"%s\">%s</property>\n", 
+    //                           racine->properties[i].name, racine->properties[i].value);
+    // }
     
     // Output style properties if available
-    for (int i = 0; i < racine->style_prop_count; i++) {
-        for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+    // for (int i = 0; i < racine->style_prop_count; i++) {
+    //     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
         
-        // Style properties vary by widget type
-        const char *style_tag = "style";
-        if (strcmp(widget_type, "label") == 0) {
-            style_tag = "labelstyle";
-        } else if (strcmp(widget_type, "button") == 0) {
-            style_tag = "buttonstyle";
-        } else if (strcmp(widget_type, "checkbox") == 0) {
-            style_tag = "checkboxstyle";
-        }
+    //     // Style properties vary by widget type
+    //     const char *style_tag = "style";
+    //     if (strcmp(widget_type, "label") == 0) {
+    //         style_tag = "labelstyle";
+    //     } else if (strcmp(widget_type, "button") == 0) {
+    //         style_tag = "buttonstyle";
+    //     } else if (strcmp(widget_type, "checkbox") == 0) {
+    //         style_tag = "checkboxstyle";
+    //     }
         
-        g_string_append_printf(string, "<%s name=\"%s\">%s</%s>\n", 
-                              style_tag, racine->style_props[i].name, 
-                              racine->style_props[i].value, style_tag);
-    }
+    //     g_string_append_printf(string, "<%s name=\"%s\">%s</%s>\n", 
+    //                           style_tag, racine->style_props[i].name, 
+    //                           racine->style_props[i].value, style_tag);
+    // }
     
-    // Handle children for containers
-    if (racine->fils) {
-        // If this is a container other than preview_area, wrap children in a children tag
-        if (racine->is_container) {
-            for (int i = 0; i < indent + 2; i++) g_string_append(string, "  ");
-            g_string_append(string, "<child>\n");
+    // // Handle children for containers
+    // if (racine->fils) {
+    //     // If this is a container other than preview_area, wrap children in a children tag
+    //     if (racine->is_container) {
+    //         for (int i = 0; i < indent + 2; i++) g_string_append(string, "  ");
+    //         g_string_append(string, "<child>\n");
             
-            generate_xml_from_arbre(string, racine->fils, indent + 4);
+    //         generate_xml_from_arbre(string, racine->fils, indent + 4);
             
-            for (int i = 0; i < indent + 2; i++) g_string_append(string, "  ");
-            g_string_append(string, "</child>\n");
-        } else {
-            generate_xml_from_arbre(string, racine->fils, indent + 2);
-        }
-    }
+    //         for (int i = 0; i < indent + 2; i++) g_string_append(string, "  ");
+    //         g_string_append(string, "</child>\n");
+    //     } else {
+    //         generate_xml_from_arbre(string, racine->fils, indent + 2);
+    //     }
+    // }
     
     // Process siblings at the same level
     if (racine->frere) {
         // Close current tag before moving to sibling
-        for (int i = 0; i < indent; i++) g_string_append(string, "  ");
-        g_string_append_printf(string, "</%s>\n", widget_type);
+        // for (int i = 0; i < indent; i++) g_string_append(string, "  ");
+        // g_string_append_printf(string, "</%s>\n", widget_type);
         
         generate_xml_from_arbre(string, racine->frere, indent);
         return; // Skip the closing tag at the end since we already added it
     }
     
     // Close element
-    for (int i = 0; i < indent; i++) g_string_append(string, "  ");
-    g_string_append_printf(string, "</%s>\n", widget_type);
+    //commented because each element should close itself
+    // for (int i = 0; i < indent; i++) g_string_append(string, "  ");
+    // g_string_append_printf(string, "</%s>\n", widget_type);
 }
 
 // Export to XML function
