@@ -323,9 +323,9 @@ btn* creer_button(btn* mybtn)
     gtk_widget_grab_focus(mybtn->button);
     //Ajouter le bouton au conteneur, s'il ne s'agit d'un conteneur fixe
     if((!mybtn->isFixed) && ((mybtn->container)!=NULL))
-    {
+    {   g_print("Containersa dsadvsjahdvasjdhjasdvashdvashdavds({{{{{}}}}}): %s\n", gtk_widget_get_name(mybtn->container));
         gtk_container_add(GTK_CONTAINER(mybtn->container), mybtn->button);
-        //gtk_box_pack_start(GTK_BOX(mybtn->container), mybtn->button, TRUE, TRUE, 0);
+        gtk_box_pack_start(GTK_BOX(mybtn->container), mybtn->button, TRUE, TRUE, 0);
 
     }
     //Aligner le bouton

@@ -590,7 +590,7 @@ static void show_properties_dialog_btn_checkbox(GtkWidget *widget, gpointer data
         btn *checkbox_button = NULL;
         if(GTK_IS_FIXED(target_container)){
         // Create checkbox button
-        checkbox_button = btnCheckFixed(
+        btn *checkbox_button = btnCheckFixed(
             (gchar*)name,             // Button name
             (gchar*)label_text,       // Button label
             (gchar*)tooltip,          // Tooltip
@@ -611,7 +611,6 @@ static void show_properties_dialog_btn_checkbox(GtkWidget *widget, gpointer data
                 NULL                      // Image (NULL for checkbox)
             );
        }
-
         
         if (checkbox_button != NULL) {
             // Create the button widget with editing capabilities
@@ -927,6 +926,9 @@ static void show_properties_dialog_btn_spin(GtkWidget *widget, gpointer data) {
     response = gtk_dialog_run(GTK_DIALOG(dialog));
     
     if (response == GTK_RESPONSE_ACCEPT) {
+        for (int i = 0; i < 10; i++) {
+            g_print("asdhvasjbdahsdvadj");
+        }
         // Get values from form
         const gchar *name = gtk_entry_get_text(GTK_ENTRY(name_entry));
         const gchar *tooltip = gtk_entry_get_text(GTK_ENTRY(tooltip_entry));
@@ -947,10 +949,14 @@ static void show_properties_dialog_btn_spin(GtkWidget *widget, gpointer data) {
         } else {
             target_container = app_data->preview_area;
         }
+        // print the targed container for debug
+        g_print("Container: %s\n", gtk_widget_get_name(target_container));
         
         // Create spin object
         spinObj *sp = (spinObj*)malloc(sizeof(spinObj));
         if (sp) {
+            
+            
             sp->borneInf = min_value;
             sp->borneSup = max_value;
             sp->step = step_value;
@@ -958,15 +964,42 @@ static void show_properties_dialog_btn_spin(GtkWidget *widget, gpointer data) {
             sp->start = initial_value;
             
             // Create spin button
-            btn *spin_button = btnSpinFixed(
-                (gchar*)name,             // Button name
-                "",                       // Label (not used for spin button)
-                (gchar*)tooltip,          // Tooltip
-                dim(80, 30),              // Dimension
-                cord(x, y),               // Position
-                target_container,         // Container
-                sp                        // Spin object
-            );
+            //print then selected container for debug
+            // g_print("Container: jhasvfajsdاتشريلاشتسيارتشساي %s\n", gtk_widget_get_name(target_container));
+            // g_print("");
+            btn *spin_button = NULL;
+            if (GTK_IS_FIXED(target_container)) {
+                g_print("Fixed container\n");
+                spin_button = btnSpinFixed(
+                    (gchar*)name,             // Button name
+                    "",                       // Label (not used for spin button)
+                    (gchar*)tooltip,          // Tooltip
+                    dim(80, 30),              // Dimension
+                    cord(x, y),               // Position
+                    target_container,         // Container
+                    sp                        // Spin object
+                );
+            }else {
+                spin_button = btnSpin(
+                    (gchar*)name,             // Button name
+                    "",                       // Label (not used for spin button)
+                    (gchar*)tooltip,          // Tooltip
+                    // dim(80, 30),              // Dimension
+                    // cord(x, y),               // Position
+                    NULL,
+                    target_container,         // Container
+                    sp                        // Spin object
+                );
+            }
+            // btn *spin_button = btnSpinFixed(
+            //     (gchar*)name,             // Button name
+            //     "",                       // Label (not used for spin button)
+            //     (gchar*)tooltip,          // Tooltip
+            //     dim(80, 30),              // Dimension
+            //     cord(x, y),               // Position
+            //     target_container,         // Container
+            //     sp                        // Spin object
+            // );
             
             if (spin_button != NULL) {
                 // Create the button widget with editing capabilities
@@ -1449,7 +1482,6 @@ static void show_password_entry_dialog(AppData *app_data)
 
     gtk_widget_destroy(dialog);
 }
-
 static void add_btn_normal_clicked(GtkWidget *widget, gpointer data)
 {
     AppData *app_data = (AppData *)data;
