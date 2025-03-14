@@ -142,6 +142,257 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                                      entry->invisible_char);
                 break;
             }
+            
+            
+            // Normal Button
+            case WIDGET_BUTTON_NORMAL:
+            {
+                btn *button = (btn*)racine->widget_data;
+                g_print("  Button normal properties - x:%d y:%d\n", 
+                       button->pos ? button->pos->x : 0, 
+                       button->pos ? button->pos->y : 0);
+                
+                // Position and size properties
+                if (button->pos) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"x\">%d</property>\n", button->pos->x);
+                    
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"y\">%d</property>\n", button->pos->y);
+                }
+                
+                if (button->dim) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"width\">%d</property>\n", button->dim->width);
+                    
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"height\">%d</property>\n", button->dim->height);
+                }
+                
+                // Button-specific properties
+                if (button->label) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"label\">%s</property>\n", button->label);
+                }
+                
+                if (button->tooltip) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"tooltip\">%s</property>\n", button->tooltip);
+                }
+                
+                break;
+            }
+            
+            // Checkbox Button
+            case WIDGET_BUTTON_CHECKBOX:
+            {
+                btn *button = (btn*)racine->widget_data;
+                g_print("  Checkbox properties - x:%d y:%d checked:%d\n", 
+                       button->pos ? button->pos->x : 0, 
+                       button->pos ? button->pos->y : 0,
+                       button->isChecked);
+                
+                // Position and size properties
+                if (button->pos) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"x\">%d</property>\n", button->pos->x);
+                    
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"y\">%d</property>\n", button->pos->y);
+                }
+                
+                // Checkbox-specific properties
+                if (button->label) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"label\">%s</property>\n", button->label);
+                }
+                
+                if (button->tooltip) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"tooltip\">%s</property>\n", button->tooltip);
+                }
+                
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"is_checked\">%d</property>\n", button->isChecked);
+                
+                break;
+            }
+            
+            // Radio Button
+            case WIDGET_BUTTON_RADIO:
+            {
+                btn *button = (btn*)racine->widget_data;
+                g_print("  Radio button properties - x:%d y:%d\n", 
+                       button->pos ? button->pos->x : 0, 
+                       button->pos ? button->pos->y : 0);
+                
+                // Position and size properties
+                if (button->pos) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"x\">%d</property>\n", button->pos->x);
+                    
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"y\">%d</property>\n", button->pos->y);
+                }
+                
+                // Radio button-specific properties
+                if (button->label) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"label\">%s</property>\n", button->label);
+                }
+                
+                if (button->tooltip) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"tooltip\">%s</property>\n", button->tooltip);
+                }
+                
+                // if (button->groupe) {
+                //     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                //     g_string_append_printf(string, "<property name=\"group\">%s</property>\n", button->groupe);
+                // }
+                
+                break;
+            }
+            
+            // Toggle Button
+            case WIDGET_BUTTON_TOGGLE:
+            {
+                btn *button = (btn*)racine->widget_data;
+                g_print("  Toggle button properties - x:%d y:%d checked:%d\n", 
+                       button->pos ? button->pos->x : 0, 
+                       button->pos ? button->pos->y : 0,
+                       button->isChecked);
+                
+                // Position and size properties
+                if (button->pos) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"x\">%d</property>\n", button->pos->x);
+                    
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"y\">%d</property>\n", button->pos->y);
+                }
+                
+                if (button->dim) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"width\">%d</property>\n", button->dim->width);
+                    
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"height\">%d</property>\n", button->dim->height);
+                }
+                
+                // Toggle button-specific properties
+                if (button->label) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"label\">%s</property>\n", button->label);
+                }
+                
+                if (button->tooltip) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"tooltip\">%s</property>\n", button->tooltip);
+                }
+                
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"is_active\">%d</property>\n", button->isChecked);
+                
+                break;
+            }
+            
+            // Switch Button
+            case WIDGET_BUTTON_SWITCH:
+            {
+                btn *button = (btn*)racine->widget_data;
+                g_print("  Switch button properties - x:%d y:%d active:%d\n", 
+                       button->pos ? button->pos->x : 0, 
+                       button->pos ? button->pos->y : 0,
+                       button->isChecked);
+                
+                // Position and size properties
+                if (button->pos) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"x\">%d</property>\n", button->pos->x);
+                    
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"y\">%d</property>\n", button->pos->y);
+                }
+                
+                if (button->dim) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"width\">%d</property>\n", button->dim->width);
+                    
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"height\">%d</property>\n", button->dim->height);
+                }
+                
+                // Switch-specific properties
+                if (button->tooltip) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"tooltip\">%s</property>\n", button->tooltip);
+                }
+                
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"is_active\">%d</property>\n", button->isChecked);
+                
+                break;
+            }
+            
+            // Spin Button
+            case WIDGET_BUTTON_SPIN:
+            {   
+                
+                btn *button = (btn*)racine->widget_data;
+                
+                // if (!button->spinObj) {
+                //     g_print("  Spin button without spinObj data\n");
+                //     break;
+                // }
+                spinObj *sp = (spinObj*)malloc(sizeof(spinObj));
+                // sp = button->spinObj;
+                g_print("  Spin button properties - x:%d y:%d min:%f max:%f step:%f digits:%u start:%f\n", 
+                       button->pos ? button->pos->x : 0, 
+                       button->pos ? button->pos->y : 0,
+                       sp->borneInf, sp->borneSup, sp->step, sp->digits, sp->start);
+                
+                // Position and size properties
+                if (button->pos) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"x\">%d</property>\n", button->pos->x);
+                    
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"y\">%d</property>\n", button->pos->y);
+                }
+                
+                if (button->dim) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"width\">%d</property>\n", button->dim->width);
+                    
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"height\">%d</property>\n", button->dim->height);
+                }
+                
+                // Spin button-specific properties
+                if (button->tooltip) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append_printf(string, "<property name=\"tooltip\">%s</property>\n", button->tooltip);
+                }
+                
+                // Spin-specific properties from spinObj
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"min_value\">%f</property>\n", sp->borneInf);
+                
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"max_value\">%f</property>\n", sp->borneSup);
+                
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"step_increment\">%f</property>\n", sp->step);
+                
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"digits\">%u</property>\n", sp->digits);
+                
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"value\">%f</property>\n", sp->start);
+                
+                break;
+            }
 
             /// add cases for ur widgets here
             

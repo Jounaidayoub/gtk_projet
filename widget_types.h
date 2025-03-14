@@ -23,7 +23,13 @@ typedef enum {
     WIDGET_SWITCH,
     WIDGET_SPINNER,
     WIDGET_PROGRESS_BAR,
-    WIDGET_RADIO_LIST
+    WIDGET_RADIO_LIST,
+    WIDGET_BUTTON_NORMAL,
+    WIDGET_BUTTON_CHECKBOX,
+    WIDGET_BUTTON_RADIO,
+    WIDGET_BUTTON_TOGGLE,
+    WIDGET_BUTTON_SWITCH,
+    WIDGET_BUTTON_SPIN,
     // Add more as needed
 } WidgetType;
 
@@ -52,6 +58,13 @@ const char* widget_type_to_string(WidgetType type) {
         case WIDGET_SPINNER: return "spinner";
         case WIDGET_PROGRESS_BAR: return "progressbar";
         case WIDGET_RADIO_LIST: return "radioList";
+        case WIDGET_BUTTON_NORMAL: return "button";
+        case WIDGET_BUTTON_CHECKBOX: return "checkbox";
+        case WIDGET_BUTTON_RADIO: return "radio";
+        case WIDGET_BUTTON_TOGGLE: return "toggle";
+        case WIDGET_BUTTON_SWITCH: return "switch";
+        case WIDGET_BUTTON_SPIN: return "spin";
+        
         default: return "unknown";
     }
 }

@@ -137,7 +137,25 @@ void add_widget_to_both_trees(AppData *app_data, GtkWidget *widget,
         widget_type = WIDGET_LABEL;
     } else if (strstr(widget_type_str, "Button") != NULL) {
         widget_type = WIDGET_BUTTON;
-    } else {
+    }
+    else if (strcmp(widget_type_str, "checkbox") == 0) {
+        widget_type = WIDGET_BUTTON_CHECKBOX;
+    }
+    else if (strcmp(widget_type_str, "radio") == 0) {
+        widget_type = WIDGET_BUTTON_RADIO;
+    }
+    else if (strcmp(widget_type_str, "toggle") == 0) {
+        widget_type = WIDGET_BUTTON_TOGGLE;
+    }
+    else if (strcmp(widget_type_str, "switch") == 0) {
+        widget_type = WIDGET_BUTTON_SWITCH;
+    
+    }
+    else if (strcmp(widget_type_str, "Spin Button") == 0) {
+        widget_type = WIDGET_BUTTON_SPIN;
+
+    }
+    else {
         widget_type = WIDGET_UNKNOWN;
     }
     

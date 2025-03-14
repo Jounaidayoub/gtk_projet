@@ -13,6 +13,10 @@ GtkWidget* create_button_with_editing(btn *button, AppData *app_data, const char
     
     // Create the button using the existing function
     button = creer_button(button);
+    gtk_widget_show(button->button);
+    // gtk_widget_show(button);
+    gtk_widget_show(app_data->preview_area);
+    
     
     // Get the actual GTK widget
     widget = button->button;
