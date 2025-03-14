@@ -120,6 +120,24 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
     // Mnemonic option
     has_mnemonic_check = gtk_check_button_new_with_label("Has Mnemonic (_X for shortcuts)");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(has_mnemonic_check), TRUE);
+    // Style fields
+    GtkWidget *police_label = gtk_label_new("Font:");
+    GtkWidget *police_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(police_entry), "Sans");
+
+    GtkWidget *color_label = gtk_label_new("Color:");
+    GtkWidget *color_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(color_entry), "#000000");
+
+    GtkWidget *taille_label = gtk_label_new("Font Size:");
+    GtkWidget *taille_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(taille_entry), "12");
+
+    GtkWidget *gras_check = gtk_check_button_new_with_label("Bold");
+
+    GtkWidget *bgcolor_label = gtk_label_new("Background Color:");
+    GtkWidget *bgcolor_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(bgcolor_entry), "#FFFFFF");
 
     // Add widgets to grid
     int row = 0;
@@ -160,6 +178,25 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
     row++;
     
     gtk_grid_attach(GTK_GRID(grid), has_mnemonic_check, 0, row, 2, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), police_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), police_entry, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), color_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), color_entry, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), taille_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), taille_entry, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), gras_check, 0, row, 2, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), bgcolor_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), bgcolor_entry, 1, row, 1, 1);
 
     // Add grid to dialog
     gtk_container_add(GTK_CONTAINER(content_area), grid);
@@ -179,11 +216,14 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
         gint height = atoi(gtk_entry_get_text(GTK_ENTRY(height_entry)));
         const gchar *image_path = gtk_entry_get_text(GTK_ENTRY(image_path_entry));
         gboolean has_mnemonic = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(has_mnemonic_check));
-        
+        const gchar *police = gtk_entry_get_text(GTK_ENTRY(police_entry));
+        const gchar *color = gtk_entry_get_text(GTK_ENTRY(color_entry));
+        gint taille = atoi(gtk_entry_get_text(GTK_ENTRY(taille_entry)));
+        gboolean is_gras = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(gras_check));
+        const gchar *bgcolor = gtk_entry_get_text(GTK_ENTRY(bgcolor_entry));
         // Get the selected container
         gint container_index = gtk_combo_box_get_active(GTK_COMBO_BOX(container_combo));
         GtkWidget *target_container = NULL;
-        
         if (container_index > 0) {
             target_container = g_list_nth_data(app_data->containers, container_index - 1);
         } else {
@@ -215,11 +255,12 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
             btn *created_button = creer_button(button);
             
             // Apply a default style
-            Style *default_style = init_style("Sans", NULL, 10, 0, NULL, 1, 5);
+            Style *default_style = init_style("Sans", hex_color_init(color), taille, is_gras, bgcolor, 1, 5);
+            g_print("back: %s", bgcolor);
             appliquer_style_button(default_style, created_button);
-            
+            copy_style_to_btn(created_button, default_style);
             // Add the widget to hierarchy trees
-            // add_widget_to_both_trees(app_data, created_button->button, name);
+            add_widget_to_both_trees(app_data, created_button->button, "Button", target_container, TRUE, created_button);
             
             // Show all widgets
             gtk_widget_show_all(app_data->preview_area);
@@ -407,7 +448,6 @@ static void show_properties_dialog_btn_radio(AppData *app_data){
         //Add the radio buttons to trees
         if (liste) {
             for (int i = 0; liste[i]; i++) {
-                g_print("Button %d: %s\n", i, liste[i]->label);
                 add_widget_to_both_trees(app_data, liste[i]->button, "radio", bx->widget, FALSE, liste[i]);
             }
         }
@@ -546,12 +586,11 @@ static void show_properties_dialog_btn_checkbox(GtkWidget *widget, gpointer data
         } else {
             target_container = app_data->preview_area;
         }
-        
-        // Create checkbox button
+
         btn *checkbox_button = NULL;
         if(GTK_IS_FIXED(target_container)){
         // Create checkbox button
-        checkbox_button = btnCheckFixed(
+        btn *checkbox_button = btnCheckFixed(
             (gchar*)name,             // Button name
             (gchar*)label_text,       // Button label
             (gchar*)tooltip,          // Tooltip
