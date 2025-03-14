@@ -177,7 +177,58 @@ static GtkWidget *create_checkbox_property(const gchar *label_text, GtkWidget **
     
     return check;
 }
+// static void add_stled_box(gtkwiget, gpointer data){
+//     AppData *app_data = (AppData *)data;
+//     clear_properties_panel(app_data);
+//     g_print("Adding styled box to preview area\n");
+//     add_styled_box_to_preview(app_data);
+// }
 
+void add_styled_box_to_preview(GtkWidget *widget, gpointer data) {
+    AppData *app_data = (AppData *)data;
+    // Create at default position
+
+
+    StyledBox *box = init_styled_box(
+        GTK_ORIENTATION_VERTICAL,
+        FALSE,
+        5,
+        NULL,
+        "#f0f0f0",  // Light gray background
+        "5px",      // Rounded corners
+        "1px solid #cccccc", // Light border
+        cord(20, 20),        // Position
+        dim(200, 150),       // Size
+        app_data->preview_area
+    );
+    
+    // Create the widget
+    create_styled_box(box);
+    
+    // Generate a unique name
+    gchar *name = g_strdup_printf("styled_box_%d", g_list_length(app_data->containers) + 1);
+    gtk_widget_set_name(box->widget, name);
+    
+    // Add event handlers to make it selectable
+    // g_signal_connect(box->widget, "button-press-event", 
+    //                  G_CALLBACK(on_container_click), app_data);
+    
+    // Add to containers list
+    app_data->containers = g_list_append(app_data->containers, box->widget);
+    
+    // Add to hierarchy tree
+    add_widget_to_both_trees(app_data, box->widget, "Styled Box", 
+                            app_data->preview_area, TRUE, box);
+    
+    // Make it visible
+    gtk_widget_show_all(box->widget);
+    
+    // Select it
+    app_data->selected_container = box->widget;
+    
+    // Clean up
+    g_free(name);
+}
 // Create property form for basic entry widget
 static void create_basic_entry_form(AppData *app_data, GtkWidget *widget) {
     GtkWidget *content = app_data->properties_content;
@@ -1093,3 +1144,5 @@ static void register_preview_area_click(GtkWidget *preview_area, AppData *app_da
 }
 
 #endif /* PROPERTY_PANEL_H */
+
+// #endif // PROPERTY_PANEL_H
