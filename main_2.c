@@ -19,7 +19,8 @@ typedef struct {
 // Forward declarations
 static void show_properties_dialog(GtkWidget *widget, gpointer data);
 static void on_drag_data_received(GtkWidget *widget, GdkDragContext *context, gint x, gint y,
-                          GtkSelectionData *data, guint info, guint time, gpointer user_data);
+                                  GtkSelectionData *data, guint info, guint time, gpointer user_data);
+void NewFunction(Arbre *racine, int indent, GString *string);
 static void export_to_xml(GtkWidget *widget, gpointer data);
 static void run_demo(GtkWidget *widget, gpointer data);
 static void add_basic_entry_clicked(GtkWidget *widget, gpointer data);

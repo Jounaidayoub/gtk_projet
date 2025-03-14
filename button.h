@@ -37,6 +37,17 @@ typedef enum
 }BtnType;
 
 
+/******************************Style************************************/
+typedef struct {
+    gchar* police;
+    HexColor* color;
+    gint taille;
+    gint gras;
+    char* bgcolor;
+    int border;
+    int border_radius;
+} Style;
+
 
 //La structure définissant le bouton, comportant les differents parametres
 // permettant de le personnaliser.
@@ -61,7 +72,66 @@ typedef struct btn{
     double opacity;//l'opacité du bouton.
     gboolean isChecked;//Si le bouton est coché.
     spinObj* sp;//L'objet contenant les parametres du button spin.
+    //style
+    Style* style; // style du bouton
+    gchar* police; // police du bouton
+    gchar* color; // couleur du bouton
+    gint taille; // taille de la police du bouton
+    gint gras; // épaisseur de la police du bouton
 }btn;
+/**
+ * @brief Copie les éléments d'une structure Style dans une autre.
+ *
+ * @param dest Pointeur vers la structure Style de destination.
+ * @param src Pointeur vers la structure Style source.
+ * @return Pointeur vers la structure Style de destination.
+ */
+/**
+ * @brief Copie les éléments d'une structure Style dans une autre.
+ *
+ * @param src Pointeur vers la structure Style source.
+ * @return Pointeur vers la nouvelle structure Style de destination.
+ */
+// Style* copy_style(const Style* src) {
+//     if (!src) return NULL;
+
+//     Style* dest = (Style*)malloc(sizeof(Style));
+//     if (!dest) {
+//         fprintf(stderr, "Erreur d'allocation mémoire pour le style de destination\n");
+//         return NULL;
+//     }
+
+//     dest->police = src->police ? g_strdup(src->police) : "Sans";
+//     // dest->color = src->color ? g_memdup(src->color, sizeof(HexColor)) : NULL;
+//     dest->taille = src->taille;
+//     dest->gras = src->gras;
+//     dest->bgcolor = src->bgcolor ? g_strdup(src->bgcolor) : "white";
+//     dest->border = src->border;
+//     dest->border_radius = src->border_radius;
+
+//     return dest;
+// }
+
+void copy_style_to_btn(btn* b, const Style* src) {
+    if (!b || !src) return;
+
+    b->police = src->police ? g_strdup(src->police) : "Sans";
+    b->color = src->color ? g_strdup(src->color->hex_code) : "black";
+    b->taille = src->taille;
+    b->gras = src->gras;
+    b->style = (Style*)malloc(sizeof(Style));
+    if (!b->style) {
+        fprintf(stderr, "Erreur d'allocation mémoire pour le style du bouton\n");
+        return;
+    }
+    b->style->police = b->police;
+    b->style->color = src->color;
+    b->style->taille = b->taille;
+    b->style->gras = b->gras;
+    b->style->bgcolor = src->bgcolor ? g_strdup(src->bgcolor) : "white";
+    b->style->border = src->border;
+    b->style->border_radius = src->border_radius;
+}
 
 /**************************************
  * NOM: allocateBtn.
@@ -73,11 +143,14 @@ typedef struct btn{
 btn* allocateBtn()
 {
     btn* mybtn=(btn*)malloc(sizeof(btn));//Allocation
+    // mybtn->style = (Style*)malloc(sizeof(Style));
     //Retourner un message d'erreur et sortire du programme si l'allocation est échouée
     if(!mybtn)
     {
-        perror("Erreur d'allocation de bouton dans allocateBtn\n");
-        exit -1;
+        // if(!mybtn->style){
+            perror("Erreur d'allocation de bouton dans allocateBtn\n");
+            exit -1;
+        // }
     }
     //Retourner le bouton
     return (btn*) mybtn;
@@ -286,16 +359,6 @@ btn* creer_button(btn* mybtn)
     return(btn*) mybtn;
 }
 
-/******************************Style************************************/
-typedef struct {
-    gchar* police;
-    HexColor* color;
-    gint taille;
-    gint gras;
-    char* bgcolor;
-    int border;
-    int border_radius;
-} Style;
 
 
 /**********************************************************************************************************
@@ -483,8 +546,11 @@ btn** liste_radios(char* labels[256], Style* st, StyledBox* bx) {
     //gtk_box_pack_start(GTK_BOX(box), pere->button, TRUE, TRUE, 0);
 
     //appliquer le style au bouton pere
-    if(st)
+    if(st){
+        // pere->style = *st;
+        copy_style_to_btn(pere, st);
         appliquer_style_button(st, pere);
+    }
     buttons[0] = pere; // Store the parent button
     //Creer les autres boutons
         // Create the child radio buttons
@@ -492,7 +558,10 @@ btn** liste_radios(char* labels[256], Style* st, StyledBox* bx) {
             btn* b = btnRadio(labels[j], labels[j], labels[j], bx->widget, margin(0, 0, 0, 0), pere->button, NULL);
             creer_button(b);
             gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(b->button), FALSE);
-            if (st) appliquer_style_button(st, b);
+            if (st){ 
+                copy_style_to_btn(b, st);
+                appliquer_style_button(st, b);
+            }
             buttons[j] = b; // Store the child button
         }
     /*

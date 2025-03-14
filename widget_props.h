@@ -91,7 +91,32 @@ void populate_widget_properties(Arbre *node, void *widget_structure, WidgetType 
             // add_style_property_to_node(node, "gras", "0");
             break;
         }
+        
+        case WIDGET_RADIO:
+        {
+            // Cast to the correct structure type
+            btn *radio = (btn*)widget_structure;
+            
+            if (radio) {
+            // Add properties from the structure
+            char width_str[16], height_str[16], x_str[16], y_str[16];
+            sprintf(width_str, "%d", radio->dim->width);
+            sprintf(height_str, "%d", radio->dim->height);
+            sprintf(x_str, "%d", radio->pos->x);
+            sprintf(y_str, "%d", radio->pos->y);
+            
+            add_property_to_node(node, "width", width_str);
+            add_property_to_node(node, "height", height_str);
+            add_property_to_node(node, "x", x_str);
+            add_property_to_node(node, "y", y_str);
+            add_property_to_node(node, "label", radio->label ? radio->label : "");
+            }
+            
+            break;
+        }
         // Add more cases for other widget types as needed
+
+
         default:
             break;
     }

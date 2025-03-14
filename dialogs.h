@@ -217,9 +217,9 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
             // Apply a default style
             Style *default_style = init_style("Sans", NULL, 10, 0, NULL, 1, 5);
             appliquer_style_button(default_style, created_button);
-            
+            copy_style_to_btn(created_button, default_style);
             // Add the widget to hierarchy trees
-            // add_widget_to_both_trees(app_data, created_button->button, name);
+            add_widget_to_both_trees(app_data, created_button->button, "Button", target_container, TRUE, created_button);
             
             // Show all widgets
             gtk_widget_show_all(app_data->preview_area);
@@ -403,11 +403,11 @@ static void show_properties_dialog_btn_radio(AppData *app_data){
             gtk_widget_show_all(app_data->preview_area);
 
         // Add the box (radioList) to both trees
-        add_widget_to_both_trees(app_data, bx->widget, "radioList", bx->container, TRUE, bx);
+        add_widget_to_both_trees(app_data, bx->widget, "box", bx->container, TRUE, bx);
         //Add the radio buttons to trees
         if (liste) {
             for (int i = 0; liste[i]; i++) {
-                g_print("Button %d: %s\n", i, liste[i]->label);
+                g_print("style de bouton %p: %s\n", i, liste[i]->style);
                 add_widget_to_both_trees(app_data, liste[i]->button, "radio", bx->widget, FALSE, liste[i]);
             }
         }
@@ -546,9 +546,11 @@ static void show_properties_dialog_btn_checkbox(GtkWidget *widget, gpointer data
         } else {
             target_container = app_data->preview_area;
         }
-        
+
+        btn *checkbox_button = NULL;
+        if(GTK_IS_FIXED(target_container)){
         // Create checkbox button
-        btn *checkbox_button = btnCheckFixed(
+        checkbox_button = btnCheckFixed(
             (gchar*)name,             // Button name
             (gchar*)label_text,       // Button label
             (gchar*)tooltip,          // Tooltip
@@ -557,6 +559,19 @@ static void show_properties_dialog_btn_checkbox(GtkWidget *widget, gpointer data
             is_checked,               // Checked state
             NULL                      // Image (NULL for checkbox)
         );
+            }
+        else{
+            checkbox_button = btnCheck(
+                (gchar*)name,             // Button name
+                (gchar*)label_text,       // Button label
+                (gchar*)tooltip,          // Tooltip
+                NULL,               // Position
+                target_container,         // Container
+                is_checked,               // Checked state
+                NULL                      // Image (NULL for checkbox)
+            );
+       }
+
         
         if (checkbox_button != NULL) {
             // Create the button widget with editing capabilities
