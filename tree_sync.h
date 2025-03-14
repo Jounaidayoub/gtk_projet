@@ -137,7 +137,12 @@ void add_widget_to_both_trees(AppData *app_data, GtkWidget *widget,
         widget_type = WIDGET_LABEL;
     } else if (strstr(widget_type_str, "Button") != NULL) {
         widget_type = WIDGET_BUTTON;
-    } else {
+    } else if (strcmp(widget_type_str, "radio") == 0) {
+            widget_type = WIDGET_RADIO;
+    } else if (strcmp(widget_type_str, "radioList") == 0) {
+        widget_type = WIDGET_RADIO_LIST;
+    }
+    else {
         widget_type = WIDGET_UNKNOWN;
     }
     
