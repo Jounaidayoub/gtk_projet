@@ -78,6 +78,7 @@ typedef struct btn{
     gchar* color; // couleur du bouton
     gint taille; // taille de la police du bouton
     gint gras; // épaisseur de la police du bouton
+    gchar* bgcolor;
 }btn;
 /**
  * @brief Copie les éléments d'une structure Style dans une autre.
@@ -126,6 +127,7 @@ void copy_style_to_btn(btn* b, const Style* src) {
     }
     b->style->police = b->police;
     b->style->color = src->color;
+    b->style->bgcolor = src->bgcolor;
     b->style->taille = b->taille;
     b->style->gras = b->gras;
     b->style->bgcolor = src->bgcolor ? g_strdup(src->bgcolor) : "white";
