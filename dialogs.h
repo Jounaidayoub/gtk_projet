@@ -259,6 +259,9 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
             g_print("back: %s", bgcolor);
             appliquer_style_button(default_style, created_button);
             copy_style_to_btn(created_button, default_style);
+            register_widget_for_property_editing(button->button, app_data);
+
+
             // Add the widget to hierarchy trees
             add_widget_to_both_trees(app_data, created_button->button, "Button", target_container, TRUE, created_button);
             

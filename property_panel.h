@@ -639,7 +639,8 @@ static void create_property_form_for_spin_button(AppData *app_data, GtkWidget *w
 }
 
 
-// Create property form for spin button widget
+
+// Create property form for normal button widget
 static void create_property_form_for_button_normal(AppData *app_data, GtkWidget *widget) {
     GtkWidget *content = app_data->properties_content;
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
@@ -649,13 +650,9 @@ static void create_property_form_for_button_normal(AppData *app_data, GtkWidget 
     current_properties.container = vbox;
     
     // Get current properties
-    gdouble value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
-    gdouble min = 0, max = 0, step = 0;
-    gtk_spin_button_get_range(GTK_SPIN_BUTTON(widget), &min, &max);
-    gtk_spin_button_get_increments(GTK_SPIN_BUTTON(widget), &step, NULL);
-    guint digits = gtk_spin_button_get_digits(GTK_SPIN_BUTTON(widget));
-    gboolean numeric = gtk_spin_button_get_numeric(GTK_SPIN_BUTTON(widget));
-    gboolean wrap = gtk_spin_button_get_wrap(GTK_SPIN_BUTTON(widget));
+    const gchar *label_text = gtk_button_get_label(GTK_BUTTON(widget));
+    const gchar *tooltip_text = gtk_widget_get_tooltip_text(widget);
+    const gchar *name = gtk_widget_get_name(widget);
     
     // Get position and size
     GtkWidget *parent = gtk_widget_get_parent(widget);
@@ -676,22 +673,15 @@ static void create_property_form_for_button_normal(AppData *app_data, GtkWidget 
     current_properties.form_grid = grid;
     
     // Title
-    GtkWidget *title = gtk_label_new("Spin Button Properties");
+    GtkWidget *title = gtk_label_new("Button Properties");
     gtk_widget_set_halign(title, GTK_ALIGN_START);
     
     // Format values as strings
     char x_str[32], y_str[32], width_str[32], height_str[32];
-    char value_str[32], min_str[32], max_str[32], step_str[32], digits_str[32];
-    
     sprintf(x_str, "%d", x);
     sprintf(y_str, "%d", y);
     sprintf(width_str, "%d", width);
     sprintf(height_str, "%d", height);
-    sprintf(value_str, "%g", value);
-    sprintf(min_str, "%g", min);
-    sprintf(max_str, "%g", max);
-    sprintf(step_str, "%g", step);
-    sprintf(digits_str, "%u", digits);
     
     // Position fields
     GtkWidget *x_label = gtk_label_new("X Position:");
@@ -713,44 +703,124 @@ static void create_property_form_for_button_normal(AppData *app_data, GtkWidget 
     current_properties.width_entry = width_entry;
     current_properties.height_entry = height_entry;
     
-    // Spin button specific fields
-    GtkWidget *value_label = gtk_label_new("Value:");
-    GtkWidget *min_label = gtk_label_new("Minimum:");
-    GtkWidget *max_label = gtk_label_new("Maximum:");
-    GtkWidget *step_label = gtk_label_new("Step Increment:");
-    GtkWidget *digits_label = gtk_label_new("Digits:");
+    // Name field
+    GtkWidget *name_label = gtk_label_new("Button Name:");
+    GtkWidget *name_entry = gtk_entry_new();
+    if (name && *name) {
+        gtk_entry_set_text(GTK_ENTRY(name_entry), name);
+    }
     
-    GtkWidget *value_entry = gtk_entry_new();
-    GtkWidget *min_entry = gtk_entry_new();
-    GtkWidget *max_entry = gtk_entry_new();
-    GtkWidget *step_entry = gtk_entry_new();
-    GtkWidget *digits_entry = gtk_entry_new();
+    // Button specific fields
+    GtkWidget *label_text_label = gtk_label_new("Button Text:");
+    GtkWidget *label_text_entry = gtk_entry_new();
+    if (label_text) {
+        gtk_entry_set_text(GTK_ENTRY(label_text_entry), label_text);
+    }
+    current_properties.label_entry = label_text_entry;
     
-    gtk_entry_set_text(GTK_ENTRY(value_entry), value_str);
-    gtk_entry_set_text(GTK_ENTRY(min_entry), min_str);
-    gtk_entry_set_text(GTK_ENTRY(max_entry), max_str);
-    gtk_entry_set_text(GTK_ENTRY(step_entry), step_str);
-    gtk_entry_set_text(GTK_ENTRY(digits_entry), digits_str);
+    // Tooltip field
+    GtkWidget *tooltip_label = gtk_label_new("Tooltip:");
+    GtkWidget *tooltip_entry = gtk_entry_new();
+    if (tooltip_text) {
+        gtk_entry_set_text(GTK_ENTRY(tooltip_entry), tooltip_text);
+    }
     
-    // Store entries for later retrieval
-    current_properties.value_entry = value_entry;
-    current_properties.min_entry = min_entry;
-    current_properties.max_entry = max_entry;
-    current_properties.step_entry = step_entry;
-    current_properties.digits_entry = digits_entry;
+    // Image path field
+    GtkWidget *image_path_label = gtk_label_new("Image Path:");
+    GtkWidget *path_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    GtkWidget *image_path_entry = gtk_entry_new();
+    GtkWidget *browse_button = gtk_button_new_with_label("Browse...");
     
-    // Checkboxes
-    GtkWidget *numeric_check = gtk_check_button_new_with_label("Numeric Only");
-    GtkWidget *wrap_check = gtk_check_button_new_with_label("Wrap Around");
+    // Get button image if it exists
+    GtkWidget *current_image = gtk_button_get_image(GTK_BUTTON(widget));
+    if (current_image != NULL) {
+        gchar *image_path = g_object_get_data(G_OBJECT(widget), "image_file_path");
+        if (image_path) {
+            gtk_entry_set_text(GTK_ENTRY(image_path_entry), image_path);
+        }
+    }
     
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(numeric_check), numeric);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(wrap_check), wrap);
+    gtk_box_pack_start(GTK_BOX(path_box), image_path_entry, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(path_box), browse_button, FALSE, FALSE, 0);
     
-    current_properties.numeric_check = numeric_check;
-    current_properties.wrap_check = wrap_check;
+    g_signal_connect(browse_button, "clicked", G_CALLBACK(NULL), image_path_entry);
+    
+    // Mnemonic option
+    GtkWidget *has_mnemonic_check = gtk_check_button_new_with_label("Has Mnemonic (_X for shortcuts)");
+    gboolean has_mnemonic = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "has_mnemonic"));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(has_mnemonic_check), has_mnemonic);
+    
+    // Style fields
+    GtkWidget *font_label = gtk_label_new("Font:");
+    GtkWidget *font_entry = gtk_entry_new();
+    
+    GtkWidget *color_label = gtk_label_new("Text Color:");
+    GtkWidget *color_entry = gtk_entry_new();
+    
+    GtkWidget *size_label = gtk_label_new("Font Size:");
+    GtkWidget *size_entry = gtk_entry_new();
+    
+    GtkWidget *bold_check = gtk_check_button_new_with_label("Bold");
+    
+    GtkWidget *bgcolor_label = gtk_label_new("Background Color:");
+    GtkWidget *bgcolor_entry = gtk_entry_new();
+    
+    // Try to get style data from the button
+    Style *style = g_object_get_data(G_OBJECT(widget), "button_style");
+    if (style) {
+        gtk_entry_set_text(GTK_ENTRY(font_entry), style->police ? style->police : "Sans");
+        
+        // if (style->color) {
+            // gchar *color_str = g_strdup_printf("#%02x%02x%02x", 
+            //                                    style->color->r, 
+            //                                    style->color->g, 
+            //                                    style->color->b);
+            // gtk_entry_set_text(GTK_ENTRY(color_entry), color_str);
+            // g_free(color_str);
+        // } else {
+            gtk_entry_set_text(GTK_ENTRY(color_entry), "#000000");
+        // }
+        
+        gchar size_str[32];
+        sprintf(size_str, "%d", style->taille);
+        gtk_entry_set_text(GTK_ENTRY(size_entry), size_str);
+        
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bold_check), style->gras);
+        
+        gtk_entry_set_text(GTK_ENTRY(bgcolor_entry), style->bgcolor ? style->bgcolor : "#FFFFFF");
+    } else {
+        // Default values
+        gtk_entry_set_text(GTK_ENTRY(font_entry), "Sans");
+        gtk_entry_set_text(GTK_ENTRY(color_entry), "#000000");
+        gtk_entry_set_text(GTK_ENTRY(size_entry), "12");
+        gtk_entry_set_text(GTK_ENTRY(bgcolor_entry), "#FFFFFF");
+    }
+    
+    // Store references for property retrieval in apply function
+    GtkWidget *dummy_entries[8];  // Temp storage for entries that don't have dedicated fields
+    int dummy_index = 0;
+    
+    // Save these in a consistent place for the apply function
+    dummy_entries[dummy_index++] = name_entry;
+    dummy_entries[dummy_index++] = tooltip_entry;
+    dummy_entries[dummy_index++] = image_path_entry;
+    dummy_entries[dummy_index++] = font_entry;
+    dummy_entries[dummy_index++] = color_entry;
+    dummy_entries[dummy_index++] = size_entry;
+    dummy_entries[dummy_index++] = bgcolor_entry;
+    g_object_set_data_full(G_OBJECT(widget), "property_entries", 
+                           g_memdup(dummy_entries, sizeof(GtkWidget*) * dummy_index),
+                           g_free);
+    
+    g_object_set_data(G_OBJECT(widget), "has_mnemonic_check", has_mnemonic_check);
+    g_object_set_data(G_OBJECT(widget), "bold_check", bold_check);
     
     // Add widgets to grid
     int row = 0;
+    
+    // Name field
+    gtk_grid_attach(GTK_GRID(grid), name_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), name_entry, 1, row++, 1, 1);
     
     // Position and size
     gtk_grid_attach(GTK_GRID(grid), x_label, 0, row, 1, 1);
@@ -765,24 +835,32 @@ static void create_property_form_for_button_normal(AppData *app_data, GtkWidget 
     gtk_grid_attach(GTK_GRID(grid), height_label, 0, row, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), height_entry, 1, row++, 1, 1);
     
-    // Spin button specific properties
-    gtk_grid_attach(GTK_GRID(grid), value_label, 0, row, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), value_entry, 1, row++, 1, 1);
+    // Button specific properties
+    gtk_grid_attach(GTK_GRID(grid), label_text_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), label_text_entry, 1, row++, 1, 1);
     
-    gtk_grid_attach(GTK_GRID(grid), min_label, 0, row, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), min_entry, 1, row++, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), tooltip_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), tooltip_entry, 1, row++, 1, 1);
     
-    gtk_grid_attach(GTK_GRID(grid), max_label, 0, row, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), max_entry, 1, row++, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), image_path_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), path_box, 1, row++, 1, 1);
     
-    gtk_grid_attach(GTK_GRID(grid), step_label, 0, row, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), step_entry, 1, row++, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), has_mnemonic_check, 0, row++, 2, 1);
     
-    gtk_grid_attach(GTK_GRID(grid), digits_label, 0, row, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), digits_entry, 1, row++, 1, 1);
+    // Style properties
+    gtk_grid_attach(GTK_GRID(grid), font_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), font_entry, 1, row++, 1, 1);
     
-    gtk_grid_attach(GTK_GRID(grid), numeric_check, 0, row++, 2, 1);
-    gtk_grid_attach(GTK_GRID(grid), wrap_check, 0, row++, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), color_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), color_entry, 1, row++, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), size_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), size_entry, 1, row++, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), bold_check, 0, row++, 2, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), bgcolor_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), bgcolor_entry, 1, row++, 1, 1);
     
     // Add title and grid to vbox
     gtk_box_pack_start(GTK_BOX(vbox), title, FALSE, FALSE, 5);
@@ -798,6 +876,270 @@ static void create_property_form_for_button_normal(AppData *app_data, GtkWidget 
     gtk_widget_set_sensitive(app_data->apply_button, TRUE);
     gtk_widget_set_sensitive(app_data->remove_button, TRUE);
 }
+
+// Create property form for normal button widget
+// static void create_property_form_for_button_normal(AppData *app_data, GtkWidget *widget) {
+//     GtkWidget *content = app_data->properties_content;
+//     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    
+//     // Store the widget being edited
+//     current_properties.widget = widget;
+//     current_properties.container = vbox;
+    
+//     // Get current properties
+//     const gchar *label_text = gtk_button_get_label(GTK_BUTTON(widget));
+    
+//     // Get position and size
+//     GtkWidget *parent = gtk_widget_get_parent(widget);
+//     gint x = 0, y = 0, width = 0, height = 0;
+    
+//     if (GTK_IS_FIXED(parent)) {
+//         gtk_container_child_get(GTK_CONTAINER(parent), widget, "x", &x, "y", &y, NULL);
+//     }
+    
+//     gtk_widget_get_size_request(widget, &width, &height);
+    
+//     // Create grid for form layout
+//     GtkWidget *grid = gtk_grid_new();
+//     gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+//     gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+//     gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+    
+//     current_properties.form_grid = grid;
+    
+//     // Title
+//     GtkWidget *title = gtk_label_new("Button Properties");
+//     gtk_widget_set_halign(title, GTK_ALIGN_START);
+    
+//     // Format values as strings
+//     char x_str[32], y_str[32], width_str[32], height_str[32];
+//     sprintf(x_str, "%d", x);
+//     sprintf(y_str, "%d", y);
+//     sprintf(width_str, "%d", width);
+//     sprintf(height_str, "%d", height);
+    
+//     // Position fields
+//     GtkWidget *x_label = gtk_label_new("X Position:");
+//     GtkWidget *y_label = gtk_label_new("Y Position:");
+//     GtkWidget *x_entry = gtk_entry_new();
+//     GtkWidget *y_entry = gtk_entry_new();
+//     gtk_entry_set_text(GTK_ENTRY(x_entry), x_str);
+//     gtk_entry_set_text(GTK_ENTRY(y_entry), y_str);
+//     current_properties.x_entry = x_entry;
+//     current_properties.y_entry = y_entry;
+    
+//     // Size fields
+//     GtkWidget *width_label = gtk_label_new("Width:");
+//     GtkWidget *height_label = gtk_label_new("Height:");
+//     GtkWidget *width_entry = gtk_entry_new();
+//     GtkWidget *height_entry = gtk_entry_new();
+//     gtk_entry_set_text(GTK_ENTRY(width_entry), width_str);
+//     gtk_entry_set_text(GTK_ENTRY(height_entry), height_str);
+//     current_properties.width_entry = width_entry;
+//     current_properties.height_entry = height_entry;
+    
+//     // Button specific fields
+//     GtkWidget *label_text_label = gtk_label_new("Button Text:");
+//     GtkWidget *label_text_entry = gtk_entry_new();
+//     if (label_text) {
+//         gtk_entry_set_text(GTK_ENTRY(label_text_entry), label_text);
+//     }
+//     current_properties.label_entry = label_text_entry;
+    
+//     // Add widgets to grid
+//     int row = 0;
+    
+//     // Position and size
+//     gtk_grid_attach(GTK_GRID(grid), x_label, 0, row, 1, 1);
+//     gtk_grid_attach(GTK_GRID(grid), x_entry, 1, row++, 1, 1);
+    
+//     gtk_grid_attach(GTK_GRID(grid), y_label, 0, row, 1, 1);
+//     gtk_grid_attach(GTK_GRID(grid), y_entry, 1, row++, 1, 1);
+    
+//     gtk_grid_attach(GTK_GRID(grid), width_label, 0, row, 1, 1);
+//     gtk_grid_attach(GTK_GRID(grid), width_entry, 1, row++, 1, 1);
+    
+//     gtk_grid_attach(GTK_GRID(grid), height_label, 0, row, 1, 1);
+//     gtk_grid_attach(GTK_GRID(grid), height_entry, 1, row++, 1, 1);
+    
+//     // Button specific properties
+//     gtk_grid_attach(GTK_GRID(grid), label_text_label, 0, row, 1, 1);
+//     gtk_grid_attach(GTK_GRID(grid), label_text_entry, 1, row++, 1, 1);
+    
+//     // Add title and grid to vbox
+//     gtk_box_pack_start(GTK_BOX(vbox), title, FALSE, FALSE, 5);
+//     gtk_box_pack_start(GTK_BOX(vbox), grid, FALSE, FALSE, 0);
+    
+//     // Add the vbox to the content area
+//     gtk_container_add(GTK_CONTAINER(content), vbox);
+    
+//     // Show all widgets
+//     gtk_widget_show_all(content);
+    
+//     // Enable Apply and Remove buttons
+//     gtk_widget_set_sensitive(app_data->apply_button, TRUE);
+//     gtk_widget_set_sensitive(app_data->remove_button, TRUE);
+// }
+
+// Create property form for spin button widget
+// static void create_property_form_for_button_normal(AppData *app_data, GtkWidget *widget) {
+//     GtkWidget *content = app_data->properties_content;
+//     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    
+//     // Store the widget being edited
+//     current_properties.widget = widget;
+//     current_properties.container = vbox;
+    
+//     // Get current properties
+//     gdouble value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(widget));
+//     gdouble min = 0, max = 0, step = 0;
+//     gtk_spin_button_get_range(GTK_SPIN_BUTTON(widget), &min, &max);
+//     gtk_spin_button_get_increments(GTK_SPIN_BUTTON(widget), &step, NULL);
+//     guint digits = gtk_spin_button_get_digits(GTK_SPIN_BUTTON(widget));
+//     gboolean numeric = gtk_spin_button_get_numeric(GTK_SPIN_BUTTON(widget));
+//     gboolean wrap = gtk_spin_button_get_wrap(GTK_SPIN_BUTTON(widget));
+    
+//     // Get position and size
+//     GtkWidget *parent = gtk_widget_get_parent(widget);
+//     gint x = 0, y = 0, width = 0, height = 0;
+    
+//     if (GTK_IS_FIXED(parent)) {
+//         gtk_container_child_get(GTK_CONTAINER(parent), widget, "x", &x, "y", &y, NULL);
+//     }
+    
+//     gtk_widget_get_size_request(widget, &width, &height);
+    
+//     // Create grid for form layout
+//     GtkWidget *grid = gtk_grid_new();
+//     gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+//     gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+//     gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+    
+//     current_properties.form_grid = grid;
+    
+//     // Title
+//     GtkWidget *title = gtk_label_new("Spin Button Properties");
+//     gtk_widget_set_halign(title, GTK_ALIGN_START);
+    
+//     // Format values as strings
+//     char x_str[32], y_str[32], width_str[32], height_str[32];
+//     char value_str[32], min_str[32], max_str[32], step_str[32], digits_str[32];
+    
+//     sprintf(x_str, "%d", x);
+//     sprintf(y_str, "%d", y);
+//     sprintf(width_str, "%d", width);
+//     sprintf(height_str, "%d", height);
+//     sprintf(value_str, "%g", value);
+//     sprintf(min_str, "%g", min);
+//     sprintf(max_str, "%g", max);
+//     sprintf(step_str, "%g", step);
+//     sprintf(digits_str, "%u", digits);
+    
+//     // Position fields
+//     GtkWidget *x_label = gtk_label_new("X Position:");
+//     GtkWidget *y_label = gtk_label_new("Y Position:");
+//     GtkWidget *x_entry = gtk_entry_new();
+//     GtkWidget *y_entry = gtk_entry_new();
+//     gtk_entry_set_text(GTK_ENTRY(x_entry), x_str);
+//     gtk_entry_set_text(GTK_ENTRY(y_entry), y_str);
+//     current_properties.x_entry = x_entry;
+//     current_properties.y_entry = y_entry;
+    
+//     // Size fields
+//     GtkWidget *width_label = gtk_label_new("Width:");
+//     GtkWidget *height_label = gtk_label_new("Height:");
+//     GtkWidget *width_entry = gtk_entry_new();
+//     GtkWidget *height_entry = gtk_entry_new();
+//     gtk_entry_set_text(GTK_ENTRY(width_entry), width_str);
+//     gtk_entry_set_text(GTK_ENTRY(height_entry), height_str);
+//     current_properties.width_entry = width_entry;
+//     current_properties.height_entry = height_entry;
+    
+//     // Spin button specific fields
+//     GtkWidget *value_label = gtk_label_new("Value:");
+//     GtkWidget *min_label = gtk_label_new("Minimum:");
+//     GtkWidget *max_label = gtk_label_new("Maximum:");
+//     GtkWidget *step_label = gtk_label_new("Step Increment:");
+//     GtkWidget *digits_label = gtk_label_new("Digits:");
+    
+//     GtkWidget *value_entry = gtk_entry_new();
+//     GtkWidget *min_entry = gtk_entry_new();
+//     GtkWidget *max_entry = gtk_entry_new();
+//     GtkWidget *step_entry = gtk_entry_new();
+//     GtkWidget *digits_entry = gtk_entry_new();
+    
+//     gtk_entry_set_text(GTK_ENTRY(value_entry), value_str);
+//     gtk_entry_set_text(GTK_ENTRY(min_entry), min_str);
+//     gtk_entry_set_text(GTK_ENTRY(max_entry), max_str);
+//     gtk_entry_set_text(GTK_ENTRY(step_entry), step_str);
+//     gtk_entry_set_text(GTK_ENTRY(digits_entry), digits_str);
+    
+//     // Store entries for later retrieval
+//     current_properties.value_entry = value_entry;
+//     current_properties.min_entry = min_entry;
+//     current_properties.max_entry = max_entry;
+//     current_properties.step_entry = step_entry;
+//     current_properties.digits_entry = digits_entry;
+    
+//     // Checkboxes
+//     GtkWidget *numeric_check = gtk_check_button_new_with_label("Numeric Only");
+//     GtkWidget *wrap_check = gtk_check_button_new_with_label("Wrap Around");
+    
+//     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(numeric_check), numeric);
+//     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(wrap_check), wrap);
+    
+//     current_properties.numeric_check = numeric_check;
+//     current_properties.wrap_check = wrap_check;
+    
+//     // Add widgets to grid
+//     int row = 0;
+    
+//     // Position and size
+//     gtk_grid_attach(GTK_GRID(grid), x_label, 0, row, 1, 1);
+//     gtk_grid_attach(GTK_GRID(grid), x_entry, 1, row++, 1, 1);
+    
+//     gtk_grid_attach(GTK_GRID(grid), y_label, 0, row, 1, 1);
+//     gtk_grid_attach(GTK_GRID(grid), y_entry, 1, row++, 1, 1);
+    
+//     gtk_grid_attach(GTK_GRID(grid), width_label, 0, row, 1, 1);
+//     gtk_grid_attach(GTK_GRID(grid), width_entry, 1, row++, 1, 1);
+    
+//     gtk_grid_attach(GTK_GRID(grid), height_label, 0, row, 1, 1);
+//     gtk_grid_attach(GTK_GRID(grid), height_entry, 1, row++, 1, 1);
+    
+//     // Spin button specific properties
+//     gtk_grid_attach(GTK_GRID(grid), value_label, 0, row, 1, 1);
+//     gtk_grid_attach(GTK_GRID(grid), value_entry, 1, row++, 1, 1);
+    
+//     gtk_grid_attach(GTK_GRID(grid), min_label, 0, row, 1, 1);
+//     gtk_grid_attach(GTK_GRID(grid), min_entry, 1, row++, 1, 1);
+    
+//     gtk_grid_attach(GTK_GRID(grid), max_label, 0, row, 1, 1);
+//     gtk_grid_attach(GTK_GRID(grid), max_entry, 1, row++, 1, 1);
+    
+//     gtk_grid_attach(GTK_GRID(grid), step_label, 0, row, 1, 1);
+//     gtk_grid_attach(GTK_GRID(grid), step_entry, 1, row++, 1, 1);
+    
+//     gtk_grid_attach(GTK_GRID(grid), digits_label, 0, row, 1, 1);
+//     gtk_grid_attach(GTK_GRID(grid), digits_entry, 1, row++, 1, 1);
+    
+//     gtk_grid_attach(GTK_GRID(grid), numeric_check, 0, row++, 2, 1);
+//     gtk_grid_attach(GTK_GRID(grid), wrap_check, 0, row++, 2, 1);
+    
+//     // Add title and grid to vbox
+//     gtk_box_pack_start(GTK_BOX(vbox), title, FALSE, FALSE, 5);
+//     gtk_box_pack_start(GTK_BOX(vbox), grid, FALSE, FALSE, 0);
+    
+//     // Add the vbox to the content area
+//     gtk_container_add(GTK_CONTAINER(content), vbox);
+    
+//     // Show all widgets
+//     gtk_widget_show_all(content);
+    
+//     // Enable Apply and Remove buttons
+//     gtk_widget_set_sensitive(app_data->apply_button, TRUE);
+//     gtk_widget_set_sensitive(app_data->remove_button, TRUE);
+// }
 
 
 
@@ -1036,7 +1378,7 @@ void register_widget_for_property_editing(GtkWidget *widget, AppData *app_data) 
 
 // Add this function to property_panel.h
 
-static void on_browse_image_clicked(GtkButton *button, gpointer user_data)
+static inline void  on_browse_image_clicked(GtkButton *button, gpointer user_data)
 {
     GtkWidget *entry = GTK_WIDGET(user_data);
     GtkWidget *dialog;
@@ -1069,6 +1411,8 @@ static void on_browse_image_clicked(GtkButton *button, gpointer user_data)
 
 // Create property form for image widget
 static void create_property_form_for_image(AppData *app_data, GtkWidget *widget) {
+
+
     GtkWidget *content = app_data->properties_content;
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     
@@ -1147,7 +1491,7 @@ static void create_property_form_for_image(AppData *app_data, GtkWidget *widget)
     gtk_box_pack_start(GTK_BOX(path_box), path_entry, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(path_box), browse_button, FALSE, FALSE, 0);
     
-    g_signal_connect(browse_button, "clicked", G_CALLBACK(on_browse_image_clicked), path_entry);
+    g_signal_connect(browse_button, "clicked", G_CALLBACK(NULL), path_entry);
     
     // Keep aspect ratio checkbox
     GtkWidget *aspect_check = gtk_check_button_new_with_label("Keep Aspect Ratio");
@@ -1258,12 +1602,12 @@ static void create_property_form_for_widget(AppData *app_data, GtkWidget *widget
             // gtk_container_add(GTK_CONTAINER(app_data->properties_content), label);
             // current_properties.container = label;
             // gtk_widget_show_all(app_data->properties_content);
-            
+            g_print("iammmm heeeeeeeere\n");
             create_property_form_for_button_normal(app_data, widget);     
 
             // Enable Remove button only
-            gtk_widget_set_sensitive(app_data->apply_button, FALSE);
-            gtk_widget_set_sensitive(app_data->remove_button, TRUE);
+            // gtk_widget_set_sensitive(app_data->apply_button, FALSE);
+            // gtk_widget_set_sensitive(app_data->remove_button, TRUE);
         }
     
     
