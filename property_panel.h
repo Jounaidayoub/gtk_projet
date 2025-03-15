@@ -1028,6 +1028,12 @@ static void create_password_entry_form(AppData *app_data, GtkWidget *widget) {
     gtk_widget_set_sensitive(app_data->remove_button, TRUE);
 }
 
+void register_widget_for_property_editing(GtkWidget *widget, AppData *app_data) {
+    g_print("Registering widget %p for property editing\n", widget);
+    g_signal_connect(widget, "button-press-event", G_CALLBACK(on_widget_button_press_select), app_data);
+}
+
+
 // Create property form based on widget type
 static void create_property_form_for_widget(AppData *app_data, GtkWidget *widget) {
     // Clear existing content
@@ -1249,10 +1255,10 @@ static void on_remove_clicked(GtkButton *button, gpointer user_data) {
 }
 
 // Register a widget for property editing - make it extern so it can be called from other files
-void register_widget_for_property_editing(GtkWidget *widget, AppData *app_data) {
-    g_print("Registering widget %p for property editing\n", widget);
-    g_signal_connect(widget, "button-press-event", G_CALLBACK(on_widget_button_press_select), app_data);
-}
+// void register_widget_for_property_editing(GtkWidget *widget, AppData *app_data) {
+//     g_print("Registering widget %p for property editing\n", widget);
+//     g_signal_connect(widget, "button-press-event", G_CALLBACK(on_widget_button_press_select), app_data);
+// }
 
 // Initialize the property panel
 static void init_property_panel(AppData *app_data) {

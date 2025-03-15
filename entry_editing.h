@@ -73,4 +73,32 @@ void* get_widget_structure(AppData *app_data, GtkWidget *widget) {
     return NULL;
 }
 
+GtkWidget *creer_image_with_editing(MonImage *img, struct _AppData *app_data) {
+    g_print("Creating image with editing\n");
+
+    // Create the image widget
+    GtkWidget *image_widget = gtk_image_new_from_file(img->path);
+    if (!image_widget) {
+        g_print("Error: Failed to create image widget from file %s\n", img->path);
+        return NULL;
+    }
+
+    // Resize the image
+    image_widget = redimensionner_image(image_widget, img->dim.width, img->dim.height);
+    if (!image_widget) {
+        g_print("Error: Failed to resize image\n");
+        return NULL;
+    }
+
+    // Register for property editing
+    g_print("Registering image widget %p for property editing\n", image_widget);
+    register_widget_for_property_editing(image_widget, app_data);
+
+    // Add to both tree structures
+    add_widget_to_both_trees(app_data, image_widget, "Image", app_data->selected_container, 0, img);
+
+    return image_widget;
+}
+
+
 #endif /* ENTRY_EDITING_H */

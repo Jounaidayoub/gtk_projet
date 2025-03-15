@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
     gtk_container_add(GTK_CONTAINER(containers_frame), containers_box);
     
     // Add container buttons
-    const char *container_labels[] = {"Box", "styledbx", "Grid", "ScrolledWindow"};
+    const char *container_labels[] = {"Box", "styledbx", "image", "ScrolledWindow"};
     WidgetType container_types[] = {WIDGET_BOX, WIDGET_FRAME, WIDGET_GRID, WIDGET_SCROLLED_WINDOW};
     
     for (int i = 0; i < 4; i++) {
@@ -134,7 +134,9 @@ int main(int argc, char *argv[]) {
         if (i == 1) { // "Frame" is the second one
             g_signal_connect(button, "clicked", G_CALLBACK(create_styled_box_container), &app_data);
         }
-        
+        if (i == 2) { // "Grid" is the third one
+            g_signal_connect(button, "clicked", G_CALLBACK(add_image_clicked), &app_data);
+        }
         gtk_box_pack_start(GTK_BOX(containers_box), button, FALSE, FALSE, 2);
     }
     
