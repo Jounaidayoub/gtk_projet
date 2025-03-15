@@ -43,7 +43,7 @@ GtkWidget* create_radio_button_with_editing(btn *button, AppData *app_data) {
 
 // Function for checkbox button with editing capabilities
 GtkWidget* create_checkbox_button_with_editing(btn *button, AppData *app_data) {
-    return create_button_with_editing(button, app_data, "Checkbox");
+    return create_button_with_editing(button, app_data, "checkbox");
 }
 
 // Function for toggle button with editing capabilities

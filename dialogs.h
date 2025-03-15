@@ -587,10 +587,11 @@ static void show_properties_dialog_btn_checkbox(GtkWidget *widget, gpointer data
             target_container = app_data->preview_area;
         }
 
+
         btn *checkbox_button = NULL;
         if(GTK_IS_FIXED(target_container)){
         // Create checkbox button
-        btn *checkbox_button = btnCheckFixed(
+        checkbox_button = btnCheckFixed(
             (gchar*)name,             // Button name
             (gchar*)label_text,       // Button label
             (gchar*)tooltip,          // Tooltip
@@ -611,6 +612,7 @@ static void show_properties_dialog_btn_checkbox(GtkWidget *widget, gpointer data
                 NULL                      // Image (NULL for checkbox)
             );
        }
+
         
         if (checkbox_button != NULL) {
             // Create the button widget with editing capabilities

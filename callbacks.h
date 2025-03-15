@@ -74,6 +74,14 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                        entry->dim->width, entry->dim->height, 
                        entry->cord->x, entry->cord->y);
                 
+
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append(string, "<entry>\n");
+
+                // type property
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"type\">basic</property>\n");
+                
                 // Position and size properties
                 for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
                 g_string_append_printf(string, "<property name=\"x\">%d</property>\n", entry->cord->x);
@@ -108,6 +116,9 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                     g_string_append_printf(string, "<property name=\"default_text\">%s</property>\n", 
                                          entry->default_text);
                 }
+
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append(string, "</entry>\n");
                 break;
             }
             
@@ -117,6 +128,14 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                 g_print("  Entry password properties - w:%d h:%d x:%d y:%d\n", 
                        entry->dim->width, entry->dim->height, 
                        entry->cord->x, entry->cord->y);
+                
+
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append(string, "<entry>\n");
+
+                // type property
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"type\">pass</property>\n");
                 
                 // Position and size properties
                 for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
@@ -141,6 +160,11 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                 for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
                 g_string_append_printf(string, "<property name=\"invisible_char\">%c</property>\n", 
                                      entry->invisible_char);
+
+
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append(string, "</entry>\n");
+
                 break;
             }
             
@@ -155,6 +179,9 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                 
                 // Position and size properties
                 if (button->pos) {
+                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                    g_string_append(string, "<button>\n");
+
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
                     g_string_append_printf(string, "<property name=\"x\">%d</property>\n", button->pos->x);
                     
@@ -180,12 +207,13 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
                     g_string_append_printf(string, "<property name=\"tooltip\">%s</property>\n", button->tooltip);
                 }
-                
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append(string, "</button>\n");
                 break;
             }
             
             // Checkbox Button
-            case WIDGET_BUTTON_CHECKBOX:
+            case WIDGET_CHECKBOX:
             {
                 btn *button = (btn*)racine->widget_data;
                 g_print("  Checkbox properties - x:%d y:%d checked:%d\n", 
@@ -193,6 +221,9 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                        button->pos ? button->pos->y : 0,
                        button->isChecked);
                 
+
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append(string, "<checkbox>\n");
                 // Position and size properties
                 if (button->pos) {
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
@@ -216,10 +247,14 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                 for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
                 g_string_append_printf(string, "<property name=\"is_checked\">%d</property>\n", button->isChecked);
                 
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append(string, "</checkbox>\n");
                 break;
+
             }
             
             // Radio Button
+            /*
             case WIDGET_BUTTON_RADIO:
             {
                 btn *button = (btn*)racine->widget_data;
@@ -254,7 +289,7 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                 
                 break;
             }
-            
+             */
             // Toggle Button
             case WIDGET_BUTTON_TOGGLE:
             {
@@ -264,6 +299,9 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                        button->pos ? button->pos->y : 0,
                        button->isChecked);
                 
+
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append(string, "<button>\n");
                 // Position and size properties
                 if (button->pos) {
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
@@ -295,6 +333,10 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                 for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
                 g_string_append_printf(string, "<property name=\"is_active\">%d</property>\n", button->isChecked);
                 
+
+                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                g_string_append(string, "</button>\n");
+
                 break;
             }
             
@@ -307,6 +349,10 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                        button->pos ? button->pos->y : 0,
                        button->isChecked);
                 
+
+                       for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                       g_string_append(string, "<button>\n");
+
                 // Position and size properties
                 if (button->pos) {
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
@@ -333,6 +379,10 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                 for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
                 g_string_append_printf(string, "<property name=\"is_active\">%d</property>\n", button->isChecked);
                 
+            // Close </radio> tag
+            for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+            g_string_append(string, "</button>\n");
+    
                 break;
             }
             
@@ -353,7 +403,10 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                        button->pos ? button->pos->y : 0,
                        sp->borneInf, sp->borneSup, sp->step, sp->digits, sp->start);
                 
-                // Position and size properties
+                       for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+                       g_string_append(string, "<button>\n");
+
+                       // Position and size properties
                 if (button->pos) {
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
                     g_string_append_printf(string, "<property name=\"x\">%d</property>\n", button->pos->x);
@@ -392,6 +445,10 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                 for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
                 g_string_append_printf(string, "<property name=\"value\">%f</property>\n", sp->start);
                 
+            // Close </radio> tag
+            for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+            g_string_append(string, "</button>\n");
+    
                 break;
             }
 

@@ -141,6 +141,8 @@ void add_widget_to_both_trees(AppData *app_data, GtkWidget *widget,
             widget_type = WIDGET_RADIO;
     } else if (strcmp(widget_type_str, "radioList") == 0) {
         widget_type = WIDGET_RADIO_LIST;
+    } else if (strcmp(widget_type_str, "checkbox") == 0) {
+        widget_type = WIDGET_CHECKBOX;
     }
     else {
         widget_type = WIDGET_UNKNOWN;
