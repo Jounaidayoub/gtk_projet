@@ -461,7 +461,36 @@ static void show_properties_dialog_btn_radio(AppData *app_data){
 
 };
 
+// static void on_browse_image_clicked(GtkButton *button, gpointer user_data)
+// {
+//     GtkWidget *entry = GTK_WIDGET(user_data);
+//     GtkWidget *dialog;
+    
+//     dialog = gtk_file_chooser_dialog_new("Open Image",
+//                                        NULL,
+//                                        GTK_FILE_CHOOSER_ACTION_OPEN,
+//                                        "Cancel", GTK_RESPONSE_CANCEL,
+//                                        "Open", GTK_RESPONSE_ACCEPT,
+//                                        NULL);
+    
+//     gtk_window_set_default_size(GTK_WINDOW(dialog), 600, 400);
 
+//     // Add filters for image files
+//     GtkFileFilter *filter = gtk_file_filter_new();
+//     gtk_file_filter_set_name(filter, "Image Files");
+//     gtk_file_filter_add_pixbuf_formats(filter);
+//     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
+    
+//     // Show the dialog and get the result
+//     if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
+//     {
+//         char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+//         gtk_entry_set_text(GTK_ENTRY(entry), filename);
+//         g_free(filename);
+//     }
+    
+//     gtk_widget_destroy(dialog);
+// }
 
 static void show_image_dialog(AppData *app_data)
 {
@@ -519,6 +548,16 @@ static void show_image_dialog(AppData *app_data)
     path_label = gtk_label_new("Image Path:");
     path_entry = gtk_entry_new();
 
+    // Create a button for file selection
+    GtkWidget *browse_button = gtk_button_new_with_label("Browse...");
+    
+    GtkWidget *path_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_box_pack_start(GTK_BOX(path_box), path_entry, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(path_box), browse_button, FALSE, FALSE, 0);
+    
+    g_signal_connect(browse_button, "clicked", G_CALLBACK(on_browse_image_clicked), path_entry);
+
+
     // Champs de position
     x_label = gtk_label_new("X Position:");
     y_label = gtk_label_new("Y Position:");
@@ -539,6 +578,9 @@ static void show_image_dialog(AppData *app_data)
     gtk_grid_attach(GTK_GRID(grid), path_label,  0, 1, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), path_entry,  1, 1, 1, 1);
 
+    gtk_grid_attach(GTK_GRID(grid), path_label, 0, 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), path_box, 1, 1, 1, 1);  
+    // Use path_box instead of path_entry
     gtk_grid_attach(GTK_GRID(grid), x_label,     0, 2, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), x_entry,     1, 2, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), y_label,     0, 3, 1, 1);

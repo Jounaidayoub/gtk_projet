@@ -33,6 +33,7 @@ typedef struct {
     GtkWidget *button_text_entry;
     GtkWidget *spacing_entry;
     GtkWidget *orientation_combo;
+    GtkWidget *label_entry; // Add this line
 
     // For spin buttons
     GtkWidget *value_entry;
@@ -1033,19 +1034,194 @@ void register_widget_for_property_editing(GtkWidget *widget, AppData *app_data) 
     g_signal_connect(widget, "button-press-event", G_CALLBACK(on_widget_button_press_select), app_data);
 }
 
+// Add this function to property_panel.h
 
+static void on_browse_image_clicked(GtkButton *button, gpointer user_data)
+{
+    GtkWidget *entry = GTK_WIDGET(user_data);
+    GtkWidget *dialog;
+    
+    dialog = gtk_file_chooser_dialog_new("Open Image",
+                                       NULL,
+                                       GTK_FILE_CHOOSER_ACTION_OPEN,
+                                       "Cancel", GTK_RESPONSE_CANCEL,
+                                       "Open", GTK_RESPONSE_ACCEPT,
+                                       NULL);
+    
+    gtk_window_set_default_size(GTK_WINDOW(dialog), 600, 400);
+
+    // Add filters for image files
+    GtkFileFilter *filter = gtk_file_filter_new();
+    gtk_file_filter_set_name(filter, "Image Files");
+    gtk_file_filter_add_pixbuf_formats(filter);
+    gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
+    
+    // Show the dialog and get the result
+    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
+    {
+        char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+        gtk_entry_set_text(GTK_ENTRY(entry), filename);
+        g_free(filename);
+    }
+    
+    gtk_widget_destroy(dialog);
+}
+
+// Create property form for image widget
+static void create_property_form_for_image(AppData *app_data, GtkWidget *widget) {
+    GtkWidget *content = app_data->properties_content;
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    
+    // Store the widget being edited
+    current_properties.widget = widget;
+    current_properties.container = vbox;
+    
+    // Get the actual image from the event box
+    GtkWidget *image_widget = g_object_get_data(G_OBJECT(widget), "image_widget");
+    if (!image_widget || !GTK_IS_IMAGE(image_widget)) {
+        g_print("Could not find image widget in event box\n");
+        return;
+    }
+    
+    // Get position and size
+    GtkWidget *parent = gtk_widget_get_parent(widget);
+    gint x = 0, y = 0, width = 0, height = 0;
+    
+    if (GTK_IS_FIXED(parent)) {
+        gtk_container_child_get(GTK_CONTAINER(parent), widget, "x", &x, "y", &y, NULL);
+    }
+    
+    gtk_widget_get_size_request(widget, &width, &height);
+    
+    // Create grid for form layout
+    GtkWidget *grid = gtk_grid_new();
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+    
+    current_properties.form_grid = grid;
+    
+    // Title
+    GtkWidget *title = gtk_label_new("Image Properties");
+    gtk_widget_set_halign(title, GTK_ALIGN_START);
+    
+    // Format values as strings
+    char x_str[32], y_str[32], width_str[32], height_str[32];
+    sprintf(x_str, "%d", x);
+    sprintf(y_str, "%d", y);
+    sprintf(width_str, "%d", width);
+    sprintf(height_str, "%d", height);
+    
+    // Position fields
+    GtkWidget *x_label = gtk_label_new("X Position:");
+    GtkWidget *y_label = gtk_label_new("Y Position:");
+    GtkWidget *x_entry = gtk_entry_new();
+    GtkWidget *y_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(x_entry), x_str);
+    gtk_entry_set_text(GTK_ENTRY(y_entry), y_str);
+    current_properties.x_entry = x_entry;
+    current_properties.y_entry = y_entry;
+    
+    // Size fields
+    GtkWidget *width_label = gtk_label_new("Width:");
+    GtkWidget *height_label = gtk_label_new("Height:");
+    GtkWidget *width_entry = gtk_entry_new();
+    GtkWidget *height_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(width_entry), width_str);
+    gtk_entry_set_text(GTK_ENTRY(height_entry), height_str);
+    current_properties.width_entry = width_entry;
+    current_properties.height_entry = height_entry;
+    
+    // Image path field
+    GtkWidget *path_label = gtk_label_new("Image Path:");
+    GtkWidget *path_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    GtkWidget *path_entry = gtk_entry_new();
+    GtkWidget *browse_button = gtk_button_new_with_label("Browse...");
+    
+    // Get image path
+    gchar *image_path = g_object_get_data(G_OBJECT(widget), "image_file_path");
+    if (image_path) {
+        gtk_entry_set_text(GTK_ENTRY(path_entry), image_path);
+    }
+    
+    gtk_box_pack_start(GTK_BOX(path_box), path_entry, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(path_box), browse_button, FALSE, FALSE, 0);
+    
+    g_signal_connect(browse_button, "clicked", G_CALLBACK(on_browse_image_clicked), path_entry);
+    
+    // Keep aspect ratio checkbox
+    GtkWidget *aspect_check = gtk_check_button_new_with_label("Keep Aspect Ratio");
+    gboolean keep_aspect = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "keep_aspect"));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(aspect_check), keep_aspect);
+    
+    // Store references for later use in apply button
+    current_properties.label_entry = path_entry;  // Reuse label_entry for image path
+    current_properties.active_check = aspect_check;  // Reuse active_check for aspect ratio
+    
+    // Add widgets to grid
+    int row = 0;
+    
+    // Position and size
+    gtk_grid_attach(GTK_GRID(grid), x_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), x_entry, 1, row++, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), y_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), y_entry, 1, row++, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), width_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), width_entry, 1, row++, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), height_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), height_entry, 1, row++, 1, 1);
+    
+    // Image specific properties
+    gtk_grid_attach(GTK_GRID(grid), path_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), path_box, 1, row++, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), aspect_check, 0, row++, 2, 1);
+    
+    // Add title and grid to vbox
+    gtk_box_pack_start(GTK_BOX(vbox), title, FALSE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(vbox), grid, FALSE, FALSE, 0);
+    
+    // Add the vbox to the content area
+    gtk_container_add(GTK_CONTAINER(content), vbox);
+    
+    // Show all widgets
+    gtk_widget_show_all(content);
+    
+    // Enable Apply and Remove buttons
+    gtk_widget_set_sensitive(app_data->apply_button, TRUE);
+    gtk_widget_set_sensitive(app_data->remove_button, TRUE);
+}
 // Create property form based on widget type
 static void create_property_form_for_widget(AppData *app_data, GtkWidget *widget) {
     // Clear existing content
     clear_properties_panel(app_data);
+    g_print("\nWidget type: %s\n", G_OBJECT_TYPE_NAME(widget));
     
-    if (GTK_IS_SPIN_BUTTON(widget)) {
+    // CRITICAL FIX: Make the event box check first and complete
+    if (GTK_IS_EVENT_BOX(widget) && g_object_get_data(G_OBJECT(widget), "image_widget")) {
+        g_print("\nImage Event Box detected\n");
+        create_property_form_for_image(app_data, widget);
+    }
+    else if (GTK_IS_SPIN_BUTTON(widget)) {
         g_print("\nSpin تشاسيرشاستيرشتيسا\n");
         create_property_form_for_spin_button(app_data, widget);
     } else if (GTK_IS_SWITCH(widget)) {
         g_print("\nSwitch\n");
         create_property_form_for_switch(app_data, widget);
     }
+    else if (GTK_IS_EVENT_BOX(widget)){
+        g_print("\nEvent Box\n");
+        // create_property_form_for_image(app_data, widget);
+    }
+
+    else if (GTK_IS_EVENT_BOX(widget) && 
+    g_object_get_data(G_OBJECT(widget), "image_widget")) {
+    create_property_form_for_image(app_data, widget);
+    }
+
     // Create form based on widget type
      else if (GTK_IS_ENTRY(widget)) {
         if (!gtk_entry_get_visibility(GTK_ENTRY(widget))) {
