@@ -1140,7 +1140,151 @@ static void create_property_form_for_button_normal(AppData *app_data, GtkWidget 
 //     gtk_widget_set_sensitive(app_data->apply_button, TRUE);
 //     gtk_widget_set_sensitive(app_data->remove_button, TRUE);
 // }
-
+// Create property form for TextView widget
+static void create_property_form_for_text_view(AppData *app_data, GtkWidget *widget) {
+    GtkWidget *content = app_data->properties_content;
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    
+    // Store the widget being edited
+    current_properties.widget = widget;
+    current_properties.container = vbox;
+    
+    // Get the MonTextView data
+    MonTextView *textview = g_object_get_data(G_OBJECT(widget), "textview_data");
+    if (!textview) {
+        g_print("Error: Could not find TextView data\n");
+        return;
+    }
+    
+    // Get text content
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(widget));
+    GtkTextIter start, end;
+    gtk_text_buffer_get_start_iter(buffer, &start);
+    gtk_text_buffer_get_end_iter(buffer, &end);
+    gchar *current_text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+    
+    // Get position and size
+    gint x = textview->Crd.x;
+    gint y = textview->Crd.y;
+    gint width = textview->dim.width;
+    gint height = textview->dim.height;
+    
+    // Create grid for form layout
+    GtkWidget *grid = gtk_grid_new();
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+    
+    current_properties.form_grid = grid;
+    
+    // Title
+    GtkWidget *title = gtk_label_new("TextView Properties");
+    gtk_widget_set_halign(title, GTK_ALIGN_START);
+    
+    // Format values as strings
+    char x_str[32], y_str[32], width_str[32], height_str[32];
+    sprintf(x_str, "%d", x);
+    sprintf(y_str, "%d", y);
+    sprintf(width_str, "%d", width);
+    sprintf(height_str, "%d", height);
+    
+    // Position fields
+    GtkWidget *x_label = gtk_label_new("X Position:");
+    GtkWidget *y_label = gtk_label_new("Y Position:");
+    GtkWidget *x_entry = gtk_entry_new();
+    GtkWidget *y_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(x_entry), x_str);
+    gtk_entry_set_text(GTK_ENTRY(y_entry), y_str);
+    current_properties.x_entry = x_entry;
+    current_properties.y_entry = y_entry;
+    
+    // Size fields
+    GtkWidget *width_label = gtk_label_new("Width:");
+    GtkWidget *height_label = gtk_label_new("Height:");
+    GtkWidget *width_entry = gtk_entry_new();
+    GtkWidget *height_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(width_entry), width_str);
+    gtk_entry_set_text(GTK_ENTRY(height_entry), height_str);
+    current_properties.width_entry = width_entry;
+    current_properties.height_entry = height_entry;
+    
+    // Text content field
+    GtkWidget *text_label = gtk_label_new("Text Content:");
+    GtkWidget *text_view = gtk_text_view_new();
+    GtkWidget *text_scroll = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_min_content_height(GTK_SCROLLED_WINDOW(text_scroll), 100);
+    gtk_container_add(GTK_CONTAINER(text_scroll), text_view);
+    
+    // Set current text content
+    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
+    gtk_text_buffer_set_text(buffer, textview->texte ? textview->texte : "", -1);
+    
+    // TextView-specific properties
+    GtkWidget *editable_check = gtk_check_button_new_with_label("Editable");
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(editable_check), 
+                                gtk_text_view_get_editable(GTK_TEXT_VIEW(widget)));
+    
+    // Wrap mode field
+    GtkWidget *wrap_label = gtk_label_new("Wrap Mode:");
+    GtkWidget *wrap_combo = gtk_combo_box_text_new();
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(wrap_combo), "None");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(wrap_combo), "Character");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(wrap_combo), "Word");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(wrap_combo), "Word & Character");
+    
+    // Set current wrap mode
+    GtkWrapMode current_wrap = gtk_text_view_get_wrap_mode(GTK_TEXT_VIEW(widget));
+    gtk_combo_box_set_active(GTK_COMBO_BOX(wrap_combo), current_wrap);
+    
+    // Store references for property retrieval in apply function
+    g_object_set_data(G_OBJECT(widget), "prop_text_view", text_view);
+    g_object_set_data(G_OBJECT(widget), "prop_editable_check", editable_check);
+    g_object_set_data(G_OBJECT(widget), "prop_wrap_combo", wrap_combo);
+    
+    // Add widgets to grid
+    int row = 0;
+    
+    // Position and size
+    gtk_grid_attach(GTK_GRID(grid), x_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), x_entry, 1, row++, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), y_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), y_entry, 1, row++, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), width_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), width_entry, 1, row++, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), height_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), height_entry, 1, row++, 1, 1);
+    
+    // TextView-specific properties
+    gtk_grid_attach(GTK_GRID(grid), text_label, 0, row, 2, 1);
+    row++;
+    gtk_grid_attach(GTK_GRID(grid), text_scroll, 0, row, 2, 3);
+    row += 3;
+    
+    gtk_grid_attach(GTK_GRID(grid), editable_check, 0, row++, 2, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), wrap_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), wrap_combo, 1, row++, 1, 1);
+    
+    // Add title and grid to vbox
+    gtk_box_pack_start(GTK_BOX(vbox), title, FALSE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(vbox), grid, FALSE, FALSE, 0);
+    
+    // Add the vbox to the content area
+    gtk_container_add(GTK_CONTAINER(content), vbox);
+    
+    // Show all widgets
+    gtk_widget_show_all(content);
+    
+    // Enable Apply and Remove buttons
+    gtk_widget_set_sensitive(app_data->apply_button, TRUE);
+    gtk_widget_set_sensitive(app_data->remove_button, TRUE);
+    
+    // Clean up
+    g_free(current_text);
+}
 
 
 // Create property form for switch widget
@@ -1556,6 +1700,10 @@ static void create_property_form_for_widget(AppData *app_data, GtkWidget *widget
         g_print("\nSwitch\n");
         create_property_form_for_switch(app_data, widget);
     }
+        else if (GTK_IS_TEXT_VIEW(widget)) {
+        g_print("\nTextView\n");
+        create_property_form_for_text_view(app_data, widget);
+    }
     else if (GTK_IS_EVENT_BOX(widget)){
         g_print("\nEvent Box\n");
         // create_property_form_for_image(app_data, widget);
@@ -1680,7 +1828,66 @@ static void on_apply_clicked(GtkButton *button, gpointer user_data) {
     }
     // Apply widget-specific properties
 
-    
+        else if (GTK_IS_TEXT_VIEW(widget)) {
+        // Get the MonTextView data
+        MonTextView *textview = g_object_get_data(G_OBJECT(widget), "textview_data");
+        if (!textview) {
+            g_print("Error: TextView data not found!\n");
+            return;
+        }
+        
+        // Get property values from form widgets
+        GtkWidget *prop_text_view = g_object_get_data(G_OBJECT(widget), "prop_text_view");
+        GtkWidget *editable_check = g_object_get_data(G_OBJECT(widget), "prop_editable_check");
+        GtkWidget *wrap_combo = g_object_get_data(G_OBJECT(widget), "prop_wrap_combo");
+        
+        // Get text content
+        GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(prop_text_view));
+        GtkTextIter start, end;
+        gtk_text_buffer_get_start_iter(buffer, &start);
+        gtk_text_buffer_get_end_iter(buffer, &end);
+        gchar *new_text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+        
+        // Update position and size in the MonTextView structure
+        textview->Crd.x = x;
+        textview->Crd.y = y;
+        textview->dim.width = width;
+        textview->dim.height = height;
+        
+        // Update text content
+        if (textview->texte) {
+            g_free(textview->texte);
+        }
+        textview->texte = g_strdup(new_text);
+        g_free(new_text);
+        
+        // Apply changes to the widget
+        
+        // Update widget text
+        buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(widget));
+        gtk_text_buffer_set_text(buffer, textview->texte, -1);
+        
+        // Update editable state
+        gtk_text_view_set_editable(GTK_TEXT_VIEW(widget), 
+                                  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(editable_check)));
+        
+        // Update wrap mode
+        int wrap_index = gtk_combo_box_get_active(GTK_COMBO_BOX(wrap_combo));
+        gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(widget), (GtkWrapMode)wrap_index);
+        
+        // Apply size - THIS IS CRITICAL
+        gtk_widget_set_size_request(widget, width, height);
+        
+        // Apply position if in fixed container - THIS IS CRITICAL
+        GtkWidget *parent = gtk_widget_get_parent(widget);
+        if (GTK_IS_FIXED(parent)) {
+            // Make sure we're moving the actual widget, not just updating internal data
+            gtk_fixed_move(GTK_FIXED(parent), widget, x, y);
+        }
+        
+        // Force a redraw
+        gtk_widget_queue_resize(widget);
+    }
     else if (GTK_IS_ENTRY(widget)) {
         if (!gtk_entry_get_visibility(GTK_ENTRY(widget))) {
             // Password entry

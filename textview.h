@@ -76,14 +76,14 @@ MonTextView *creer_textview(MonTextView *T) {
     gtk_container_add(GTK_CONTAINER(text_scroll), T->elem);
 
     // Create a frame and add the scrolled window to it
-    GtkWidget *frame = gtk_frame_new(T->titre);
-    gtk_container_add(GTK_CONTAINER(frame), text_scroll);
+    // GtkWidget *frame = gtk_frame_new(T->titre);
+    // gtk_container_add(GTK_CONTAINER(frame), text_scroll);
 
     // Add the frame to the container
     if (GTK_IS_FIXED(T->container)) {
-        gtk_fixed_put(GTK_FIXED(T->container), frame, T->Crd.x, T->Crd.y);
+        gtk_fixed_put(GTK_FIXED(T->container), text_scroll, T->Crd.x, T->Crd.y);
     } else {
-        gtk_container_add(GTK_CONTAINER(T->container), frame);
+        gtk_container_add(GTK_CONTAINER(T->container), text_scroll);
     }
 
     return T;

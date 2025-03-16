@@ -86,7 +86,8 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent)
         switch (racine->type)
         {
         case WIDGET_TEXTVIEW:
-        {
+        {   
+            
             MonTextView *textview = (MonTextView *)racine->widget_data;
             
             // Open TextView tag

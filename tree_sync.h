@@ -144,6 +144,9 @@ void add_widget_to_both_trees(AppData *app_data, GtkWidget *widget,
     } else if (strcmp(widget_type_str, "checkbox") == 0) {
         widget_type = WIDGET_CHECKBOX;
     }
+    else if (strcmp(widget_type_str, "TextView") == 0) {
+        widget_type = WIDGET_TEXTVIEW;
+    }
     else {
         widget_type = WIDGET_UNKNOWN;
     }
