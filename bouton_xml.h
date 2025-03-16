@@ -144,7 +144,7 @@ void window_xml(FILE *file)
         ajouterHeader(maFenetre,50,900,
                       maFenetre->title,maFenetre->icon_name,50,50);
     */
-     g_signal_connect(maFenetre->window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+     g_signal_connect(maFenetre->window, "destroy", G_CALLBACK(gtk_widget_destroy), NULL);
     //si child balise retourne 23
     //si la balise est: <child>
     if((test==23))
