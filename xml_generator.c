@@ -233,12 +233,12 @@ int main(int argc, char *argv[]) {
 }
 
 
-void open_dialog(GtkWidget* widget, gpointer data){
-    fixedo* fix = (fixedo*) data;
-    dialogue_template("Boite", "Voulez vous afficher une image",
-                      "ex_img.jpg", "icon.png", *cord(1200, 600),
-                      fix->fixed_container);
-}
+// void open_dialog(GtkWidget* widget, gpointer data){
+//     fixedo* fix = (fixedo*) data;
+//     dialogue_template("Boite", "Voulez vous afficher une image",
+//                       "ex_img.jpg", "icon.png", *cord(1200, 600),
+//                       fix->fixed_container);
+// }
 
 int mainf(int argc, char *argv[]){
     // Initialisation de GTK
