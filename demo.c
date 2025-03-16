@@ -14,13 +14,26 @@
 #include "widget_props.h"  // Add the widget properties header
 #include "entry_editing.h"  // Include this header last
 
+void run_demo(GtkWidget *widget, gpointer data) {
+    // Initialisation de GTK
+    AppData* a = (AppData*) data;
+    GtkWidget *current_window = GTK_WIDGET(a->window);
+    gtk_widget_destroy(current_window);
+
+    FILE *file = fopen("demo.html", "r");
+    if (!file) {
+        printf("ERREUR d'ouverture du fichier !!");
+    }
+    creer_object(file, 0);
+    
+}
+
 int main(int argc, char *argv[]) {
     // Initialize GTK
     gtk_init(&argc, &argv);
     
     // App data structure to hold our widgets
     AppData app_data;
-
     // Initialize container management in AppData
     app_data.containers = NULL;
     app_data.selected_container = NULL;
@@ -279,7 +292,7 @@ int main(int argc, char *argv[]) {
     GtkWidget *exit_button = gtk_button_new_with_label("Exit");
     
     g_signal_connect(export_button, "clicked", G_CALLBACK(export_to_xml), &app_data);
-    // g_signal_connect(run_button, "clicked", G_CALLBACK(run_demo), &app_data);
+    g_signal_connect(run_button, "clicked", G_CALLBACK(run_demo), &app_data);
     g_signal_connect(debug_button, "clicked", G_CALLBACK(on_show_arbre_clicked), &app_data);
     g_signal_connect(exit_button, "clicked", G_CALLBACK(gtk_main_quit), NULL);
     
