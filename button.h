@@ -11,6 +11,8 @@
 #define MAX_LENGTH 100
 #define MARKUP_LENGTH 50
 #include "coordonnees.h"
+
+
 //Les positions prédéfinis de l'icone d'un button
 /*
 typedef enum {
@@ -21,7 +23,24 @@ typedef enum {
 } BtnImagePosition;
 */
 
-
+// Predefined callback to change button label
+void change_label(GtkWidget *widget, gpointer data) {
+    gtk_button_set_label(GTK_BUTTON(widget), "Label Changed!");
+}
+// Callback function for the button click event
+static void open_dialog(GtkButton *button, gpointer user_data) {
+    // 'user_data' here is used as a pointer to the parent window
+    GtkWidget *dialog;
+    dialog = gtk_message_dialog_new(GTK_WINDOW(user_data),
+                                    GTK_DIALOG_MODAL,
+                                    GTK_MESSAGE_INFO,
+                                    GTK_BUTTONS_OK,
+                                    "Button was clicked!");
+    // Display the dialog and wait for the user to respond
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    // Destroy the dialog after closing it
+    gtk_widget_destroy(dialog);
+}
 
 //Définition d'une énumération 'BtnType' comportant les types de boutons possibles.
 typedef enum
@@ -79,6 +98,7 @@ typedef struct btn{
     gint taille; // taille de la police du bouton
     gint gras; // épaisseur de la police du bouton
     gchar* bgcolor;
+    gchar* callback; // callback du bouton
 }btn;
 /**
  * @brief Copie les éléments d'une structure Style dans une autre.
@@ -358,6 +378,15 @@ btn* creer_button(btn* mybtn)
     gdk_rgba_parse(&color, "blue"); // You can use color names or hex codes
     gtk_widget_override_background_color(mybtn->button, GTK_STATE_FLAG_NORMAL, &color);
 */
+
+    if(mybtn->callback ){
+        if(strcmp(mybtn->callback, "Change Label") == 0){
+            g_signal_connect(mybtn->button, "clicked", G_CALLBACK(change_label), NULL);
+        }
+        else if(strcmp(mybtn->callback, "Open Dialog") == 0){
+            g_signal_connect(mybtn->button, "clicked", G_CALLBACK(open_dialog), NULL);
+        }
+    }
     return(btn*) mybtn;
 }
 
