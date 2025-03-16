@@ -30,6 +30,7 @@ typedef enum {
     WIDGET_BUTTON_TOGGLE,
     WIDGET_BUTTON_SWITCH,
     WIDGET_BUTTON_SPIN,
+    WIDGET_TEXTVIEW,
     // Add more as needed
 } WidgetType;
 

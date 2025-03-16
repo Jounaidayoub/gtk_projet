@@ -18,7 +18,7 @@ void run_demo() {
     // Initialisation de GTK
     
 
-    FILE *file = fopen("d.html", "r");
+    FILE *file = fopen("demo.html", "r");
     if (!file) {
         printf("ERREUR d'ouverture du fichier !!");
     }

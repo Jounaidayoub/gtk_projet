@@ -1679,6 +1679,8 @@ static void on_apply_clicked(GtkButton *button, gpointer user_data) {
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(widget), value);
     }
     // Apply widget-specific properties
+
+    
     else if (GTK_IS_ENTRY(widget)) {
         if (!gtk_entry_get_visibility(GTK_ENTRY(widget))) {
             // Password entry

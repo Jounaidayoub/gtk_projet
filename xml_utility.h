@@ -256,7 +256,7 @@ void creer_object(FILE *file,int parent)
         case 32:filechooser_xml(file,parent);break;
         case 33:image_xml(file,parent);break;
         case 34:spin_xml(file,parent);break;
-         */
+        */
         default:printf("pas de children");break;
     }
 }

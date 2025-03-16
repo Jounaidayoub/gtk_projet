@@ -68,12 +68,24 @@ MonTextView *creer_textview(MonTextView *T) {
     if (T->titre) {
         gtk_widget_set_name(T->elem, T->titre);
     }
-    gtk_widget_set_size_request(T->elem, T->dim.width, T->dim.height);
 
-    if(GTK_IS_FIXED(T->container)){
-        gtk_fixed_put(GTK_FIXED(T->container), T->elem, T->Crd.x, T->Crd.y);
+    // Create a GtkScrolledWindow and add the TextView to it
+    GtkWidget *text_scroll = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(text_scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+    gtk_widget_set_size_request(text_scroll, T->dim.width, T->dim.height);
+    gtk_container_add(GTK_CONTAINER(text_scroll), T->elem);
+
+    // Create a frame and add the scrolled window to it
+    GtkWidget *frame = gtk_frame_new(T->titre);
+    gtk_container_add(GTK_CONTAINER(frame), text_scroll);
+
+    // Add the frame to the container
+    if (GTK_IS_FIXED(T->container)) {
+        gtk_fixed_put(GTK_FIXED(T->container), frame, T->Crd.x, T->Crd.y);
+    } else {
+        gtk_container_add(GTK_CONTAINER(T->container), frame);
     }
-    gtk_container_add(GTK_CONTAINER(T->container), T->elem);
+
     return T;
 }
 
@@ -128,12 +140,30 @@ void TextView_xml(FILE *file, int  parent)
     creer_object(file, parent);
 }
 
-
-
-
-
-
-
-
+GtkWidget* create_text_view_with_scrolled_window(dimension *dim, const gchar *title) {
+    // Create a scrolled window
+    GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+    
+    // Set the size of the scrolled window based on the provided dimensions
+    gtk_widget_set_size_request(scrolled_window, dim->width, dim->height);
+    
+    // Create a text view
+    GtkWidget *text_view = gtk_text_view_new();
+    
+    // Add the text view to the scrolled window
+    gtk_container_add(GTK_CONTAINER(scrolled_window), text_view);
+    
+    // Create a frame and add the scrolled window to it
+    GtkWidget *frame = gtk_frame_new(title);
+    gtk_container_add(GTK_CONTAINER(frame), scrolled_window);
+    
+    // Show the text view, scrolled window, and frame
+    gtk_widget_show(text_view);
+    gtk_widget_show(scrolled_window);
+    gtk_widget_show(frame);
+    
+    return frame;
+}
 
 #endif //TEST1_TEXTVIEW_H

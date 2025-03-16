@@ -85,6 +85,46 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent)
         g_print("\n\n racine type: %d", racine->type);
         switch (racine->type)
         {
+        case WIDGET_TEXTVIEW:
+        {
+            MonTextView *textview = (MonTextView *)racine->widget_data;
+            
+            // Open TextView tag
+            for (int j = 0; j < indent + 2; j++)
+                g_string_append(string, "  ");
+            g_string_append(string, "<TextView>\n");
+            
+            // Text property
+            for (int j = 0; j < indent + 2; j++)
+                g_string_append(string, "  ");
+            g_string_append_printf(string, "<property name=\"text\" >%s</property>\n", 
+                                  textview->texte ? textview->texte : "");
+            
+            // Position properties
+            for (int j = 0; j < indent + 2; j++)
+                g_string_append(string, "  ");
+            g_string_append_printf(string, "<property name=\"x\" >%d</property>\n", textview->Crd.x);
+            
+            for (int j = 0; j < indent + 2; j++)
+                g_string_append(string, "  ");
+            g_string_append_printf(string, "<property name=\"y\" >%d</property>\n", textview->Crd.y);
+            
+            // Size properties
+            for (int j = 0; j < indent + 2; j++)
+                g_string_append(string, "  ");
+            g_string_append_printf(string, "<property name=\"width\" >%d</property>\n", textview->dim.width);
+            
+            for (int j = 0; j < indent + 2; j++)
+                g_string_append(string, "  ");
+            g_string_append_printf(string, "<property name=\"height\" >%d</property>\n", textview->dim.height);
+            
+            // Close TextView tag
+            for (int j = 0; j < indent + 2; j++)
+                g_string_append(string, "  ");
+            g_string_append(string, "</TextView>\n");
+            
+            break;
+        }
             // BASIC ENTRY - Fix to match sample XML format
         case WIDGET_ENTRY_BASIC:
         {
@@ -470,86 +510,104 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent)
             break;
         }
 
-        // Spin Button
-        case WIDGET_BUTTON_SPIN:
-        {
+            // Spin Button
+            // Spin Button
+            // case WIDGET_BUTTON_SPIN:
+            // {
+            // btn *button = (btn *)racine->widget_data;
 
-            btn *button = (btn *)racine->widget_data;
-
-            // if (!button->spinObj) {
-            //     g_print("  Spin button without spinObj data\n");
-            //     break;
+            // // Get the spinObj data safely
+            // spinObj *sp = button->sp;
+            // if (!sp) {
+            //     g_print("  Spin button missing spinObj data, using defaults\n");
+            //     // Create default spin object if missing
+            //     sp = g_malloc(sizeof(spinObj));
+            //     sp->borneInf = 0.0;
+            //     sp->borneSup = 100.0;
+            //     sp->step = 1.0;
+            //     sp->digits = 0;
+            //     sp->start = 0.0;
             // }
-            spinObj *sp = (spinObj *)malloc(sizeof(spinObj));
-            // sp = button->spinObj;
-            g_print("  Spin button properties - x:%d y:%d min:%f max:%f step:%f digits:%u start:%f\n",
-                    button->pos ? button->pos->x : 0,
-                    button->pos ? button->pos->y : 0,
-                    sp->borneInf, sp->borneSup, sp->step, sp->digits, sp->start);
 
-            for (int j = 0; j < indent + 2; j++)
-                g_string_append(string, "  ");
-            g_string_append(string, "<button>\n");
+            // g_print("  Spin button properties - x:%d y:%d min:%f max:%f step:%f digits:%u start:%f\n",
+            //         button->pos ? button->pos->x : 0,
+            //         button->pos ? button->pos->y : 0,
+            //         sp->borneInf, sp->borneSup, sp->step, sp->digits, sp->start);
 
-            // Position and size properties
-            if (button->pos)
-            {
-                for (int j = 0; j < indent + 2; j++)
-                    g_string_append(string, "  ");
-                g_string_append_printf(string, "<property name=\"x\">%d</property>\n", button->pos->x);
+            // // Changed from <button> to <spin> to match parser's expected format
+            // for (int j = 0; j < indent + 2; j++)
+            //     g_string_append(string, "  ");
+            // g_string_append(string, "<spin>\n");
 
-                for (int j = 0; j < indent + 2; j++)
-                    g_string_append(string, "  ");
-                g_string_append_printf(string, "<property name=\"y\">%d</property>\n", button->pos->y);
-            }
+            // // Add type property to match parser expectations
+            // for (int j = 0; j < indent + 2; j++)
+            //     g_string_append(string, "  ");
+            // g_string_append_printf(string, "<property name=\"type\" >numeric</property>\n");
 
-            if (button->dim)
-            {
-                for (int j = 0; j < indent + 2; j++)
-                    g_string_append(string, "  ");
-                g_string_append_printf(string, "<property name=\"width\">%d</property>\n", button->dim->width);
+            // // Position and size properties
+            // if (button->pos)
+            // {
+            //     for (int j = 0; j < indent + 2; j++)
+            //         g_string_append(string, "  ");
+            //     g_string_append_printf(string, "<property name=\"x\" >%d</property>\n", button->pos->x);
 
-                for (int j = 0; j < indent + 2; j++)
-                    g_string_append(string, "  ");
-                g_string_append_printf(string, "<property name=\"height\">%d</property>\n", button->dim->height);
-            }
+            //     for (int j = 0; j < indent + 2; j++)
+            //         g_string_append(string, "  ");
+            //     g_string_append_printf(string, "<property name=\"y\" >%d</property>\n", button->pos->y);
+            // }
 
-            // Spin button-specific properties
-            if (button->tooltip)
-            {
-                for (int j = 0; j < indent + 2; j++)
-                    g_string_append(string, "  ");
-                g_string_append_printf(string, "<property name=\"tooltip\">%s</property>\n", button->tooltip);
-            }
+            // if (button->dim)
+            // {
+            //     for (int j = 0; j < indent + 2; j++)
+            //         g_string_append(string, "  ");
+            //     g_string_append_printf(string, "<property name=\"width\" >%d</property>\n", button->dim->width);
 
-            // Spin-specific properties from spinObj
-            for (int j = 0; j < indent + 2; j++)
-                g_string_append(string, "  ");
-            g_string_append_printf(string, "<property name=\"min_value\">%f</property>\n", sp->borneInf);
+            //     for (int j = 0; j < indent + 2; j++)
+            //         g_string_append(string, "  ");
+            //     g_string_append_printf(string, "<property name=\"height\" >%d</property>\n", button->dim->height);
+            // }
 
-            for (int j = 0; j < indent + 2; j++)
-                g_string_append(string, "  ");
-            g_string_append_printf(string, "<property name=\"max_value\">%f</property>\n", sp->borneSup);
+            // // Spin button-specific properties - align names with parser expectations
+            // if (button->tooltip)
+            // {
+            //     for (int j = 0; j < indent + 2; j++)
+            //         g_string_append(string, "  ");
+            //     g_string_append_printf(string, "<property name=\"tooltip\" >%s</property>\n", button->tooltip);
+            // }
 
-            for (int j = 0; j < indent + 2; j++)
-                g_string_append(string, "  ");
-            g_string_append_printf(string, "<property name=\"step_increment\">%f</property>\n", sp->step);
+            // // Spin-specific properties from spinObj - match parser property names
+            // for (int j = 0; j < indent + 2; j++)
+            //     g_string_append(string, "  ");
+            // g_string_append_printf(string, "<property name=\"min\" >%g</property>\n", sp->borneInf);
 
-            for (int j = 0; j < indent + 2; j++)
-                g_string_append(string, "  ");
-            g_string_append_printf(string, "<property name=\"digits\">%u</property>\n", sp->digits);
+            // for (int j = 0; j < indent + 2; j++)
+            //     g_string_append(string, "  ");
+            // g_string_append_printf(string, "<property name=\"max\" >%g</property>\n", sp->borneSup);
 
-            for (int j = 0; j < indent + 2; j++)
-                g_string_append(string, "  ");
-            g_string_append_printf(string, "<property name=\"value\">%f</property>\n", sp->start);
+            // for (int j = 0; j < indent + 2; j++)
+            //     g_string_append(string, "  ");
+            // g_string_append_printf(string, "<property name=\"step\" >%g</property>\n", sp->step);
 
-            // Close </radio> tag
-            for (int j = 0; j < indent + 2; j++)
-                g_string_append(string, "  ");
-            g_string_append(string, "</button>\n");
+            // for (int j = 0; j < indent + 2; j++)
+            //     g_string_append(string, "  ");
+            // g_string_append_printf(string, "<property name=\"digits\" >%u</property>\n", sp->digits);
 
-            break;
-        }
+            // for (int j = 0; j < indent + 2; j++)
+            //     g_string_append(string, "  ");
+            // g_string_append_printf(string, "<property name=\"value\" >%g</property>\n", sp->start);
+
+            // // Close spin tag
+            // for (int j = 0; j < indent + 2; j++)
+            //     g_string_append(string, "  ");
+            // g_string_append(string, "</spin>\n");
+
+            // // Free the temporary spin object if we created one
+            // if (!button->sp && sp) {
+            //     g_free(sp);
+            // }
+
+            // break;
+            // }
 
         case WIDGET_RADIO:
         {

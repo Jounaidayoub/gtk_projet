@@ -320,7 +320,262 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
     gtk_widget_destroy(dialog);
 }
 
+// Function to show properties dialog for TextView
+void show_properties_dialog_textview(AppData *app_data, GtkWidget *widget) {
+    GtkWidget *content = app_data->properties_content;
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    
+    // Get MonTextView data from widget
+    MonTextView *textview = g_object_get_data(G_OBJECT(widget), "textview_data");
+    if (!textview) {
+        g_print("Error: No TextView data associated with this widget\n");
+        return;
+    }
+    
+    // Create grid for form layout
+    GtkWidget *grid = gtk_grid_new();
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+    
+    // Title
+    GtkWidget *title = gtk_label_new("TextView Properties");
+    gtk_widget_set_halign(title, GTK_ALIGN_START);
+    
+    // Text content
+    GtkWidget *text_label = gtk_label_new("Text Content:");
+    GtkWidget *text_view = gtk_text_view_new();
+    GtkWidget *text_scroll = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_min_content_height(GTK_SCROLLED_WINDOW(text_scroll), 100);
+    gtk_container_add(GTK_CONTAINER(text_scroll), text_view);
+    
+    // Set current text
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
+    gtk_text_buffer_set_text(buffer, textview->texte ? textview->texte : "", -1);
+    
+    // Position fields
+    GtkWidget *x_label = gtk_label_new("X Position:");
+    GtkWidget *y_label = gtk_label_new("Y Position:");
+    GtkWidget *x_entry = gtk_entry_new();
+    GtkWidget *y_entry = gtk_entry_new();
+    
+    char x_str[32], y_str[32], width_str[32], height_str[32];
+    sprintf(x_str, "%d", textview->Crd.x);
+    sprintf(y_str, "%d", textview->Crd.y);
+    sprintf(width_str, "%d", textview->dim.width);
+    sprintf(height_str, "%d", textview->dim.height);
+    
+    gtk_entry_set_text(GTK_ENTRY(x_entry), x_str);
+    gtk_entry_set_text(GTK_ENTRY(y_entry), y_str);
+    
+    // Size fields
+    GtkWidget *width_label = gtk_label_new("Width:");
+    GtkWidget *height_label = gtk_label_new("Height:");
+    GtkWidget *width_entry = gtk_entry_new();
+    GtkWidget *height_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(width_entry), width_str);
+    gtk_entry_set_text(GTK_ENTRY(height_entry), height_str);
+    
+    // Add widgets to grid
+    int row = 0;
+    gtk_grid_attach(GTK_GRID(grid), text_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), text_scroll, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), x_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), x_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), y_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), y_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), width_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), width_entry, 1, row, 1, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), height_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), height_entry, 1, row, 1, 1);
+    
+    // Store form fields for apply function
+    g_object_set_data(G_OBJECT(widget), "properties_text_view", text_view);
+    g_object_set_data(G_OBJECT(widget), "properties_x_entry", x_entry);
+    g_object_set_data(G_OBJECT(widget), "properties_y_entry", y_entry);
+    g_object_set_data(G_OBJECT(widget), "properties_width_entry", width_entry);
+    g_object_set_data(G_OBJECT(widget), "properties_height_entry", height_entry);
+    
+    // Add to vbox
+    gtk_box_pack_start(GTK_BOX(vbox), title, FALSE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(vbox), grid, TRUE, TRUE, 0);
+    
+    // Add to properties content area
+    gtk_container_add(GTK_CONTAINER(content), vbox);
+    gtk_widget_show_all(content);
+    
+    // Enable Apply and Remove buttons
+    gtk_widget_set_sensitive(app_data->apply_button, TRUE);
+    gtk_widget_set_sensitive(app_data->remove_button, TRUE);
+}
 
+//  Function to show dialog for creating a TextView
+// Function to show dialog for creating a TextView
+void show_create_textview_dialog(GtkWidget *button, gpointer user_data) {
+    AppData *app_data = (AppData *)user_data;
+    
+    GtkWidget *dialog;
+    GtkWidget *content_area;
+    GtkWidget *grid;
+    GtkWidget *text_label, *text_view, *text_scroll;
+    GtkWidget *x_label, *y_label, *width_label, *height_label;
+    GtkWidget *x_entry, *y_entry, *width_entry, *height_entry;
+    gint response;
+    
+    // Create dialog
+    dialog = gtk_dialog_new_with_buttons("TextView Properties",
+                                       GTK_WINDOW(app_data->window),
+                                       GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                       "OK", GTK_RESPONSE_ACCEPT,
+                                       "Cancel", GTK_RESPONSE_CANCEL,
+                                       NULL);
+    
+    content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    
+    // Create grid for form layout
+    grid = gtk_grid_new();
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+    
+    // Add container selection at the top of the dialog
+    GtkWidget *container_label = gtk_label_new("Add to Container:");
+    GtkWidget *container_combo = gtk_combo_box_text_new();
+    
+    // Add default option (preview area)
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(container_combo), "Window (Default)");
+    
+    // Add all containers
+    GList *iter;
+    for (iter = app_data->containers; iter != NULL; iter = iter->next)
+    {
+        GtkWidget *container = GTK_WIDGET(iter->data);
+        const gchar *name = gtk_widget_get_name(container);
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(container_combo), name);
+    }
+    
+    // Select currently selected container
+    gint active_index = 0;
+    if (app_data->selected_container)
+    {
+        active_index = g_list_index(app_data->containers, app_data->selected_container) + 1;
+    }
+    gtk_combo_box_set_active(GTK_COMBO_BOX(container_combo), active_index);
+    
+    // Add container selection to the top of the form
+    gtk_grid_attach(GTK_GRID(grid), container_label, 0, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), container_combo, 1, 0, 1, 1);
+    
+    // Text content
+    text_label = gtk_label_new("Text Content:");
+    text_view = gtk_text_view_new();
+    text_scroll = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_min_content_height(GTK_SCROLLED_WINDOW(text_scroll), 100);
+    gtk_container_add(GTK_CONTAINER(text_scroll), text_view);
+    
+    // Position fields
+    x_label = gtk_label_new("X Position:");
+    y_label = gtk_label_new("Y Position:");
+    x_entry = gtk_entry_new();
+    y_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(x_entry), "10");
+    gtk_entry_set_text(GTK_ENTRY(y_entry), "10");
+    
+    // Size fields
+    width_label = gtk_label_new("Width:");
+    height_label = gtk_label_new("Height:");
+    width_entry = gtk_entry_new();
+    height_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(width_entry), "150");
+    gtk_entry_set_text(GTK_ENTRY(height_entry), "100");
+    
+    // Add widgets to grid
+    gtk_grid_attach(GTK_GRID(grid), text_label, 0, 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), text_scroll, 1, 1, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), x_label, 0, 2, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), x_entry, 1, 2, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), y_label, 0, 3, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), y_entry, 1, 3, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), width_label, 0, 4, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), width_entry, 1, 4, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), height_label, 0, 5, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), height_entry, 1, 5, 1, 1);
+    
+    // Add grid to dialog
+    gtk_container_add(GTK_CONTAINER(content_area), grid);
+    gtk_widget_show_all(dialog);
+    
+    // Run dialog
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+    
+    if (response == GTK_RESPONSE_ACCEPT)
+    {
+        // Get text from text view
+        GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
+        GtkTextIter start, end;
+        gtk_text_buffer_get_start_iter(buffer, &start);
+        gtk_text_buffer_get_end_iter(buffer, &end);
+        gchar *text_content = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+        
+        // Get position and size values
+        gint x = atoi(gtk_entry_get_text(GTK_ENTRY(x_entry)));
+        gint y = atoi(gtk_entry_get_text(GTK_ENTRY(y_entry)));
+        gint width = atoi(gtk_entry_get_text(GTK_ENTRY(width_entry)));
+        gint height = atoi(gtk_entry_get_text(GTK_ENTRY(height_entry)));
+        
+        // Get the selected container
+        gint container_index = gtk_combo_box_get_active(GTK_COMBO_BOX(container_combo));
+        GtkWidget *target_container = NULL;
+        
+        if (container_index > 0)
+        {
+            target_container = g_list_nth_data(app_data->containers, container_index - 1);
+        }
+        else
+        {
+            target_container = app_data->preview_area;
+        }
+        
+        // Create TextView with the selected container
+        coordonnees pos = {x, y};
+        dimension dim = {width, height};
+        MonTextView *textview = init_textview(text_content ? text_content : "", 
+                                           "textview", pos, dim, target_container);
+        
+        // Create the TextView widget
+        creer_textview(textview);
+        
+        // Register for property editing and add to hierarchy tree
+        g_object_set_data(G_OBJECT(textview->elem), "textview_data", textview);
+        add_widget_to_both_trees(app_data, textview->elem, "TextView", target_container, TRUE, textview);
+        
+        // Connect click handler for selecting this widget
+        g_signal_connect(textview->elem, "button-press-event", 
+                       G_CALLBACK(on_widget_button_press_select), app_data);
+        
+        // Update hierarchy view and XML display
+        // update_hierarchy_view(app_data);
+        // update_xml_display(app_data);
+        
+        // Show all widgets
+        gtk_widget_show_all(app_data->preview_area);
+        
+        // Clean up
+        g_free(text_content);
+    }
+    
+    gtk_widget_destroy(dialog);
+}
 
 static void show_properties_dialog_btn_radio(AppData *app_data){
     GtkWidget *dialog;
