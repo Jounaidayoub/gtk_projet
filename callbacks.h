@@ -466,22 +466,22 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                     
                     // Generate properties inside <radio>
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"text\">%s</property>\n", radio->label);
+                    g_string_append_printf(string, "<property name=\"text\" >%s</property>\n", radio->label);
             
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"mnemonic\">%d</property>\n", radio->hasMnemonic);
+                    g_string_append_printf(string, "<property name=\"mnemonic\" >%d</property>\n", radio->hasMnemonic);
             
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"police\">%s</property>\n", radio->police);
+                    g_string_append_printf(string, "<property name=\"police\" >%s</property>\n", radio->police);
             
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"color\">%s</property>\n", radio->color);
+                    g_string_append_printf(string, "<property name=\"color\" >%s</property>\n", radio->color);
             
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"taille\">%d</property>\n", radio->taille);
+                    g_string_append_printf(string, "<property name=\"taille\" >%d</property>\n", radio->taille);
             
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"gras\">%d</property>\n", radio->gras);
+                    g_string_append_printf(string, "<property name=\"gras\" >%d</property>\n", radio->gras);
 
                     // Close </radio> tag
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
@@ -543,7 +543,7 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                     
                     // Generate the opening tag for <radioList> with x and y attributes
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<radioList x=\"%d\" y=\"%d\">\n", radioList->cord->x, radioList->cord->y);
+                    g_string_append_printf(string, "<radioList x=%d y=%d >\n", radioList->cord->x, radioList->cord->y);
 
                     //generate the radio buttons
                     generate_xml_from_arbre(string, racine->fils, indent + 4);
