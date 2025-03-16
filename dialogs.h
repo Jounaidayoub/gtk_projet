@@ -9,6 +9,39 @@
 #include "entry_editing.h" // For entry editing functions
 #include "button_editing.h" // Add this include for button editing functions
 
+/**
+ * @brief Creer un choix, contenant un combobox et un label
+ * @param label Le label à donnée au choix (exemple: color, texte...)
+ * @param cord Les cordonnées où placer le choix
+ * @param container Le pere du choix
+ * @param items Les élements du combobox
+ * @param indiceActive L'indice de l'élement active (-1 pour aucun)
+ * @return GtkWidget* un pointeur vers le combobox
+ * */
+GtkWidget* inputCombo(char* label, coordonnees* cord, GtkWidget* container,char* items[256], int indiceActive){
+    //Creer le box
+    StyledBox *bxc = init_styled_box(GTK_ORIENTATION_HORIZONTAL, TRUE,
+                                     16, NULL,
+                                     "", "6", "2",
+                                     cord, dim(20, 30),container);
+    create_styled_box(bxc);
+
+    //creer le label
+    creer_label(init_label(label, label,
+                           NULL, NULL, bxc->widget,
+                           "black", 1, "16", "Colspan"));
+
+    //Creer le combo
+    gtkComboBox *combo = init_comboBox(*dim(20, 20), *cord(0, 0), "", bxc->widget);
+    create_ComboBox(combo);
+    int j = -1;
+    while(items[++j]){
+        ajouterElementComboBox(combo, items[j], items[j]);
+    }
+    elementActive(combo, indiceActive);
+    //Retourner le input
+    return (GtkWidget*) combo->comboBox;
+}
 // Function to show properties dialog
 static void show_properties_dialog(GtkWidget *widget, gpointer data)
 {
@@ -66,7 +99,6 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
     // Add container selection at the top of the dialog
     GtkWidget *container_label = gtk_label_new("Add to Container:");
     GtkWidget *container_combo = gtk_combo_box_text_new();
-    
     // Add default option (preview area)
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(container_combo), "Window (Default)");
     
@@ -139,6 +171,9 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
     GtkWidget *bgcolor_entry = gtk_entry_new();
     gtk_entry_set_text(GTK_ENTRY(bgcolor_entry), "#FFFFFF");
 
+
+    
+
     // Add widgets to grid
     int row = 0;
     gtk_grid_attach(GTK_GRID(grid), container_label, 0, row, 1, 1);
@@ -197,6 +232,14 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
 
     gtk_grid_attach(GTK_GRID(grid), bgcolor_label, 0, row, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), bgcolor_entry, 1, row, 1, 1);
+    row++;
+    
+    GtkWidget* callbacks_label = gtk_label_new("Callback");
+    gchar* callbacks_array[] = {"Change Label", "Open Dialog", NULL};
+    GtkWidget* callbacks_combo = inputCombo("Callbacks", cord(0, 0), grid, callbacks_array, 1);
+    gtk_grid_attach(GTK_GRID(grid), callbacks_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), callbacks_combo, 1, row, 1, 1);
+    row++;
 
     // Add grid to dialog
     gtk_container_add(GTK_CONTAINER(content_area), grid);
@@ -230,6 +273,8 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
             target_container = app_data->preview_area;
         }
         
+        //get callback name
+        gchar* callbac_char = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(callbacks_combo));
         // Create button image if path is provided
         MonImage *button_image = NULL;
         if (strlen(image_path) > 0) {
@@ -248,6 +293,8 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
         );
         
         if (button != NULL) {
+            //assign callback name
+            button->callback = callbac_char;
             // Override mnemonic setting if needed
             button->hasMnemonic = has_mnemonic;
             

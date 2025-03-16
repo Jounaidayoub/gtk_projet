@@ -170,47 +170,47 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
             
             
             // Normal Button
-            case WIDGET_BUTTON_NORMAL:
-            {
-                btn *button = (btn*)racine->widget_data;
-                g_print("  Button normal properties - x:%d y:%d\n", 
-                       button->pos ? button->pos->x : 0, 
-                       button->pos ? button->pos->y : 0);
+            // case WIDGET_BUTTON_NORMAL:
+            // {
+            //     btn *button = (btn*)racine->widget_data;
+            //     g_print("  Button normal properties - x:%d y:%d\n", 
+            //            button->pos ? button->pos->x : 0, 
+            //            button->pos ? button->pos->y : 0);
                 
-                // Position and size properties
-                if (button->pos) {
-                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append(string, "<button>\n");
+            //     // Position and size properties
+            //     if (button->pos) {
+            //         for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+            //         g_string_append(string, "<button>\n");
 
-                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"x\">%d</property>\n", button->pos->x);
+            //         for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+            //         g_string_append_printf(string, "<property name=\"x\">%d</property>\n", button->pos->x);
                     
-                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"y\">%d</property>\n", button->pos->y);
-                }
+            //         for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+            //         g_string_append_printf(string, "<property name=\"y\">%d</property>\n", button->pos->y);
+            //     }
                 
-                if (button->dim) {
-                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"width\">%d</property>\n", button->dim->width);
+            //     if (button->dim) {
+            //         for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+            //         g_string_append_printf(string, "<property name=\"width\">%d</property>\n", button->dim->width);
                     
-                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"height\">%d</property>\n", button->dim->height);
-                }
+            //         for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+            //         g_string_append_printf(string, "<property name=\"height\">%d</property>\n", button->dim->height);
+            //     }
                 
-                // Button-specific properties
-                if (button->label) {
-                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"label\">%s</property>\n", button->label);
-                }
+            //     // Button-specific properties
+            //     if (button->label) {
+            //         for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+            //         g_string_append_printf(string, "<property name=\"text\">%s</property>\n", button->label);
+            //     }
                 
-                if (button->tooltip) {
-                    for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"tooltip\">%s</property>\n", button->tooltip);
-                }
-                for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                g_string_append(string, "</button>\n");
-                break;
-            }
+            //     // if (button->tooltip) {
+            //     //     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+            //     //     g_string_append_printf(string, "<property name=\"tooltip\">%s</property>\n", button->tooltip);
+            //     // }
+            //     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
+            //     g_string_append(string, "</button>\n");
+            //     break;
+            // }
             
             // Checkbox Button
             case WIDGET_CHECKBOX:
@@ -501,34 +501,34 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent) {
                     
                     // Generate properties inside <button>
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"text\">%s</property>\n", button->label);
+                    g_string_append_printf(string, "<property name=\"text\" >%s</property>\n", button->label);
             
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"mnemonic\">%d</property>\n", button->hasMnemonic);
+                    g_string_append_printf(string, "<property name=\"mnemonic\" >%d</property>\n", button->hasMnemonic);
             
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"police\">%s</property>\n", button->police);
+                    g_string_append_printf(string, "<property name=\"police\" >%s</property>\n", button->police);
 
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"color\">%s</property>\n", button->color);
+                    g_string_append_printf(string, "<property name=\"color\" >%s</property>\n", button->color);
             
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"taille\">%d</property>\n", button->taille);
+                    g_string_append_printf(string, "<property name=\"taille\" >%d</property>\n", button->taille);
             
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"x\">%d</property>\n", button->pos->x);
+                    g_string_append_printf(string, "<property name=\"x\" >%d</property>\n", button->pos->x);
 
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"y\">%d</property>\n", button->pos->y);
+                    g_string_append_printf(string, "<property name=\"y\" >%d</property>\n", button->pos->y);
 
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"width\">%d</property>\n", button->dim->width);
+                    g_string_append_printf(string, "<property name=\"width\" >%d</property>\n", button->dim->width);
 
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"height\">%d</property>\n", button->dim->height);
+                    g_string_append_printf(string, "<property name=\"height\" >%d</property>\n", button->dim->height);
 
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
-                    g_string_append_printf(string, "<property name=\"gras\">%d</property>\n", button->gras);
+                    g_string_append_printf(string, "<property name=\"gras\" >%d</property>\n", button->gras);
 
                     // // Close </button> tag
                     for (int j = 0; j < indent + 2; j++) g_string_append(string, "  ");
@@ -635,18 +635,18 @@ void export_to_xml(GtkWidget *widget, gpointer data) {
     g_string_append(xml_string, "<window>\n");
     
     // Add window properties to match d.html structure
-    g_string_append(xml_string, "    <property name=\"title\">GTK UI Builder</property>\n");
-    g_string_append(xml_string, "    <property name=\"width\">900</property>\n");
-    g_string_append(xml_string, "    <property name=\"height\">700</property>\n");
-    g_string_append(xml_string, "    <property name=\"resizable\">1</property>\n");
-    g_string_append(xml_string, "    <property name=\"border\">5</property>\n");
-    g_string_append(xml_string, "    <property name=\"position\">c</property>\n");
-    g_string_append(xml_string, "    <property name=\"x\">400</property>\n");
-    g_string_append(xml_string, "    <property name=\"y\">250</property>\n");
-    g_string_append(xml_string, "    <property name=\"bgColor\">#ffffff</property>\n");
-    g_string_append(xml_string, "    <property name=\"icon\">icon.png</property>\n");
-    g_string_append(xml_string, "    <property name=\"headerBar\">1</property>\n");
-    g_string_append(xml_string, "    <property name=\"bgImage\">background.png</property>\n");
+    g_string_append(xml_string, "    <property name=\"title\" >GTK UI Builder</property>\n");
+    g_string_append(xml_string, "    <property name=\"width\" >900</property>\n");
+    g_string_append(xml_string, "    <property name=\"height\" >900</property>\n");
+    g_string_append(xml_string, "    <property name=\"resizable\" >1</property>\n");
+    g_string_append(xml_string, "    <property name=\"border\" >10</property>\n");
+    g_string_append(xml_string, "    <property name=\"position\" >c</property>\n");
+    g_string_append(xml_string, "    <property name=\"x\" >400</property>\n");
+    g_string_append(xml_string, "    <property name=\"y\" >250</property>\n");
+    // g_string_append(xml_string, "    <property name=\"bgColor\" >#ffffff</property>\n");
+    g_string_append(xml_string, "    <property name=\"icon\" >icon.png</property>\n");
+    // g_string_append(xml_string, "    <property name=\"headerBar\" >1</property>\n");
+    // g_string_append(xml_string, "    <property name=\"bgImage\" >background.png</property>\n");
     g_string_append(xml_string, "    <child>\n\n");
     g_string_append(xml_string, "        <fixed>\n\n");
     g_string_append(xml_string, "            <children>\n");
@@ -668,15 +668,15 @@ void export_to_xml(GtkWidget *widget, gpointer data) {
     // Set the text in the buffer
     gtk_text_buffer_set_text(buffer, xml_string->str, -1);
     
-    // // Save to file demo.html
-    // FILE *file = fopen("demo.html", "w");
-    // if (file) {
-    //     fputs(xml_string->str, file);
-    //     fclose(file);
-    //     g_print("XML exported to demo.html\n");
-    // } else {
-    //     g_print("Error: Could not save to demo.html\n");
-    // }
+    // Save to file demo.html
+    FILE *file = fopen("demo.html", "w");
+    if (file) {
+        fputs(xml_string->str, file);
+        fclose(file);
+        g_print("XML exported to demo.html\n");
+    } else {
+        g_print("Error: Could not save to demo.html\n");
+    }
     
     // // Free the GString
     // g_string_free(xml_string, TRUE);

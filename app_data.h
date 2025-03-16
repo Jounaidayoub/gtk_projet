@@ -30,6 +30,8 @@ typedef struct _AppData {
     
     // New field for XML display
     GtkWidget *xml_text_view;    // TextView to display generated XML
+    // char** argv;
+    // int argc;
 } AppData;
 
 // Function declaration to resolve circular dependency
