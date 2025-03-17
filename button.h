@@ -135,22 +135,22 @@ typedef struct btn{
 
 void copy_style_to_btn(btn* b, const Style* src) {
     if (!b || !src) return;
-
-    b->police = src->police ? g_strdup(src->police) : "Sans";
-    b->color = src->color ? g_strdup(src->color->hex_code) : "black";
+    b->police = src->police ? g_strdup(src->police) : g_strdup("Sans");
+    b->color = src->color ? g_strdup(src->color->hex_code) : g_strdup("black");
+    b->bgcolor = src->bgcolor ? g_strdup(src->bgcolor) : g_strdup("#FFFF");
     b->taille = src->taille;
     b->gras = src->gras;
+
     b->style = (Style*)malloc(sizeof(Style));
     if (!b->style) {
         fprintf(stderr, "Erreur d'allocation mémoire pour le style du bouton\n");
         return;
     }
-    b->style->police = b->police;
+    b->style->police = g_strdup(b->police);
     b->style->color = src->color;
-    b->style->bgcolor = src->bgcolor;
+    b->style->bgcolor = src->bgcolor ? g_strdup(src->bgcolor) : g_strdup("white");
     b->style->taille = b->taille;
     b->style->gras = b->gras;
-    b->style->bgcolor = src->bgcolor ? g_strdup(src->bgcolor) : "white";
     b->style->border = src->border;
     b->style->border_radius = src->border_radius;
 }
@@ -444,8 +444,13 @@ void regler_css(btn *b, Style* stl) {
 
     // Construct the dynamic CSS string
     //BAckground
-    printf("#hello { background: %s;}", stl->bgcolor);
-    char* bgcolor = stl->bgcolor ? stl->bgcolor : "";
+    printf("#%s { background: %s;}", b->nom,stl->bgcolor);
+    char* bgcolor = NULL;
+    if(stl->bgcolor){
+        bgcolor = strdup(stl->bgcolor);
+    }else{
+        bgcolor = "";
+    }
     gchar *css ;
     //Si le 'bgcolor' est une image(contient une extension) alors appliquer l'image comme background
     if (strchr(bgcolor, '.')) {

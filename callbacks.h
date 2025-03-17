@@ -667,6 +667,10 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent)
             // Generate properties inside <button>
             for (int j = 0; j < indent + 2; j++)
                 g_string_append(string, "  ");
+            g_string_append_printf(string, "<property name=\"nom\" >%s</property>\n", button->nom);
+
+            for (int j = 0; j < indent + 2; j++)
+                g_string_append(string, "  ");
             g_string_append_printf(string, "<property name=\"text\" >%s</property>\n", button->label);
 
             for (int j = 0; j < indent + 2; j++)
@@ -704,6 +708,10 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent)
             for (int j = 0; j < indent + 2; j++)
                 g_string_append(string, "  ");
             g_string_append_printf(string, "<property name=\"gras\" >%d</property>\n", button->gras);
+
+            for (int j = 0; j < indent + 2; j++)
+                g_string_append(string, "  ");
+                g_string_append_printf(string, "<property name=\"bgcolor\" >%s</property>\n", button->bgcolor);
 
             // // Close </button> tag
             for (int j = 0; j < indent + 2; j++)

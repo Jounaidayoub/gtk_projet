@@ -9,7 +9,7 @@
 // Add forward declarations
 extern void update_container_combo(AppData *app_data);
 static void create_property_form_for_widget(AppData *app_data, GtkWidget *widget);
-
+void* get_widget_structure(AppData *app_data, GtkWidget *widget);
 // Structure to store widget property fields for later retrieval
 typedef struct {
     GtkWidget *widget;       // The widget being edited
@@ -645,6 +645,8 @@ static void create_property_form_for_button_normal(AppData *app_data, GtkWidget 
     GtkWidget *content = app_data->properties_content;
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     
+    //get the struct
+    btn* b = (btn*) get_widget_structure(app_data, widget);
     // Store the widget being edited
     current_properties.widget = widget;
     current_properties.container = vbox;
@@ -765,36 +767,16 @@ static void create_property_form_for_button_normal(AppData *app_data, GtkWidget 
     GtkWidget *bgcolor_label = gtk_label_new("Background Color:");
     GtkWidget *bgcolor_entry = gtk_entry_new();
     
-    // Try to get style data from the button
-    Style *style = g_object_get_data(G_OBJECT(widget), "button_style");
-    if (style) {
-        gtk_entry_set_text(GTK_ENTRY(font_entry), style->police ? style->police : "Sans");
-        
-        // if (style->color) {
-            // gchar *color_str = g_strdup_printf("#%02x%02x%02x", 
-            //                                    style->color->r, 
-            //                                    style->color->g, 
-            //                                    style->color->b);
-            // gtk_entry_set_text(GTK_ENTRY(color_entry), color_str);
-            // g_free(color_str);
-        // } else {
-            gtk_entry_set_text(GTK_ENTRY(color_entry), "#000000");
-        // }
-        
-        gchar size_str[32];
-        sprintf(size_str, "%d", style->taille);
-        gtk_entry_set_text(GTK_ENTRY(size_entry), size_str);
-        
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bold_check), style->gras);
-        
-        gtk_entry_set_text(GTK_ENTRY(bgcolor_entry), style->bgcolor ? style->bgcolor : "#FFFFFF");
-    } else {
-        // Default values
-        gtk_entry_set_text(GTK_ENTRY(font_entry), "Sans");
-        gtk_entry_set_text(GTK_ENTRY(color_entry), "#000000");
-        gtk_entry_set_text(GTK_ENTRY(size_entry), "12");
-        gtk_entry_set_text(GTK_ENTRY(bgcolor_entry), "#FFFFFF");
-    }
+ 
+        // gtk_entry_set_text(GTK_ENTRY(font_entry), style->police ? style->police : "Sans");
+        gtk_entry_set_text(GTK_ENTRY(font_entry), b->police ? b->police : "Sans");
+        g_print("\nPolice: %s", b->police);
+        gtk_entry_set_text(GTK_ENTRY(color_entry), b->color ? b->color : "#000000");
+        char* taille_str;
+        sprintf(taille_str,"%d",b->taille);
+        gtk_entry_set_text(GTK_ENTRY(size_entry), b->taille ? taille_str : "12");        
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bold_check), b->gras ? TRUE : FALSE);
+        gtk_entry_set_text(GTK_ENTRY(bgcolor_entry), b->bgcolor ? b->bgcolor : "#FFFFFF");
     
     // Store references for property retrieval in apply function
     GtkWidget *dummy_entries[8];  // Temp storage for entries that don't have dedicated fields

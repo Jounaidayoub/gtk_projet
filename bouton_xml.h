@@ -171,7 +171,7 @@ void init_btn_normal_xml(FILE *file, int parent){
     gchar *expand_gchar,*fill_gchar;
     gint type_bg = -1; // 0:pour simple background ; 1:pour simple background modern;
     int test, hasMnemonic;
-    char x[10], y[10];
+    char x[10], y[10], nom[MAX];;
     char width[MAX], height[MAX];
     gchar *bgColor_gchar, *icon_gchar;
     char title[MAX], icon[MAX], bgcolor[MAX], taille[MAX], border[MAX],
@@ -192,7 +192,9 @@ void init_btn_normal_xml(FILE *file, int parent){
             // Récupération de l'icône du bouton
         else if (!(strcmp("icon\"", mot))) {
             lire_gchar_str_with_deplacement(file, icon, 10);
-        } else if (!(strcmp("mnemonic\"", mot))) {
+        }else if (!(strcmp("nom\"", mot))) {
+            lire_gchar_str_with_deplacement(file, nom, 10);
+        }  else if (!(strcmp("mnemonic\"", mot))) {
             hasMnemonic = char_TO_int(lire_gchar(file));
             if(hasMnemonic){
                 //Ajouter le underscore ('_') au title
@@ -308,7 +310,7 @@ void init_btn_normal_xml(FILE *file, int parent){
     btn* mybtn = NULL;
     //Si le parent est fixed
     if(parent == 2){
-        mybtn = btnNormalFixed(title, title, title,
+        mybtn = btnNormalFixed(nom, title, title,
                        parents[parent], cord(atoi(x), atoi(y)),
                        dim(atoi(width), atoi(height)),
                        ima
@@ -316,7 +318,7 @@ void init_btn_normal_xml(FILE *file, int parent){
     }
     //Si le parent n'est pas fixed
     else{
-        mybtn = btnNormal(title, title, title,
+        mybtn = btnNormal(nom, title, title,
                        parents[parent], margin(atoi(x), atoi(y), atoi(x), atoi(y)),
                        dim(atoi(width), atoi(height)),
                        ima

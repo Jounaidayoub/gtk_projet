@@ -9,6 +9,12 @@
 #include "entry_editing.h" // For entry editing functions
 #include "button_editing.h" // Add this include for button editing functions
 
+static gchar* generate_unique_id() {
+    static gint counter = 0;
+    gchar *unique_id = g_strdup_printf("widget_%d", counter++);
+    return unique_id;
+}
+
 /**
  * @brief Creer un choix, contenant un combobox et un label
  * @param label Le label à donnée au choix (exemple: color, texte...)
@@ -120,7 +126,7 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
     // Button identification fields
     name_label = gtk_label_new("Button Name:");
     name_entry = gtk_entry_new();
-    gtk_entry_set_text(GTK_ENTRY(name_entry), "button1");
+    gtk_entry_set_text(GTK_ENTRY(name_entry), generate_unique_id());
     
     label_label = gtk_label_new("Button Label:");
     label_entry = gtk_entry_new();
@@ -281,6 +287,8 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
             button_image = init_image(image_path, *dim(16, 16), *cord(0, 0));
         }
         
+        // Generate a unique name for the widget
+        // gchar *widget_name = generate_widget_name(widget_type_str, widget);
         // Create normal button
         btn *button = btnNormalFixed(
             (gchar*)name,             // Button name
@@ -302,11 +310,11 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
             btn *created_button = creer_button(button);
             
             // Apply a default style
-            Style *default_style = init_style("Sans", hex_color_init(color), taille, is_gras, bgcolor, 1, 5);
-            g_print("back: %s", bgcolor);
+            Style *default_style = init_style(police, hex_color_init(color), taille, is_gras, bgcolor, 1, 5);
             appliquer_style_button(default_style, created_button);
             copy_style_to_btn(created_button, default_style);
-            register_widget_for_property_editing(button->button, app_data);
+            // register_widget_for_property_editing(button->button, app_data);(replaced by line below)
+            g_signal_connect(button->button, "button-press-event", G_CALLBACK(on_widget_button_press_select), app_data);
 
 
             // Add the widget to hierarchy trees
