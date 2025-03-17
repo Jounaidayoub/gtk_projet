@@ -80,9 +80,10 @@ void add_widget_to_both_trees(AppData *app_data, GtkWidget *widget,
                              const gchar *widget_type_str, GtkWidget *parent_container, 
                              gboolean is_container, void *widget_structure) {
     // Generate a unique name for the widget
-    gchar *widget_name = generate_widget_name(widget_type_str, widget);
-    gtk_widget_set_name(widget, widget_name);
+    // gchar *widget_name = generate_widget_name(widget_type_str, widget);
+    // gtk_widget_set_name(widget, widget_name);
     
+    gchar *widget_name = strdup(gtk_widget_get_name(widget));
     // PART 1: Add to GtkTreeStore for visualization in hierarchy view
     GtkTreeIter parent_iter, new_iter;
     gboolean found = FALSE;

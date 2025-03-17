@@ -5,3 +5,7 @@ textviw
 
 
 dialog
+
+
+checkbox xml
+when edite update the arbre
