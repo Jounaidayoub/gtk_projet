@@ -355,4 +355,60 @@ int getIndice(char *tableau[], char *chaine) {
     return -1;
 }
 
+
+/**
+ * @brief Supprime un noeud de l'arbre ainsi que tous ses descendants.
+ *
+ * Cette fonction libère récursivement la mémoire allouée pour le noeud passé en paramètre,
+ * ainsi que pour tous ses fils et frères. Elle doit être utilisée pour supprimer un noeud
+ * détaché de l'arbre ou pour supprimer l'intégralité d'un sous-arbre.
+ *
+ * @param noeud Pointeur vers le noeud à supprimer.
+ */
+void supprimer_noeud(Arbre *noeud) {
+    if (noeud == NULL) {
+        return;
+    }
+    
+    // Supprimer récursivement le sous-arbre des fils
+    supprimer_noeud(noeud->fils);
+    
+    // Supprimer récursivement le sous-arbre des frères
+    supprimer_noeud(noeud->frere);
+    
+    // Libérer le noeud courant
+    free(noeud);
+}
+
+
+/**
+ * @brief Supprime le premier noeud de l'arbre dont le nom correspond au paramètre, ainsi que tous ses descendants.
+ *
+ * La fonction parcourt récursivement l'arbre. Lorsqu'un noeud dont le nom correspond à 'nom' est trouvé,
+ * il est supprimé (ainsi que tous ses fils et frères associés). Si ce noeud est la racine d'un sous-arbre,
+ * la fonction retourne le pointeur vers le premier frère du noeud supprimé, ce qui met à jour la branche concernée.
+ *
+ * @param racine La racine de l'arbre ou du sous-arbre à traiter.
+ * @param nom Le nom du noeud à supprimer.
+ * @return Arbre* Le nouvel arbre (ou sous-arbre) après suppression du noeud.
+ */
+Arbre* supprimerNoeudParNom(Arbre* racine, const char* nom) {
+    if (racine == NULL) {
+        return NULL;
+    }
+
+    // Si le noeud courant correspond au nom recherché, le supprimer
+    if (strcmp(racine->nom, nom) == 0) {
+        Arbre* nouveau = racine->frere;  // Sauvegarder la suite de la liste au même niveau
+        supprimer_noeud(racine);         // Libérer la mémoire du noeud et de ses descendants
+        return nouveau;
+    }
+
+    // Sinon, traiter récursivement les fils et les frères
+    racine->fils = supprimerNoeudParNom(racine->fils, nom);
+    racine->frere = supprimerNoeudParNom(racine->frere, nom);
+    
+    return racine;
+}
+
 #endif //XML_TAHA_CONTAINERS_LIST_H
