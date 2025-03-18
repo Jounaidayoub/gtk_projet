@@ -21,7 +21,7 @@ typedef struct {
     GtkWidget *y_entry;      
     GtkWidget *width_entry;  
     GtkWidget *height_entry;
-    
+    GtkWidget *name_entry;
     // Widget-specific fields (union could be used to save memory)
     GtkWidget *placeholder_entry;
     GtkWidget *max_len_entry;
@@ -44,6 +44,14 @@ typedef struct {
     GtkWidget *numeric_check;
     GtkWidget *wrap_check;
     GtkWidget *active_check;
+
+    //font things
+    GtkWidget *font_entry;
+    GtkWidget *size_entry;
+    GtkWidget *color_entry;
+    GtkWidget *bold_check;
+    GtkWidget *italic_check;    
+    GtkWidget *bgcolor_entry;
 
 
 } PropertyFields;
@@ -641,6 +649,7 @@ static void create_property_form_for_spin_button(AppData *app_data, GtkWidget *w
 
 
 // Create property form for normal button widget
+//For editing
 static void create_property_form_for_button_normal(AppData *app_data, GtkWidget *widget) {
     GtkWidget *content = app_data->properties_content;
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
@@ -711,7 +720,7 @@ static void create_property_form_for_button_normal(AppData *app_data, GtkWidget 
     if (name && *name) {
         gtk_entry_set_text(GTK_ENTRY(name_entry), name);
     }
-    
+    current_properties.name_entry = name_entry;
     // Button specific fields
     GtkWidget *label_text_label = gtk_label_new("Button Text:");
     GtkWidget *label_text_entry = gtk_entry_new();
@@ -767,6 +776,12 @@ static void create_property_form_for_button_normal(AppData *app_data, GtkWidget 
     GtkWidget *bgcolor_label = gtk_label_new("Background Color:");
     GtkWidget *bgcolor_entry = gtk_entry_new();
     
+    current_properties.font_entry = font_entry;
+    current_properties.color_entry = color_entry;
+    current_properties.size_entry = size_entry;
+    current_properties.bold_check = bold_check;
+    current_properties.bgcolor_entry = bgcolor_entry;
+
  
         // gtk_entry_set_text(GTK_ENTRY(font_entry), style->police ? style->police : "Sans");
         gtk_entry_set_text(GTK_ENTRY(font_entry), b->police ? b->police : "Sans");
@@ -1733,6 +1748,8 @@ static void create_property_form_for_widget(AppData *app_data, GtkWidget *widget
             // current_properties.container = label;
             // gtk_widget_show_all(app_data->properties_content);
             g_print("iammmm heeeeeeeere\n");
+
+            //edit a button normale
             create_property_form_for_button_normal(app_data, widget);     
 
             // Enable Remove button only
@@ -1780,15 +1797,46 @@ static void on_apply_clicked(GtkButton *button, gpointer user_data) {
     gint y = atoi(gtk_entry_get_text(GTK_ENTRY(current_properties.y_entry)));
     gint width = atoi(gtk_entry_get_text(GTK_ENTRY(current_properties.width_entry)));
     gint height = atoi(gtk_entry_get_text(GTK_ENTRY(current_properties.height_entry)));
-    
+    gchar* font = gtk_entry_get_text(GTK_ENTRY(current_properties.font_entry));
+    gchar* color = gtk_entry_get_text(GTK_ENTRY(current_properties.color_entry));
+    gint size = atoi(gtk_entry_get_text(GTK_ENTRY(current_properties.size_entry)));
+    gint bold = atoi(gtk_entry_get_text(GTK_ENTRY(current_properties.bold_check)));
+    gchar* bgcolor = gtk_entry_get_text(GTK_ENTRY(current_properties.bgcolor_entry));
+    gchar *label_text = gtk_entry_get_text(GTK_ENTRY(current_properties.label_entry));
+    gboolean is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(current_properties.active_check));
+
+
+    //update the btn structure
+    btn* bb = get_widget_structure(app_data, widget);
+    bb->dim->height = height;
+    bb->dim->width = width;
+    bb->pos->x = x;
+    bb->pos->y = y;
+    bb->color = strdup(color);
+    bb->bgcolor = strdup(bgcolor);
+    bb->police = strdup(font);
+    bb->gras = bold;
+    printf("\nbb->label: %s, label_text: %s", bb->label, label_text);
+    strcpy(bb->label, label_text);
+    strcpy(bb->tooltip, label_text);
+    bb->isChecked = is_active;
+
+    // Update the widget
     // Update position if widget is in a fixed container
     GtkWidget *parent = gtk_widget_get_parent(widget);
     if (GTK_IS_FIXED(parent)) {
         gtk_fixed_move(GTK_FIXED(parent), widget, x, y);
     }
-    
-    // Update size
     gtk_widget_set_size_request(widget, width, height);
+    gtk_button_set_label(GTK_BUTTON(widget), label_text);
+    gtk_widget_set_tooltip_text(widget, label_text);
+    // gtk_widget_modify_font(widget, pango_font_description_from_string(font));
+    // gtk_widget_modify_fg(widget, GTK_STATE_NORMAL, get_gdk_color(color));
+    // gtk_widget_modify_bg(widget, GTK_STATE_NORMAL, get_gdk_color(bgcolor));
+    // gtk_widget_modify_base(widget, GTK_STATE_NORMAL, get_gdk_color(bgcolor));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), is_active);
+
+
     if (GTK_IS_SPIN_BUTTON(widget)) {
         // Apply spin button specific properties
         g_print("\nApplying spin button properties\n");
@@ -1807,6 +1855,10 @@ static void on_apply_clicked(GtkButton *button, gpointer user_data) {
         gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(widget), numeric);
         gtk_spin_button_set_wrap(GTK_SPIN_BUTTON(widget), wrap);
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(widget), value);
+        bb->sp->digits = digits;
+        bb->sp->step = step;
+        bb->sp->borneInf = min;
+        bb->sp->borneSup = max;
     }
     // Apply widget-specific properties
 
@@ -1913,11 +1965,14 @@ static void on_apply_clicked(GtkButton *button, gpointer user_data) {
     // Inside the on_apply_clicked function, add this case after the GTK_IS_ENTRY case:
     else if (GTK_IS_CHECK_BUTTON(widget)) {
         // Apply check button specific properties
-        const gchar *label_text = gtk_entry_get_text(GTK_ENTRY(current_properties.label_text_entry));
-        gboolean is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(current_properties.active_check));
+        // const gchar *label_text = gtk_entry_get_text(GTK_ENTRY(current_properties.label_text_entry));
+        // gboolean is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(current_properties.active_check));
         
-        gtk_button_set_label(GTK_BUTTON(widget), label_text);
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), is_active);
+        // gtk_button_set_label(GTK_BUTTON(widget), label_text);
+        // gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), is_active);
+        // update btn structure
+        // strcpy(bb->label, label_text);
+        // bb->isChecked = is_active;
     }
     // Handle other widget types here
     
