@@ -664,7 +664,45 @@ void liste_checks(char* labels[256], Style* st, StyledBox* bx) {
     }
 }
 
+// Function to apply style properties from btn to the widget using CSS
+void appliquer_style_css(btn *b) {
+    if (!b || !b->style) return;
 
+    // Create a new CSS provider
+    GtkCssProvider *provider = gtk_css_provider_new();
+
+    // Construct the dynamic CSS string
+    gchar *css = g_strdup_printf(
+        "#%s {"
+        "  font-family: '%s';"
+        "  font-size: %dpx;"
+        "  color: %s;"
+        "  background-color: %s;"
+        "  border: %dpx solid black;"
+        "  border-radius: %dpx;"
+        "}",
+        b->nom,
+        b->style->police ? b->style->police : "Sans",
+        b->style->taille > 0 ? b->style->taille : 12,
+        b->style->color ? b->style->color->hex_code : "#000000",
+        b->style->bgcolor ? b->style->bgcolor : "#FFFFFF",
+        b->style->border,
+        b->style->border_radius
+    );
+
+    // Load the CSS into the provider
+    gtk_css_provider_load_from_data(provider, css, -1, NULL);
+
+    // Get the style context of the button
+    GtkStyleContext *context = gtk_widget_get_style_context(b->button);
+    gtk_style_context_add_provider(context,
+                                   GTK_STYLE_PROVIDER(provider),
+                                   GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+    // Free allocated memory
+    g_free(css);
+    g_object_unref(provider);
+}
 
 
 #endif //TEST1_BUTTON_H

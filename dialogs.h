@@ -290,6 +290,7 @@ static void show_properties_dialog_btn_normal(AppData *app_data)
                 (int)(color_value.green * 255),
                 (int)(color_value.blue * 255));
 
+                
         sprintf(bgcolor, "#%02X%02X%02X",
                 (int)(bgcolor_value.red * 255),
                 (int)(bgcolor_value.green * 255),

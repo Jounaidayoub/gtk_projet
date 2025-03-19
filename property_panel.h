@@ -786,14 +786,21 @@ static void create_property_form_for_button_normal(AppData *app_data, GtkWidget 
     
     GtkWidget *bold_check = gtk_check_button_new_with_label("Bold");
     
-    GtkWidget *bgcolor_label = gtk_label_new("Background Color:");
-    GtkWidget *bgcolor_entry = gtk_entry_new();
+    // GtkWidget *bgcolor_label = gtk_label_new("Background Color:");
+    // GtkWidget *bgcolor_entry = gtk_entry_new();
     
+    GtkWidget *bgcolor_label = gtk_label_new("Background Color:");
+    GtkWidget *bgcolor_button = gtk_color_button_new();
+    // Set initial color to white
+    GdkRGBA color_white = {1.0, 1.0, 1.0, 1.0};
+    gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(bgcolor_button), &color_white);
+
+
     current_properties.font_entry = font_entry;
     current_properties.color_entry = color_entry;
     current_properties.size_entry = size_entry;
     current_properties.bold_check = bold_check;
-    current_properties.bgcolor_entry = bgcolor_entry;
+    current_properties.bgcolor_entry = bgcolor_button;
 
  
         // gtk_entry_set_text(GTK_ENTRY(font_entry), style->police ? style->police : "Sans");
@@ -804,7 +811,7 @@ static void create_property_form_for_button_normal(AppData *app_data, GtkWidget 
         sprintf(taille_str,"%d",b->taille);
         gtk_entry_set_text(GTK_ENTRY(size_entry), b->taille ? taille_str : "12");        
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bold_check), b->gras ? TRUE : FALSE);
-        gtk_entry_set_text(GTK_ENTRY(bgcolor_entry), b->bgcolor ? b->bgcolor : "#FFFFFF");
+        // gtk_entry_set_text(GTK_ENTRY(bgcolor_entry), b->bgcolor ? b->bgcolor : "#FFFFFF");
     
     // Store references for property retrieval in apply function
     GtkWidget *dummy_entries[8];  // Temp storage for entries that don't have dedicated fields
@@ -817,7 +824,7 @@ static void create_property_form_for_button_normal(AppData *app_data, GtkWidget 
     dummy_entries[dummy_index++] = font_entry;
     dummy_entries[dummy_index++] = color_entry;
     dummy_entries[dummy_index++] = size_entry;
-    dummy_entries[dummy_index++] = bgcolor_entry;
+    dummy_entries[dummy_index++] = bgcolor_button;
     g_object_set_data_full(G_OBJECT(widget), "property_entries", 
                            g_memdup(dummy_entries, sizeof(GtkWidget*) * dummy_index),
                            g_free);
@@ -870,7 +877,7 @@ static void create_property_form_for_button_normal(AppData *app_data, GtkWidget 
     gtk_grid_attach(GTK_GRID(grid), bold_check, 0, row++, 2, 1);
     
     gtk_grid_attach(GTK_GRID(grid), bgcolor_label, 0, row, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), bgcolor_entry, 1, row++, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), bgcolor_button, 1, row++, 1, 1);
     
     // Add title and grid to vbox
     gtk_box_pack_start(GTK_BOX(vbox), title, FALSE, FALSE, 5);
@@ -1995,29 +2002,42 @@ static void on_apply_clicked(GtkButton *button, gpointer user_data) {
     gint y = atoi(gtk_entry_get_text(GTK_ENTRY(current_properties.y_entry)));
     gint width = atoi(gtk_entry_get_text(GTK_ENTRY(current_properties.width_entry)));
     gint height = atoi(gtk_entry_get_text(GTK_ENTRY(current_properties.height_entry)));
-    // gchar* font = gtk_entry_get_text(GTK_ENTRY(current_properties.font_entry));
-    // gchar* color = gtk_entry_get_text(GTK_ENTRY(current_properties.color_entry));
-    // gint size = atoi(gtk_entry_get_text(GTK_ENTRY(current_properties.size_entry)));
-    // gint bold = atoi(gtk_entry_get_text(GTK_ENTRY(current_properties.bold_check)));
+    gchar* font = gtk_entry_get_text(GTK_ENTRY(current_properties.font_entry));
+    gchar* color = gtk_entry_get_text(GTK_ENTRY(current_properties.color_entry));
+    gint size = atoi(gtk_entry_get_text(GTK_ENTRY(current_properties.size_entry)));
+    gint bold = atoi(gtk_entry_get_text(GTK_ENTRY(current_properties.bold_check)));
     // gchar* bgcolor = gtk_entry_get_text(GTK_ENTRY(current_properties.bgcolor_entry));
-    // gchar *label_text = gtk_entry_get_text(GTK_ENTRY(current_properties.label_entry));
-    // gboolean is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(current_properties.active_check));
+    gchar *label_text = gtk_entry_get_text(GTK_ENTRY(current_properties.label_entry));
+    gboolean is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(current_properties.active_check));
 
-
+    //get bgcolor
+    GdkRGBA bgcolor_value;
+    char bgcolor[8]; // #RRGGBB format
+    gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(current_properties.bgcolor_entry), &bgcolor_value);
+    sprintf(bgcolor, "#%02X%02X%02X",
+    (int)(bgcolor_value.red * 255),
+    (int)(bgcolor_value.green * 255),
+    (int)(bgcolor_value.blue * 255));
     //update the btn structure
-    // btn* bb = get_widget_structure(app_data, widget);
-    // bb->dim->height = height;
-    // bb->dim->width = width;
-    // bb->pos->x = x;
-    // bb->pos->y = y;
-    // bb->color = strdup(color);
-    // bb->bgcolor = strdup(bgcolor);
-    // bb->police = strdup(font);
-    // bb->gras = bold;
-    // printf("\nbb->label: %s, label_text: %s", bb->label, label_text);
-    // strcpy(bb->label, label_text);
-    // strcpy(bb->tooltip, label_text);
-    // bb->isChecked = is_active;
+    btn* bb = NULL;
+    if(GTK_IS_BUTTON(widget)){
+        bb = get_widget_structure(app_data, widget);
+        bb->dim->height = height;
+        bb->dim->width = width;
+        bb->pos->x = x;
+        bb->pos->y = y;
+        bb->color = strdup(color);
+        bb->bgcolor = strdup(bgcolor);
+        bb->police = strdup(font);
+        bb->gras = bold;
+        printf("\nbb->label: %s, label_text: %s", bb->label, label_text);
+        strcpy(bb->label, label_text);
+        strcpy(bb->tooltip, label_text);
+        bb->isChecked = is_active;
+
+        appliquer_style_css(bb);
+    }
+
 
     // Update the widget
     // Update position if widget is in a fixed container
@@ -2026,13 +2046,10 @@ static void on_apply_clicked(GtkButton *button, gpointer user_data) {
         gtk_fixed_move(GTK_FIXED(parent), widget, x, y);
     }
     gtk_widget_set_size_request(widget, width, height);
-    // gtk_button_set_label(GTK_BUTTON(widget), label_text);
-    // gtk_widget_set_tooltip_text(widget, label_text);
-    // gtk_widget_modify_font(widget, pango_font_description_from_string(font));
-    // gtk_widget_modify_fg(widget, GTK_STATE_NORMAL, get_gdk_color(color));
-    // gtk_widget_modify_bg(widget, GTK_STATE_NORMAL, get_gdk_color(bgcolor));
-    // gtk_widget_modify_base(widget, GTK_STATE_NORMAL, get_gdk_color(bgcolor));
-    // gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), is_active);
+    gtk_button_set_label(GTK_BUTTON(widget), label_text);
+    gtk_widget_set_tooltip_text(widget, label_text);
+    gtk_widget_modify_font(widget, pango_font_description_from_string(font));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), is_active);
 
 
     if (GTK_IS_SPIN_BUTTON(widget)) {
@@ -2053,83 +2070,89 @@ static void on_apply_clicked(GtkButton *button, gpointer user_data) {
         gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(widget), numeric);
         gtk_spin_button_set_wrap(GTK_SPIN_BUTTON(widget), wrap);
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(widget), value);
-        // bb->sp->digits = digits;
-        // bb->sp->step = step;
-        // bb->sp->borneInf = min;
-        // bb->sp->borneSup = max;
+        bb->sp->digits = digits;
+        bb->sp->step = step;
+        bb->sp->borneInf = min;
+        bb->sp->borneSup = max;
     }
     // Apply widget-specific properties
 
-        else if (GTK_IS_TEXT_VIEW(widget)) {
+    else if (GTK_IS_TEXT_VIEW(widget))
+    {
         // Get the MonTextView data
         MonTextView *textview = g_object_get_data(G_OBJECT(widget), "textview_data");
-        if (!textview) {
+        if (!textview)
+        {
             g_print("Error: TextView data not found!\n");
             return;
         }
-        
+
         // Get property values from form widgets
         GtkWidget *prop_text_view = g_object_get_data(G_OBJECT(widget), "prop_text_view");
         GtkWidget *editable_check = g_object_get_data(G_OBJECT(widget), "prop_editable_check");
         GtkWidget *wrap_combo = g_object_get_data(G_OBJECT(widget), "prop_wrap_combo");
-        
+
         // Get text content
         GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(prop_text_view));
         GtkTextIter start, end;
         gtk_text_buffer_get_start_iter(buffer, &start);
         gtk_text_buffer_get_end_iter(buffer, &end);
         gchar *new_text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
-        
+
         // Update position and size in the MonTextView structure
         textview->Crd.x = x;
         textview->Crd.y = y;
         textview->dim.width = width;
         textview->dim.height = height;
-        
+
         // Update text content
-        if (textview->texte) {
+        if (textview->texte)
+        {
             g_free(textview->texte);
         }
         textview->texte = g_strdup(new_text);
         g_free(new_text);
-        
+
         // Apply changes to the widget
-        
+
         // Update widget text
         buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(widget));
         gtk_text_buffer_set_text(buffer, textview->texte, -1);
-        
+
         // Update editable state
-        gtk_text_view_set_editable(GTK_TEXT_VIEW(widget), 
-                                  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(editable_check)));
-        
+        gtk_text_view_set_editable(GTK_TEXT_VIEW(widget),
+                                   gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(editable_check)));
+
         // Update wrap mode
         int wrap_index = gtk_combo_box_get_active(GTK_COMBO_BOX(wrap_combo));
         gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(widget), (GtkWrapMode)wrap_index);
-        
+
         // Apply size - THIS IS CRITICAL
         gtk_widget_set_size_request(widget, width, height);
-        
+
         // Apply position if in fixed container - THIS IS CRITICAL
         GtkWidget *parent = gtk_widget_get_parent(widget);
-        if (GTK_IS_FIXED(parent)) {
+        if (GTK_IS_FIXED(parent))
+        {
             // Make sure we're moving the actual widget, not just updating internal data
             gtk_fixed_move(GTK_FIXED(parent), widget, x, y);
         }
-        
+
         // Force a redraw
         gtk_widget_queue_resize(widget);
     }
 
-        else if (GTK_IS_COMBO_BOX(widget)) {
+    else if (GTK_IS_COMBO_BOX(widget))
+    {
         // Get ComboBox data structure
         g_print("\nApplying combo box properties\n");
         gtkComboBox *combo = g_object_get_data(G_OBJECT(widget), "combo_data");
-        if (!combo) {
+        if (!combo)
+        {
             g_print("Error: No ComboBox data found\n");
             return;
         }
-        
+
         // Get form field values
         GtkWidget *name_entry = g_object_get_data(G_OBJECT(widget), "prop_name_entry");
         GtkWidget *tooltip_entry = g_object_get_data(G_OBJECT(widget), "prop_tooltip_entry");
@@ -2138,7 +2161,7 @@ static void on_apply_clicked(GtkButton *button, gpointer user_data) {
         GtkWidget *width_entry = g_object_get_data(G_OBJECT(widget), "prop_width_entry");
         GtkWidget *height_entry = g_object_get_data(G_OBJECT(widget), "prop_height_entry");
         GtkListStore *items_store = g_object_get_data(G_OBJECT(widget), "prop_items_store");
-        
+
         // Get new values
         const gchar *new_name = gtk_entry_get_text(GTK_ENTRY(name_entry));
         const gchar *new_tooltip = gtk_entry_get_text(GTK_ENTRY(tooltip_entry));
@@ -2146,105 +2169,117 @@ static void on_apply_clicked(GtkButton *button, gpointer user_data) {
         int new_y = atoi(gtk_entry_get_text(GTK_ENTRY(y_entry)));
         int new_width = atoi(gtk_entry_get_text(GTK_ENTRY(width_entry)));
         int new_height = atoi(gtk_entry_get_text(GTK_ENTRY(height_entry)));
-        
+
         // Update combo data structure
         combo->cord.x = new_x;
         combo->cord.y = new_y;
         combo->dim.width = new_width;
         combo->dim.height = new_height;
-        
+
         // Update name
         strncpy(combo->nom_class, new_name, sizeof(combo->nom_class) - 1);
         gtk_widget_set_name(widget, new_name);
-        
+
         // Update tooltip
         gtk_widget_set_tooltip_text(widget, new_tooltip);
-        
+
         // Update size
         gtk_widget_set_size_request(widget, new_width, new_height);
-        
+
         // Update position if in fixed container
         GtkWidget *parent = gtk_widget_get_parent(widget);
-        if (GTK_IS_FIXED(parent)) {
+        if (GTK_IS_FIXED(parent))
+        {
             gtk_fixed_move(GTK_FIXED(parent), widget, new_x, new_y);
         }
-        
+
         // Update items
-        if (items_store) {
+        if (items_store)
+        {
             // Clear existing items
             gtk_combo_box_text_remove_all(GTK_COMBO_BOX_TEXT(widget));
-            
+
             // Add new items from the store
             GtkTreeIter iter;
             gboolean valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(items_store), &iter);
-            
-            while (valid) {
+
+            while (valid)
+            {
                 gchar *id, *text;
                 gtk_tree_model_get(GTK_TREE_MODEL(items_store), &iter, 0, &id, 1, &text, -1);
-                
+
                 gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(widget), id, text);
-                
+
                 g_free(id);
                 g_free(text);
                 valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(items_store), &iter);
             }
-            
+
             // Set active item to first one if possible
-            if (gtk_tree_model_iter_n_children(GTK_TREE_MODEL(items_store), NULL) > 0) {
+            if (gtk_tree_model_iter_n_children(GTK_TREE_MODEL(items_store), NULL) > 0)
+            {
                 gtk_combo_box_set_active(GTK_COMBO_BOX(widget), 0);
             }
         }
-        
+
         // Update widget display
         gtk_widget_queue_resize(widget);
     }
 
-    else if (GTK_IS_ENTRY(widget)) {
-        if (!gtk_entry_get_visibility(GTK_ENTRY(widget))) {
+    else if (GTK_IS_ENTRY(widget))
+    {
+        if (!gtk_entry_get_visibility(GTK_ENTRY(widget)))
+        {
             // Password entry
             const gchar *placeholder = gtk_entry_get_text(GTK_ENTRY(current_properties.placeholder_entry));
             const gchar *mask_char_text = gtk_entry_get_text(GTK_ENTRY(current_properties.mask_char_entry));
             const gchar *text = gtk_entry_get_text(GTK_ENTRY(current_properties.default_text_entry));
-            
+
             gtk_entry_set_placeholder_text(GTK_ENTRY(widget), placeholder);
-            
-            if (mask_char_text && mask_char_text[0]) {
+
+            if (mask_char_text && mask_char_text[0])
+            {
                 gtk_entry_set_invisible_char(GTK_ENTRY(widget), mask_char_text[0]);
             }
-            
+
             gtk_entry_set_text(GTK_ENTRY(widget), text);
-        } else {
+        }
+        else
+        {
             // Basic entry
             gboolean is_editable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(current_properties.editable_check));
             gboolean is_visible = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(current_properties.visible_check));
             const gchar *placeholder = gtk_entry_get_text(GTK_ENTRY(current_properties.placeholder_entry));
             gint max_len = atoi(gtk_entry_get_text(GTK_ENTRY(current_properties.max_len_entry)));
             const gchar *text = gtk_entry_get_text(GTK_ENTRY(current_properties.default_text_entry));
-            
+
             gtk_editable_set_editable(GTK_EDITABLE(widget), is_editable);
             gtk_entry_set_visibility(GTK_ENTRY(widget), is_visible);
-            
-            if (max_len > 0) {
+
+            if (max_len > 0)
+            {
                 gtk_entry_set_max_length(GTK_ENTRY(widget), max_len);
             }
-            
+
             gtk_entry_set_placeholder_text(GTK_ENTRY(widget), placeholder);
             gtk_entry_set_text(GTK_ENTRY(widget), text);
         }
     }
     // Add to on_apply_clicked function after the entry handling
-    
-    else if (GTK_IS_SWITCH(widget)) {
+
+    else if (GTK_IS_SWITCH(widget))
+    {
         // Apply switch specific properties
         gboolean active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(current_properties.active_check));
         gtk_switch_set_active(GTK_SWITCH(widget), active);
     }
     // Inside the on_apply_clicked function, add this case after the GTK_IS_ENTRY case:
-    else if (GTK_IS_CHECK_BUTTON(widget)) {
+    else if (GTK_IS_CHECK_BUTTON(widget))
+    {
         // Apply check button specific properties
         // const gchar *label_text = gtk_entry_get_text(GTK_ENTRY(current_properties.label_text_entry));
         // gboolean is_active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(current_properties.active_check));
-        
+
         // gtk_button_set_label(GTK_BUTTON(widget), label_text);
         // gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), is_active);
         // update btn structure
@@ -2252,7 +2287,7 @@ static void on_apply_clicked(GtkButton *button, gpointer user_data) {
         // bb->isChecked = is_active;
     }
     // Handle other widget types here
-    
+
     // Refresh display
     gtk_widget_show_all(app_data->preview_area);
 }
