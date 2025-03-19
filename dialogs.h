@@ -1528,6 +1528,261 @@ static void show_properties_dialog_btn_spin(GtkWidget *widget, gpointer data) {
     gtk_widget_destroy(dialog);
 }
 
+
+
+
+// Helper function to add new item to list store
+static void add_item_to_list(GtkButton *button, gpointer user_data) {
+    GtkListStore *store = GTK_LIST_STORE(user_data);
+    GtkWidget *entry = gtk_widget_get_parent(GTK_WIDGET(button));
+    entry = gtk_container_get_children(GTK_CONTAINER(entry))->data;
+    
+    const gchar *text = gtk_entry_get_text(GTK_ENTRY(entry));
+    if (text && *text) {
+        GtkTreeIter iter;
+        gchar *id = g_strdup_printf("item%d", g_random_int());
+        
+        gtk_list_store_append(store, &iter);
+        gtk_list_store_set(store, &iter, 0, id, 1, text, -1);
+        
+        gtk_entry_set_text(GTK_ENTRY(entry), "");
+        g_free(id);
+    }
+}
+
+// Helper function to remove selected item
+static void remove_selected_item(GtkButton *button, gpointer user_data) {
+    GtkTreeView *tree_view = GTK_TREE_VIEW(user_data);
+    GtkTreeSelection *selection = gtk_tree_view_get_selection(tree_view);
+    GtkTreeModel *model;
+    GtkTreeIter iter;
+    
+    if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
+        gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
+    }
+}
+
+// Function to show properties dialog for ComboBox
+
+// Function to show dialog for creating a ComboBox
+static void show_create_combobox_dialog(GtkWidget *button, gpointer user_data) {
+    AppData *app_data = (AppData *)user_data;
+    
+    GtkWidget *dialog;
+    GtkWidget *content_area;
+    GtkWidget *grid;
+    GtkWidget *name_label, *tooltip_label;
+    GtkWidget *name_entry, *tooltip_entry;
+    GtkWidget *x_label, *y_label, *width_label, *height_label;
+    GtkWidget *x_entry, *y_entry, *width_entry, *height_entry;
+    GtkWidget *items_label, *items_tree, *items_scroll;
+    GtkWidget *add_item_box, *add_item_entry, *add_item_button;
+    GtkWidget *remove_item_button;
+    gint response;
+
+    // Create dialog
+    dialog = gtk_dialog_new_with_buttons("Add ComboBox",
+                                       GTK_WINDOW(app_data->window),
+                                       GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                       "OK", GTK_RESPONSE_ACCEPT,
+                                       "Cancel", GTK_RESPONSE_CANCEL,
+                                       NULL);
+    
+    content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    
+    // Create grid for form layout
+    grid = gtk_grid_new();
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+    
+    // Add container selection at the top of the dialog
+    GtkWidget *container_label = gtk_label_new("Add to Container:");
+    GtkWidget *container_combo = gtk_combo_box_text_new();
+    
+    // Add default option (preview area)
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(container_combo), "Window (Default)");
+    
+    // Add all containers
+    GList *iter;
+    for (iter = app_data->containers; iter != NULL; iter = iter->next) {
+        GtkWidget *container = GTK_WIDGET(iter->data);
+        const gchar *name = gtk_widget_get_name(container);
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(container_combo), name);
+    }
+    
+    // Select currently selected container
+    gint active_index = 0;
+    if (app_data->selected_container) {
+        active_index = g_list_index(app_data->containers, app_data->selected_container) + 1;
+    }
+    gtk_combo_box_set_active(GTK_COMBO_BOX(container_combo), active_index);
+    
+    // Name field
+    name_label = gtk_label_new("ComboBox Name:");
+    name_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(name_entry), "combobox1");
+    
+    tooltip_label = gtk_label_new("Tooltip:");
+    tooltip_entry = gtk_entry_new();
+    
+    // Position fields
+    x_label = gtk_label_new("X Position:");
+    y_label = gtk_label_new("Y Position:");
+    x_entry = gtk_entry_new();
+    y_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(x_entry), "10");
+    gtk_entry_set_text(GTK_ENTRY(y_entry), "10");
+    
+    // Size fields
+    width_label = gtk_label_new("Width:");
+    height_label = gtk_label_new("Height:");
+    width_entry = gtk_entry_new();
+    height_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(width_entry), "20");
+    gtk_entry_set_text(GTK_ENTRY(height_entry), "100");
+    
+    // Items list
+    items_label = gtk_label_new("Items:");
+    GtkListStore *store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING); // ID, Text
+    items_tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+    
+    // Add columns
+    GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(items_tree), -1, "ID", renderer, "text", 0, NULL);
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(items_tree), -1, "Text", renderer, "text", 1, NULL);
+    
+    items_scroll = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_min_content_height(GTK_SCROLLED_WINDOW(items_scroll), 100);
+    gtk_container_add(GTK_CONTAINER(items_scroll), items_tree);
+    
+    // Add item box
+    add_item_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    add_item_entry = gtk_entry_new();
+    add_item_button = gtk_button_new_with_label("Add Item");
+    gtk_box_pack_start(GTK_BOX(add_item_box), add_item_entry, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(add_item_box), add_item_button, FALSE, FALSE, 0);
+    
+    // Connect add item signal
+    g_signal_connect(add_item_button, "clicked", G_CALLBACK(add_item_to_list), store);
+    
+    // Remove item button
+    remove_item_button = gtk_button_new_with_label("Remove Selected Item");
+    g_signal_connect(remove_item_button, "clicked", G_CALLBACK(remove_selected_item), items_tree);
+    
+    // Add widgets to grid
+    int row = 0;
+    gtk_grid_attach(GTK_GRID(grid), container_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), container_combo, 1, row++, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), name_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), name_entry, 1, row++, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), tooltip_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), tooltip_entry, 1, row++, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), x_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), x_entry, 1, row++, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), y_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), y_entry, 1, row++, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), width_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), width_entry, 1, row++, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), height_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), height_entry, 1, row++, 1, 1);
+    
+    gtk_grid_attach(GTK_GRID(grid), items_label, 0, row, 2, 1);
+    row++;
+    
+    gtk_grid_attach(GTK_GRID(grid), items_scroll, 0, row, 2, 3);
+    row += 3;
+    
+    gtk_grid_attach(GTK_GRID(grid), add_item_box, 0, row++, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), remove_item_button, 0, row++, 2, 1);
+    
+    // Add grid to dialog
+    gtk_container_add(GTK_CONTAINER(content_area), grid);
+    gtk_widget_show_all(dialog);
+    
+    // Run dialog
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+    
+    if (response == GTK_RESPONSE_ACCEPT) {
+        // Get values from form
+        const gchar *name = gtk_entry_get_text(GTK_ENTRY(name_entry));
+        const gchar *tooltip = gtk_entry_get_text(GTK_ENTRY(tooltip_entry));
+        gint x = atoi(gtk_entry_get_text(GTK_ENTRY(x_entry)));
+        gint y = atoi(gtk_entry_get_text(GTK_ENTRY(y_entry)));
+        gint width = atoi(gtk_entry_get_text(GTK_ENTRY(width_entry)));
+        gint height = atoi(gtk_entry_get_text(GTK_ENTRY(height_entry)));
+        
+        // Get the selected container
+        gint container_index = gtk_combo_box_get_active(GTK_COMBO_BOX(container_combo));
+        GtkWidget *target_container = NULL;
+        
+        if (container_index > 0) {
+            target_container = g_list_nth_data(app_data->containers, container_index - 1);
+        } else {
+            target_container = app_data->preview_area;
+        }
+        
+        // Create ComboBox
+        gtkComboBox *combo = init_comboBox(
+            (dimension){width, height},
+            (coordonnees){x, y},
+            (gchar*)name,
+            target_container
+        );
+        
+        if (combo) {
+            create_ComboBox(combo);
+            
+            // Add items to the ComboBox
+            GtkTreeIter iter;
+            gboolean valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
+            
+            while (valid) {
+                gchar *id, *text;
+                gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, 0, &id, 1, &text, -1);
+                
+                ajouterElementComboBox(combo, id, text);
+                
+                g_free(id);
+                g_free(text);
+                valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter);
+            }
+            
+            // Set tooltip
+            if (tooltip && *tooltip) {
+                gtk_widget_set_tooltip_text(combo->comboBox, tooltip);
+            }
+            
+            // Store the combo data with the widget for property editing
+            g_object_set_data(G_OBJECT(combo->comboBox), "combo_data", combo);
+            
+            // Register the widget for property editing
+            g_signal_connect(combo->comboBox, "button-press-event", 
+                           G_CALLBACK(on_widget_button_press_select), app_data);
+                
+            
+            
+            // Add widget to hierarchy trees
+            add_widget_to_both_trees(app_data, combo->comboBox, "ComboBox", target_container, TRUE, combo);
+            
+            // Show all widgets
+            gtk_widget_show_all(app_data->preview_area);
+        }
+    }
+    
+    gtk_widget_destroy(dialog);
+}
+
+
+
+
+
 static void show_properties_dialog_btn_switch(GtkWidget *widget, gpointer data) {
     AppData *app_data = (AppData *)data;
     GtkWidget *dialog;
@@ -2021,5 +2276,6 @@ static void add_password_entry_clicked(GtkWidget *widget, gpointer data)
     AppData *app_data = (AppData *)data;
     show_password_entry_dialog(app_data);
 }
+
 
 #endif /* DIALOGS_H */

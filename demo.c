@@ -120,12 +120,17 @@ int main(int argc, char *argv[]) {
     // Add the two entry type buttons
     GtkWidget *basic_entry_btn = gtk_button_new_with_label("Add Basic Entry");
     GtkWidget *password_entry_btn = gtk_button_new_with_label("Add Password Entry");
+    GtkWidget *combo = gtk_button_new_with_label("Add ComboBox");
+    // Gtkwidget *com = gtk_button_new_with_label("Add Combo Entry");
+    
     
     g_signal_connect(basic_entry_btn, "clicked", G_CALLBACK(add_basic_entry_clicked), &app_data);
     g_signal_connect(password_entry_btn, "clicked", G_CALLBACK(add_password_entry_clicked), &app_data);
+    g_signal_connect(combo, "clicked", G_CALLBACK(show_create_combobox_dialog), &app_data);
     
     gtk_box_pack_start(GTK_BOX(entries_box), basic_entry_btn, FALSE, FALSE, 2);
     gtk_box_pack_start(GTK_BOX(entries_box), password_entry_btn, FALSE, FALSE, 2);
+    gtk_box_pack_start(GTK_BOX(entries_box), combo, FALSE, FALSE, 2);
     
     // Add containers section
     GtkWidget *containers_frame = gtk_frame_new("Containers");

@@ -346,7 +346,7 @@ int mainf(int argc, char *argv[]){
                                       TRUE, 15, "", "", "5", "1", cord(100, 600), dim(20, 20),fixed->fixed_container);
     create_styled_box(bbox);
     // Initialisation du TextView avec un texte, un titre, des coordonnées et des dimensions
-    MonTextView *textview = init_textview(" exemple de texte dans le TextView.", "MonTextViewTitre",
+    MonTextView *textview = init_textview(" exemple de texte dans le c.", "MonTextViewTitre",
                                           *cord(100, 500), *dim(300, 50), bbox->widget);
 
     // Création du widget GTK TextView à partir de l'objet MonTextView
