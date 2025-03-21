@@ -1,5 +1,6 @@
 <window>
     <property name="title" >GTK UI Builder</property>
+    <property name="subtitle" >Build fancy UIs</property>
     <property name="width" >900</property>
     <property name="height" >900</property>
     <property name="resizable" >1</property>
@@ -8,46 +9,46 @@
     <property name="x" >400</property>
     <property name="y" >250</property>
     <property name="icon" >icon.png</property>
+    <property name="headerBar" >1</property>
+    <property name="closeBtn" >1</property>
+    <property name="reduceBtn" >1</property>
+    <property name="maxBtn" >0</property>
+    <property name="bgImage" >ex_img.jpg</property>
     <child>
 
         <fixed>
 
             <children>
-                    <button>
-            <property name="nom" >spin1</property>
-            <property name="text" ></property>
-            <property name="mnemonic" >1</property>
-            <property name="police" >(NULL)</property>
-            <property name="color" >(NULL)</property>
-            <property name="taille" >0</property>
-            <property name="x" >10</property>
-            <property name="y" >150</property>
-            <property name="width" >80</property>
-            <property name="height" >30</property>
-            <property name="gras" >0</property>
-            <property name="bgcolor" >(NULL)</property>
-            </button>
-                    <radioList x=20 y=150 >
-                                    <radio>
-                    <property name="text" >Ahmed</property>
+                <button>
+                    <property name="text" >hello</property>
+                    <property name="icon" >icon.png</property>
                     <property name="mnemonic" >1</property>
-                    <property name="police" >Sans</property>
-                    <property name="color" >#000</property>
-                    <property name="taille" >12</property>
-                    <property name="gras" >0</property>
-                    </radio>
-            </radioList>
-                    <entry>
-            <property name="type" >pass</property>
-            <property name="placeholder" >Enter password...</property>
-            <property name="visible" >1</property>
-            <property name="editable" >1</property>
-            <property name="x" >220</property>
-            <property name="y" >50</property>
-            <property name="width" >150</property>
-            <property name="height" >30</property>
-            <property name="max" >50</property>
-            </entry>
+                    <property name="x" >400</property>
+                    <property name="y" >500</property>
+                    
+                    <property name="width" >100</property>
+                    <property name="height" >10</property>
+                    <property name="police" >Consolas</property>
+                    
+                    <property name="taille" >24</property>
+                    <property name="gras" >1</property>
+                    <property name="border" >1</property>
+                    <property name="border_radius" >3</property>
+
+                </button>
+                <button>
+                    <property name="text" >Click Me</property>
+                    <property name="icon">icon.png</property>
+                    <property name="x">550</property>
+                    <property name="mnemonic">1</property>
+                    <property name="y">710</property>
+                    <property name="width">20</property>
+                    <property name="height">40</property>
+                    <property name="police">Sans</property>
+                    <property name="color">#000000</property>
+                    <property name="taille">24</property>
+                    <property name="gras">0</property>
+                </button>
             </children>
         </fixed>
     </child>

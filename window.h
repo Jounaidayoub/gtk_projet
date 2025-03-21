@@ -21,6 +21,7 @@ typedef struct window {
     coordonnees cord;     // Coordonnées de positionnement de la fenêtre par rapport à l'axe y et x
     HexColor  bgColor;   // Couleur de fond de la fenêtre
     MonImage bgImg;      // Image de fond de la fenêtre (pointeur pour éviter la copie)
+    gchar subtitle[MAX]; // Sous-titre de la fenêtre (maximum MAX caractères)
 } Mywindow;
 
 
@@ -78,7 +79,7 @@ void create_window(Mywindow *maFenetre)
     else
         gtk_window_set_resizable(GTK_WINDOW(maFenetre->window),TRUE);
     // Modifie la couleur de fond de la fenêtre
-    //gtk_widget_override_background_color(maFenetre->window, GTK_STATE_FLAG_NORMAL,maFenetre->bgColor.color);
+    // gtk_widget_override_background_color(maFenetre->window, GTK_STATE_FLAG_NORMAL,maFenetre->bgColor.color);
     // Déplace la fenêtre aux coordonnées spécifiées dans cord
     gtk_window_move(GTK_WINDOW(maFenetre->window), maFenetre->cord.x,maFenetre->cord.y);
     // Charge l'icône de la fenêtre à partir du chemin donné
@@ -88,7 +89,7 @@ void create_window(Mywindow *maFenetre)
     gtk_window_set_icon(GTK_WINDOW(maFenetre->window), icon);
     MonImage *background_image = init_image(maFenetre->bgImg.path,maFenetre->dim,maFenetre->cord);
     // Ajoute le widget d'image à la fenêtre
-    //gtk_container_add(GTK_CONTAINER(maFenetre->window), background_image->image);
+    // gtk_container_add(GTK_CONTAINER(maFenetre->window), background_image->Image);
 }
 
 
@@ -140,12 +141,17 @@ Description  : cette fonction personnalise l'apparence de la fenêtre en
 ajoutant une barre d'en-tête
 *************************************************************/
 #include "includes_button.h"
-void ajouterHeader(Mywindow* maFenetre,int headerHeight,int headerWidth,char titre[60],char icon[60],int iconWidth,int iconHeight)
+GtkWidget* ajouterHeader(Mywindow* maFenetre,int headerHeight,int headerWidth,char titre[60],
+                    char icon[60],int iconWidth,int iconHeight, gchar* subtitle)
 {
     GtkWidget *header_bar = gtk_header_bar_new();
     gtk_widget_set_size_request(header_bar, headerWidth, headerHeight);
     gtk_header_bar_set_title(GTK_HEADER_BAR(header_bar), titre);
+    gtk_header_bar_set_subtitle(GTK_HEADER_BAR(header_bar), subtitle);
     gtk_header_bar_set_show_close_button (GTK_HEADER_BAR (header_bar), TRUE);
+    // gtk_header_bar_set_decoration_layout (GTK_HEADER_BAR (header_bar), ":minimize,maximize,close");
+    // gtk_header_bar_set_decoration_layout (GTK_HEADER_BAR (header_bar), ":maximize,close");
+    // gtk_header_bar_set_decoration_layout (GTK_HEADER_BAR (header_bar), ":close");
     // Création d'une icône pour la barre d'en-tête
 
     if (strlen(maFenetre->icon_name) > 0 && strlen(icon) > 0) {
@@ -160,17 +166,27 @@ void ajouterHeader(Mywindow* maFenetre,int headerHeight,int headerWidth,char tit
         g_object_unref(empty_icon); // Free the memory allocated for the empty icon
     }
 
-    //FIN
-    GtkWidget *box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_style_context_add_class (gtk_widget_get_style_context (box), "linked");
-    GtkWidget *button1 = gtk_button_new ();
-    gtk_container_add (GTK_CONTAINER (button1), gtk_image_new_from_icon_name ("pan-start-symbolic", GTK_ICON_SIZE_BUTTON));
-    gtk_container_add (GTK_CONTAINER (box), button1);
-    GtkWidget *button2 = gtk_button_new ();
-    gtk_container_add (GTK_CONTAINER (button2), gtk_image_new_from_icon_name ("pan-end-symbolic", GTK_ICON_SIZE_BUTTON));
-    gtk_container_add (GTK_CONTAINER (box), button2);
-    gtk_header_bar_pack_start (GTK_HEADER_BAR (header_bar), box);
+    //     // Create custom buttons for minimize, maximize, and close
+    // GtkWidget *minimize_button = gtk_button_new_with_label("–"); // You can use icons instead
+    // GtkWidget *maximize_button = gtk_button_new_with_label("□");
+    // GtkWidget *close_button    = gtk_button_new_with_label("X");
+    // // Pack custom buttons into the header bar (right side)
+    // gtk_header_bar_pack_end(GTK_HEADER_BAR(header_bar), close_button);
+    // gtk_header_bar_pack_end(GTK_HEADER_BAR(header_bar), maximize_button);
+    // gtk_header_bar_pack_end(GTK_HEADER_BAR(header_bar), minimize_button);
+    //Create buttons in left side of the header
+    // GtkWidget *box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+    // gtk_style_context_add_class (gtk_widget_get_style_context (box), "linked");
+    // GtkWidget *button1 = gtk_button_new ();
+    // gtk_container_add (GTK_CONTAINER (button1), gtk_image_new_from_icon_name ("pan-start-symbolic", GTK_ICON_SIZE_BUTTON));
+    // gtk_container_add (GTK_CONTAINER (box), button1);
+    // GtkWidget *button2 = gtk_button_new ();
+    // gtk_container_add (GTK_CONTAINER (button2), gtk_image_new_from_icon_name ("pan-end-symbolic", GTK_ICON_SIZE_BUTTON));
+    // gtk_container_add (GTK_CONTAINER (box), button2);
+    // gtk_header_bar_pack_start (GTK_HEADER_BAR (header_bar), box);
     gtk_window_set_titlebar (GTK_WINDOW(maFenetre->window), header_bar);
+
+    return header_bar;
 }//Fin Fonction ajouterHeader()
 
 ////////////////////////////////////////////////////////////////////////

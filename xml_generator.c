@@ -268,12 +268,11 @@ int mainf(int argc, char *argv[]){
                                       *bg_color,                 // Couleur de fond
                                       bg_img                     // Image de fond
     );
-
     // Création de la fenêtre
     create_window(maFenetre);
 
     ajouterHeader(maFenetre,50,900,"Test des Fonctions GTK+",
-                  "ex_img.jpg",50,50);
+                  "ex_img.jpg",50,50, maFenetre->subtitle);
 
 ///////////////////////////////////////---fixed---//////////////////////////////////////////////////////
 
@@ -503,7 +502,7 @@ int maine(int argc, char *argv[]) {
     create_window(maFenetre);
 
     ajouterHeader(maFenetre, 50, 900, "Presentation Ordianteur",
-                  "ex_img.jpg", 50, 50);
+                  "ex_img.jpg", 50, 50, "");
 
 ///////////////////////////////////////---fixed---//////////////////////////////////////////////////////
 

@@ -14,10 +14,17 @@
 //fct de creation de window a partir xml
 void window_xml(FILE *file)
 {
-    gchar *title_gchar,*bgColor_gchar,*icon_gchar;
+    gchar *title_gchar,*subtitle_gchar,*bgColor_gchar,*icon_gchar;
+    int avoirHeaderBool,closeBtnBool,reduceBtnBool,maxBtnBool;
+    int headerHeight;int headerWidth;
+    // HexColor *color=NULL;
+    MonImage *bg_img =  NULL;
     //hexa_color *color=NULL;
+    // char resizable,avoirHeader,border_size,bgColor[MAX];
     char resizable,avoirHeader,border_size,bgImage[MAX];
-    bgImage[0] = '\0';//initialisation
+
+    // bgImage[0] = '\0';//initialisation
+    // bgColor[0] = '\0';//initialisation
     int test, width_int,height_int;
     Mywindow* maFenetre =NULL;
     maFenetre=(Mywindow*)malloc(sizeof(Mywindow));
@@ -40,6 +47,13 @@ void window_xml(FILE *file)
             lire_gchar_str(file,title);//Lire le contenu de la balise property
             title_gchar = g_strdup(title);
             strcpy(maFenetre->title,title_gchar);
+        }
+        else if (!(strcmp("subtitle\"", mot)))
+        {
+            char subtitle[MAX];
+            lire_gchar_str(file,subtitle);//Lire le contenu de la balise property
+            subtitle_gchar = g_strdup(subtitle);
+            strcpy(maFenetre->subtitle,subtitle_gchar);
         }
             //recuperation de width
         else if (!(strcmp("width\"", mot)))
@@ -99,7 +113,7 @@ void window_xml(FILE *file)
             maFenetre->cord.y=atoi(coordonnes_y);
         }
         //recuperation de bgColor
-        if (!(strcmp("bgColor\"", mot)))
+        else if (!(strcmp("bgColor\"", mot)))
         {
             char bgColor[MAX];
             lire_gchar_str(file,bgColor);
@@ -118,27 +132,100 @@ void window_xml(FILE *file)
             //recuperation choix concerant header bar
         else if (!(strcmp("headerBar\"", mot)))
         {
-            avoirHeader=lire_gchar(file);
-            //convertir en entier
+            char headerBar=lire_gchar(file);
+            avoirHeaderBool=char_TO_int(headerBar);      
         }
-        if (!(strcmp("bgImage\"", mot)))
-        {
-            lire_gchar_str(file,bgImage);
-            //icon_gchar = g_strdup(bgImage);
-            //bgImage[0] = '\0';
-            /*MonImage *background_image =
-                    create_image_widget(icon_gchar,
-                                        maFenetre->cord.x, maFenetre->cord.y, maFenetre->dim);
-            maFenetre->bgImg=*background_image;
-             */
+        else if (!(strcmp("closeBtn\"", mot)))
+        {    
+            char closeBtn=lire_gchar(file);
+            closeBtnBool=char_TO_int(closeBtn);   
+        }
+        else if (!(strcmp("reduceBtn\"", mot)))
+        {   
+            char reduceBtn=lire_gchar(file);
+            reduceBtnBool=char_TO_int(reduceBtn);        
+        }
+        else if (!(strcmp("maxBtn\"", mot)))
+        { 
+            char maxBtn=lire_gchar(file);
+            maxBtnBool=char_TO_int(maxBtn);    
+        }
+
+        //int headerHeight,int headerWidth
+        // else if (!(strcmp("bgImage\"", mot)))
+        // {
+        //     lire_gchar_str(file,bgImage);
+        //     // icon_gchar = g_strdup(bgImage);
+        //     // bgImage[0] = '\0';
+        //     // MonImage *background_image =
+        //     //         create_image_widget(icon_gchar,
+        //     //                             maFenetre->cord.x, maFenetre->cord.y, maFenetre->dim);
+        //     // maFenetre->bgImg=*background_image;
+             
+        // }
+                //recuperation de bgColor
+        // else if (!(strcmp("bgColor\"", mot)))
+        // {
+        //     char bgColor[MAX];
+        //     lire_gchar_str(file,bgColor);
+        //     bgColor_gchar = g_strdup(bgColor);
+
+        // }
+        else if (!(strcmp("bgImage\"", mot))){
+            char bgImageString[MAX];
+            lire_gchar_str(file,bgImageString);
+            // strcpy(bgImage,bgImageString);
+                strcpy(maFenetre->bgImg.path,bgImageString); // Remplacez par le chemin de votre image
+                maFenetre->bgImg.dim.width = maFenetre->dim.width;
+                maFenetre->bgImg.dim.height = maFenetre->dim.height;
+                maFenetre->bgImg.cord.x = 0;
+                maFenetre->bgImg.cord.y = 0;
+                // maFenetre->bgImg=bg_img;
+                creer_image(&(maFenetre->bgImg));
+
         }
     }
     //creation de la fenêtre
     create_window(maFenetre);
-    HexColor* color=hex_color_init("#7d7d7d");
-    gtk_widget_override_background_color(maFenetre->window, GTK_STATE_FLAG_NORMAL,
-                                         color->color);
+    // HexColor* color=hex_color_init("#7d7d7d");
+    // gtk_widget_override_background_color(maFenetre->window, GTK_STATE_FLAG_NORMAL,
+    //                                      color->color);
     if(strlen(bgImage)!=0) hasOverlay=1;
+        // Ajouter le header bar
+    if(avoirHeaderBool){
+        GtkWidget* header_bar = ajouterHeader(maFenetre,50,90,
+                  maFenetre->title,maFenetre->icon_name,50,50, maFenetre->subtitle);
+        char hlayout[256] = ":";
+        if(reduceBtnBool) {
+            strcat(hlayout, "minimize,");
+        }
+        if(maxBtnBool) {
+            strcat(hlayout, "maximize,");
+        }
+        if(closeBtnBool){
+            strcat(hlayout, "close");
+        }
+        gtk_header_bar_set_decoration_layout (GTK_HEADER_BAR(header_bar), hlayout);
+    }
+
+
+// bg image
+    // if(strlen(bgImage) != 0){
+    //     gchar css_data[256];
+    //     sprintf(css_data, "window {"
+    //     "   background-image: url('%s');"
+    //     "   background-size: cover;"
+    //     "   background-repeat: no-repeat;"
+    //     "   background-position: center;"
+    //     "}", bgImage);
+
+    // GtkCssProvider *css_provider = gtk_css_provider_new();
+    // gtk_css_provider_load_from_data(css_provider, css_data, -1, NULL);
+
+    // GtkStyleContext *context = gtk_widget_get_style_context(maFenetre->window);
+    // gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(css_provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    // }
+
     printf("===================================> %d",hasOverlay);
     /*if(char_TO_int(avoirHeader)==1)
         ajouterHeader(maFenetre,50,900,
