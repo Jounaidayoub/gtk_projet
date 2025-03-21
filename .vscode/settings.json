@@ -11,6 +11,7 @@
         "typeinfo": "cpp",
         "bit": "cpp",
         "compare": "cpp",
-        "concepts": "cpp"
+        "concepts": "cpp",
+        "global.h": "c"
     }
 }

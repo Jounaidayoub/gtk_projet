@@ -7,7 +7,7 @@
 #include "property_panel.h"
 #include "dialogs.h"
 #include "callbacks.h"
-#include "menu.h"
+// #include "menu.h"
 #include "menu_dialog.h"
 #include "widget_types.h"  // Add the widget type enum header
 // #include "forms.h"         // Add the forms system header
@@ -172,11 +172,11 @@ int main(int argc, char *argv[]) {
     gtk_box_pack_start(GTK_BOX(left_panel), containers_frame, FALSE, FALSE, 0);
     
     // Create hierarchy section
-    GtkWidget *hierarchy_frame = gtk_frame_new("UI Hierarchy");
-    GtkWidget *hierarchy_scroll = gtk_scrolled_window_new(NULL, NULL);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(hierarchy_scroll),
-                                  GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-    gtk_widget_set_size_request(hierarchy_scroll, -1, 150);  // Reduced height to make room
+    // GtkWidget *hierarchy_frame = gtk_frame_new("UI Hierarchy");
+    // GtkWidget *hierarchy_scroll = gtk_scrolled_window_new(NULL, NULL);
+    // gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(hierarchy_scroll),
+                                //   GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+    // gtk_widget_set_size_request(hierarchy_scroll, -1, 150);  // Reduced height to make room
     
     // Create tree view for hierarchy
     app_data.hierarchy_store = gtk_tree_store_new(2, G_TYPE_STRING, G_TYPE_POINTER);
@@ -185,7 +185,7 @@ int main(int argc, char *argv[]) {
     GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
     GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(
         "Widget Tree", renderer, "text", 0, NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(app_data.hierarchy_view), column);
+    // gtk_tree_view_append_column(GTK_TREE_VIEW(app_data.hierarchy_view), column);
     
     // Add root node for UI
     GtkTreeIter iter;
@@ -193,9 +193,9 @@ int main(int argc, char *argv[]) {
     gtk_tree_store_set(app_data.hierarchy_store, &iter, 0, "Window", 1, NULL, -1);
     
     // Add the hierarchy view to the scrolled window and frame
-    gtk_container_add(GTK_CONTAINER(hierarchy_scroll), app_data.hierarchy_view);
-    gtk_container_add(GTK_CONTAINER(hierarchy_frame), hierarchy_scroll);
-    gtk_box_pack_start(GTK_BOX(left_panel), hierarchy_frame, TRUE, TRUE, 0);
+    // gtk_container_add(GTK_CONTAINER(hierarchy_scroll), app_data.hierarchy_view);
+    // gtk_container_add(GTK_CONTAINER(hierarchy_frame), hierarchy_scroll);
+    // gtk_box_pack_start(GTK_BOX(left_panel), hierarchy_frame, TRUE, TRUE, 0);
     
     // Add Arbre view section
     GtkWidget *arbre_frame = gtk_frame_new("Arbre Structure");
