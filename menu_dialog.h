@@ -5,6 +5,8 @@
 #include "app_data.h"
 #include "hierarchy.h"
 
+#include "property_panel.h"
+
 // Maximum string length for names and labels
 #define MAX_LABEL_LENGTH 100
 
@@ -286,7 +288,10 @@ static void free_menu_bar(MenuBar *bar) {
  */
 static void add_menu_bar_to_container(GtkWidget *container, MenuBar *bar) {
     if (!GTK_IS_FIXED(container) || !bar) return;
-    
+    // MenuBar
+    // / Register the widget for property editing
+            // g_signal_connect(bar, "button-press-event",
+                            //  G_CALLBACK(on_widget_button_press_select), app_data);
     // Add the menu bar to the fixed container at specified position
     gtk_fixed_put(GTK_FIXED(container), bar->widget, bar->x_position, bar->y_position);
     
@@ -1001,6 +1006,9 @@ static void show_menu_bar_dialog(AppData *app_data) {
     
     // Run dialog
     if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT && dialog_data.menu_bar) {
+        // / Register the widget for property editing
+            g_signal_connect(dialog_data.menu_bar->widget, "button-press-event",
+                             G_CALLBACK(on_widget_button_press_select), app_data);
         // Add menu bar to preview area
         add_menu_bar_to_container(app_data->preview_area, dialog_data.menu_bar);
         

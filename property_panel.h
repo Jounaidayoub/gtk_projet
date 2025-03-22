@@ -1967,7 +1967,23 @@ static void create_property_form_for_widget(AppData *app_data, GtkWidget *widget
         // Enable Remove button only
         gtk_widget_set_sensitive(app_data->apply_button, FALSE);
         gtk_widget_set_sensitive(app_data->remove_button, TRUE);
-    } else {
+    }
+    else if (GTK_IS_MENU_BAR(widget)) {
+        // Create menu bar form (not implemented in this example)
+        GtkWidget *label = gtk_label_new("Menu bar properties coming soon");
+        gtk_container_add(GTK_CONTAINER(app_data->properties_content), label);
+        current_properties.container = label;
+        gtk_widget_show_all(app_data->properties_content);
+
+        current_properties.widget = widget;
+
+        
+        // Enable Remove button only
+        gtk_widget_set_sensitive(app_data->apply_button, FALSE);
+        gtk_widget_set_sensitive(app_data->remove_button, TRUE);
+
+    }
+    else {
         // Unsupported widget type
         GtkWidget *label = gtk_label_new("This widget type is not supported yet");
         gtk_container_add(GTK_CONTAINER(app_data->properties_content), label);
