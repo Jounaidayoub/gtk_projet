@@ -325,11 +325,11 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent)
             {
                 for (int j = 0; j < indent + 2; j++)
                     g_string_append(string, "  ");
-                g_string_append_printf(string, "<property name=\"x\">%d</property>\n", button->pos->x);
+                g_string_append_printf(string, "<property name=\"x\" >%d</property>\n", button->pos->x);
 
                 for (int j = 0; j < indent + 2; j++)
                     g_string_append(string, "  ");
-                g_string_append_printf(string, "<property name=\"y\">%d</property>\n", button->pos->y);
+                g_string_append_printf(string, "<property name=\"y\" >%d</property>\n", button->pos->y);
             }
 
             // Checkbox-specific properties
@@ -337,19 +337,19 @@ void generate_xml_from_arbre(GString *string, Arbre *racine, int indent)
             {
                 for (int j = 0; j < indent + 2; j++)
                     g_string_append(string, "  ");
-                g_string_append_printf(string, "<property name=\"label\">%s</property>\n", button->label);
+                g_string_append_printf(string, "<property name=\"text\" >%s</property>\n", button->label);
             }
 
-            if (button->tooltip)
-            {
-                for (int j = 0; j < indent + 2; j++)
-                    g_string_append(string, "  ");
-                g_string_append_printf(string, "<property name=\"tooltip\">%s</property>\n", button->tooltip);
-            }
+            // if (button->tooltip)
+            // {
+            //     for (int j = 0; j < indent + 2; j++)
+            //         g_string_append(string, "  ");
+            //     g_string_append_printf(string, "<property name=\"tooltip\">%s</property>\n", button->tooltip);
+            // }
 
             for (int j = 0; j < indent + 2; j++)
                 g_string_append(string, "  ");
-            g_string_append_printf(string, "<property name=\"is_checked\">%d</property>\n", button->isChecked);
+            g_string_append_printf(string, "<property name=\"checked\" >%d</property>\n", button->isChecked);
 
             for (int j = 0; j < indent + 2; j++)
                 g_string_append(string, "  ");
