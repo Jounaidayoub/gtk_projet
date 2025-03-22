@@ -90,9 +90,9 @@ int main(int argc, char *argv[]) {
     gtk_container_add(GTK_CONTAINER(widgets_frame), widgets_box);
     
     // Add standard widget buttons to widget box
-    const char *widget_labels[] = {"Normal", "Radio", "Checkbox", "Toggle", "Spin", "Switch"};
+    const char *widget_labels[] = {"Normal", "Radio", "Checkbox", "Toggle", "Spin", "Switch", "Label"};
     
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 7; i++) {
         GtkWidget *button = gtk_button_new_with_label(widget_labels[i]);
         
         if (strcmp(widget_labels[i], "Normal") == 0) {
@@ -108,6 +108,10 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(widget_labels[i], "Switch") == 0) {
             g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog_btn_switch), &app_data);
         }
+        else if (strcmp(widget_labels[i], "Label") == 0) {
+            g_signal_connect(button, "clicked", G_CALLBACK(show_properties_dialog_label), &app_data);
+        }
+       
         
         gtk_box_pack_start(GTK_BOX(widgets_box), button, FALSE, FALSE, 2);
     }

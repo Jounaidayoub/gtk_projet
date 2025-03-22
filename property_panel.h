@@ -85,12 +85,17 @@ static gboolean on_widget_button_press_select(GtkWidget *widget, GdkEventButton 
     if (event->button == 1) {
         // Update the selected widget
         app_data->selected_widget = widget;
+        // current_properties.widget = widget;
         
         g_print("Selected widget: %p, creating property form...\n", widget);
         
         // Show the widget's properties
         create_property_form_for_widget(app_data, widget);
         
+            // Enable Apply and Remove buttons
+        // gtk_widget_set_sensitive(app_data->apply_button, TRUE);
+        // gtk_widget_set_sensitive(app_data->remove_button, TRUE);
+
         // Return FALSE to allow the event to propagate (widget remains functional)
         return FALSE;
     //handle the right click for combo
@@ -1737,6 +1742,91 @@ static inline void  on_browse_image_clicked(GtkButton *button, gpointer user_dat
     gtk_widget_destroy(dialog);
 }
 
+static void create_property_form_for_label_event_box(AppData *app_data, GtkWidget *event_box, GtkWidget *label) {
+    GtkWidget *content = app_data->properties_content;
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+
+    // Get current label properties
+    const gchar *label_text = gtk_label_get_text(GTK_LABEL(label));
+    gint x = 0, y = 0, width = 0, height = 0;
+
+    GtkWidget *parent = gtk_widget_get_parent(event_box);
+    if (GTK_IS_FIXED(parent)) {
+        gtk_container_child_get(GTK_CONTAINER(parent), event_box, "x", &x, "y", &y, NULL);
+    }
+    gtk_widget_get_size_request(event_box, &width, &height);
+
+    // Create grid for form layout
+    GtkWidget *grid = gtk_grid_new();
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+
+    // Title
+    GtkWidget *title = gtk_label_new("Label EventBox Properties");
+    gtk_widget_set_halign(title, GTK_ALIGN_START);
+
+    // Format values as strings
+    char x_str[32], y_str[32], width_str[32], height_str[32];
+    sprintf(x_str, "%d", x);
+    sprintf(y_str, "%d", y);
+    sprintf(width_str, "%d", width);
+    sprintf(height_str, "%d", height);
+
+    // Position fields
+    GtkWidget *x_label = gtk_label_new("X Position:");
+    GtkWidget *y_label = gtk_label_new("Y Position:");
+    GtkWidget *x_entry = gtk_entry_new();
+    GtkWidget *y_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(x_entry), x_str);
+    gtk_entry_set_text(GTK_ENTRY(y_entry), y_str);
+
+    // Size fields
+    GtkWidget *width_label = gtk_label_new("Width:");
+    GtkWidget *height_label = gtk_label_new("Height:");
+    GtkWidget *width_entry = gtk_entry_new();
+    GtkWidget *height_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(width_entry), width_str);
+    gtk_entry_set_text(GTK_ENTRY(height_entry), height_str);
+
+    // Label text field
+    GtkWidget *label_text_label = gtk_label_new("Label Text:");
+    GtkWidget *label_text_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(label_text_entry), label_text);
+
+    // Add widgets to grid
+    int row = 0;
+    gtk_grid_attach(GTK_GRID(grid), x_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), x_entry, 1, row++, 1, 1);
+
+    gtk_grid_attach(GTK_GRID(grid), y_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), y_entry, 1, row++, 1, 1);
+
+    gtk_grid_attach(GTK_GRID(grid), width_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), width_entry, 1, row++, 1, 1);
+
+    gtk_grid_attach(GTK_GRID(grid), height_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), height_entry, 1, row++, 1, 1);
+
+    gtk_grid_attach(GTK_GRID(grid), label_text_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), label_text_entry, 1, row++, 1, 1);
+
+    // Add title and grid to vbox
+    gtk_box_pack_start(GTK_BOX(vbox), title, FALSE, FALSE, 5);
+    gtk_box_pack_start(GTK_BOX(vbox), grid, FALSE, FALSE, 0);
+
+    // Add the vbox to the content area
+    gtk_container_add(GTK_CONTAINER(content), vbox);
+
+    // Show all widgets
+    gtk_widget_show_all(content);
+
+    // Enable Apply and Remove buttons
+    gtk_widget_set_sensitive(app_data->apply_button, TRUE);
+    gtk_widget_set_sensitive(app_data->remove_button, TRUE);
+}
+
+
 // Create property form for image widget
 static void create_property_form_for_image(AppData *app_data, GtkWidget *widget) {
 
@@ -1871,16 +1961,53 @@ static void create_property_form_for_widget(AppData *app_data, GtkWidget *widget
     // Clear existing content
     clear_properties_panel(app_data);
     g_print("\nWidget type: %s\n", G_OBJECT_TYPE_NAME(widget));
+
+    current_properties.widget = widget;
+
+
+        // Check if the widget is an EventBox
+        if (GTK_IS_EVENT_BOX(widget)) {
+            // Check if the EventBox has a "label" object set
+            GtkWidget *label = g_object_get_data(G_OBJECT(widget), "label");
+            if (label && GTK_IS_LABEL(label)) {
+                g_print("\nEventBox with Label detected\n");
+                create_property_form_for_label_event_box(app_data, widget, label);
+                return;
+            }
+    
+            // Handle other EventBoxes
+            g_print("\nGeneric EventBox detected\n");
+            // create_property_form_for_generic_event_box(app_data, widget);
+            return;
+        }
+    
     
     // CRITICAL FIX: Make the event box check first and complete
-    if (GTK_IS_EVENT_BOX(widget) && g_object_get_data(G_OBJECT(widget), "image_widget")) {
+     else if (GTK_IS_EVENT_BOX(widget) && g_object_get_data(G_OBJECT(widget), "image_widget")) {
         g_print("\nImage Event Box detected\n");
         create_property_form_for_image(app_data, widget);
     }
     else if (GTK_IS_SPIN_BUTTON(widget)) {
         g_print("\nSpin تشاسيرشاستيرشتيسا\n");
         create_property_form_for_spin_button(app_data, widget);
-    } else if (GTK_IS_SWITCH(widget)) {
+    } else if (GTK_IS_LABEL(widget)){
+        g_print("\nLabel\n");
+        GtkWidget *label = gtk_label_new("LAbel properties coming soon");
+        gtk_container_add(GTK_CONTAINER(app_data->properties_content), label);
+        current_properties.container = label;
+        gtk_widget_show_all(app_data->properties_content);
+
+        current_properties.widget = widget;
+
+        
+        // Enable Remove button only
+        gtk_widget_set_sensitive(app_data->apply_button, FALSE);
+        gtk_widget_set_sensitive(app_data->remove_button, TRUE);
+
+    
+    
+    }
+    else if (GTK_IS_SWITCH(widget)) {
         g_print("\nSwitch\n");
         create_property_form_for_switch(app_data, widget);
     }
@@ -1999,6 +2126,9 @@ static void create_property_form_for_widget(AppData *app_data, GtkWidget *widget
 // Apply changes to the selected widget
 static void on_apply_clicked(GtkButton *button, gpointer user_data) {
     AppData *app_data = (AppData *)user_data;
+    //print tghe g pointer 
+    g_print("gponie is , %p\n", user_data);
+    // g_print()
     GtkWidget *widget = current_properties.widget;
     
     if (!widget) {
@@ -2277,6 +2407,7 @@ static void on_apply_clicked(GtkButton *button, gpointer user_data) {
 static void on_remove_clicked(GtkButton *button, gpointer user_data) {
     AppData *app_data = (AppData *)user_data;
     GtkWidget *widget = current_properties.widget;
+    
     
     if (!widget) {
         g_print("No widget selected!\n");

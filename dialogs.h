@@ -998,6 +998,214 @@ static void add_image_clicked(GtkWidget *widget, gpointer data)
     show_image_dialog(app_data);
 }
 
+
+static void show_properties_dialog_label(GtkWidget *widget, gpointer data) {
+    AppData *app_data = (AppData *)data;
+    GtkWidget *dialog;
+    GtkWidget *content_area;
+    GtkWidget *grid;
+
+    GtkWidget *text_label, *text_entry;
+    GtkWidget *x_label, *y_label, *width_label, *height_label;
+    GtkWidget *x_entry, *y_entry, *width_entry, *height_entry;
+    GtkWidget *color_label, *color_button;
+    GtkWidget *font_label, *font_entry;
+    GtkWidget *size_label, *size_entry;
+    GtkWidget *bold_check;
+    gint response;
+
+    // Create dialog
+    dialog = gtk_dialog_new_with_buttons("Label Properties",
+                                         GTK_WINDOW(app_data->window),
+                                         GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                         "OK", GTK_RESPONSE_ACCEPT,
+                                         "Cancel", GTK_RESPONSE_CANCEL,
+                                         NULL);
+
+    content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+
+    // Create grid for form layout
+    grid = gtk_grid_new();
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+
+    // Add container selection
+    GtkWidget *container_label = gtk_label_new("Add to Container:");
+    GtkWidget *container_combo = gtk_combo_box_text_new();
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(container_combo), "Window (Default)");
+
+    // Add all containers
+    GList *iter;
+    for (iter = app_data->containers; iter != NULL; iter = iter->next) {
+        GtkWidget *container = GTK_WIDGET(iter->data);
+        const gchar *name = gtk_widget_get_name(container);
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(container_combo), name);
+    }
+
+    // Select currently selected container
+    gint active_index = 0;
+    if (app_data->selected_container) {
+        active_index = g_list_index(app_data->containers, app_data->selected_container) + 1;
+    }
+    gtk_combo_box_set_active(GTK_COMBO_BOX(container_combo), active_index);
+
+    // Label text
+    text_label = gtk_label_new("Text:");
+    text_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(text_entry), "Label Text");
+
+    // Position fields
+    x_label = gtk_label_new("X Position:");
+    y_label = gtk_label_new("Y Position:");
+    x_entry = gtk_entry_new();
+    y_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(x_entry), "10");
+    gtk_entry_set_text(GTK_ENTRY(y_entry), "10");
+
+    // Size fields
+    width_label = gtk_label_new("Width:");
+    height_label = gtk_label_new("Height:");
+    width_entry = gtk_entry_new();
+    height_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(width_entry), "150");
+    gtk_entry_set_text(GTK_ENTRY(height_entry), "30");
+
+    // Style fields
+    color_label = gtk_label_new("Text Color:");
+    color_button = gtk_color_button_new();
+    GdkRGBA initial_color = {0, 0, 0, 1}; // Default to black
+    gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(color_button), &initial_color);
+
+    font_label = gtk_label_new("Font:");
+    font_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(font_entry), "Sans");
+
+    size_label = gtk_label_new("Font Size:");
+    size_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(size_entry), "12");
+
+    bold_check = gtk_check_button_new_with_label("Bold");
+
+    // Add widgets to grid
+    int row = 0;
+    gtk_grid_attach(GTK_GRID(grid), container_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), container_combo, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), text_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), text_entry, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), x_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), x_entry, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), y_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), y_entry, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), width_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), width_entry, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), height_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), height_entry, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), color_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), color_button, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), font_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), font_entry, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), size_label, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), size_entry, 1, row, 1, 1);
+    row++;
+
+    gtk_grid_attach(GTK_GRID(grid), bold_check, 0, row, 2, 1);
+
+    // Add grid to dialog
+    gtk_container_add(GTK_CONTAINER(content_area), grid);
+    gtk_widget_show_all(dialog);
+
+    // Run dialog
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+    if (response == GTK_RESPONSE_ACCEPT) {
+        // Get values from form
+        const gchar *text = gtk_entry_get_text(GTK_ENTRY(text_entry));
+        const gchar *font = gtk_entry_get_text(GTK_ENTRY(font_entry));
+        const gchar *size = gtk_entry_get_text(GTK_ENTRY(size_entry));
+        gboolean is_bold = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(bold_check));
+        gint x = atoi(gtk_entry_get_text(GTK_ENTRY(x_entry)));
+        gint y = atoi(gtk_entry_get_text(GTK_ENTRY(y_entry)));
+        gint width = atoi(gtk_entry_get_text(GTK_ENTRY(width_entry)));
+        gint height = atoi(gtk_entry_get_text(GTK_ENTRY(height_entry)));
+
+        // Get the selected color
+        GdkRGBA selected_color;
+        gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(color_button), &selected_color);
+        char color_hex[8];
+        snprintf(color_hex, sizeof(color_hex), "#%02X%02X%02X",
+                 (int)(selected_color.red * 255),
+                 (int)(selected_color.green * 255),
+                 (int)(selected_color.blue * 255));
+
+        // Get the selected container
+        gint container_index = gtk_combo_box_get_active(GTK_COMBO_BOX(container_combo));
+        GtkWidget *target_container = NULL;
+
+        if (container_index > 0) {
+            target_container = g_list_nth_data(app_data->containers, container_index - 1);
+        } else {
+            target_container = app_data->preview_area;
+        }
+
+        // Create label
+        GtkWidget *label = gtk_label_new(text);
+
+        // Apply font and color if specified
+        if (strlen(font) > 0 || strlen(color_hex) > 0) {
+            char css[256];
+            snprintf(css, sizeof(css), "label { font: %s; color: %s; }", font, color_hex);
+            GtkCssProvider *provider = gtk_css_provider_new();
+            gtk_css_provider_load_from_data(provider, css, -1, NULL);
+            GtkStyleContext *context = gtk_widget_get_style_context(label);
+            gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+        }
+
+        // Set label dimensions if specified
+        if (width > 0 && height > 0) {
+            gtk_widget_set_size_request(label, width, height);
+        }
+
+        // Wrap the label in an event box
+        GtkWidget *event_box = gtk_event_box_new();
+        gtk_container_add(GTK_CONTAINER(event_box), label);
+
+        g_object_set_data(G_OBJECT(event_box), "label", label);
+
+        // Add the event box to the parent container
+        gtk_fixed_put(GTK_FIXED(target_container), event_box, x, y);
+
+        // Connect signals to the event box
+        g_signal_connect(event_box, "button-press-event", G_CALLBACK(on_widget_button_press_select), app_data);
+
+        // Show all widgets
+        gtk_widget_show_all(app_data->preview_area);
+
+        // Add widget to hierarchy trees
+        add_widget_to_both_trees(app_data, event_box, "Label", target_container, TRUE, label);
+    }
+
+    gtk_widget_destroy(dialog);
+}
+
+
+
 static void show_properties_dialog_btn_checkbox(GtkWidget *widget, gpointer data)
 {
     AppData *app_data = (AppData *)data;
