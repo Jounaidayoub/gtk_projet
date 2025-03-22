@@ -169,6 +169,11 @@ int main(int argc, char *argv[]) {
     GtkWidget *menu_bar_btn = gtk_button_new_with_label("Add Menu Bar");
     g_signal_connect(menu_bar_btn, "clicked", G_CALLBACK(add_menu_bar_clicked), &app_data);
     gtk_box_pack_start(GTK_BOX(containers_box), menu_bar_btn, FALSE, FALSE, 2);
+
+    // Add changer button
+    GtkWidget *changer_btn = gtk_button_new_with_label("Changer Fenetre");
+    g_signal_connect(changer_btn, "clicked", G_CALLBACK(changer_clicked), &app_data);
+    gtk_box_pack_start(GTK_BOX(containers_box), changer_btn, FALSE, FALSE, 2);
     
     // Add all sections to left panel
     gtk_box_pack_start(GTK_BOX(left_panel), widgets_frame, FALSE, FALSE, 0);
@@ -241,7 +246,7 @@ int main(int argc, char *argv[]) {
     app_data.preview_area = gtk_fixed_new();
     gtk_widget_set_name(app_data.preview_area, "preview_area");  // Set a name for lookup
     gtk_container_add(GTK_CONTAINER(preview_frame), app_data.preview_area);
-    
+    app_data.preview_frame = preview_frame;
     // Create a notebook for the main content area
     GtkWidget *notebook = gtk_notebook_new();
     gtk_box_pack_start(GTK_BOX(main_box), notebook, TRUE, TRUE, 0);

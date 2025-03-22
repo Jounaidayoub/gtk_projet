@@ -482,4 +482,151 @@ static void create_styled_box_container(GtkWidget *widget, gpointer data) {
     
     gtk_widget_destroy(dialog);
 }
+
+
+
+// Container creation callback for StyledBox
+static void changer_clicked(GtkWidget *widget, gpointer data) {
+    AppData *app_data = (AppData *)data;
+    GtkWidget *dialog;
+    GtkWidget *content_area;
+    GtkWidget *grid;
+    GtkWidget *orientation_label, *spacing_label, *name_label;
+    GtkWidget *name_entry, *spacing_entry;
+    GtkWidget *orientation_combo;
+    GtkWidget *x_label, *y_label, *width_label, *height_label;
+    GtkWidget *x_entry, *y_entry, *width_entry, *height_entry;
+    GtkWidget *bg_color_label, *bg_color_entry;
+    GtkWidget *border_radius_label, *border_radius_entry;
+    GtkWidget *border_label, *border_entry;
+    GtkWidget *homogeneous_check;
+    gint response;
+    
+    // Create dialog
+    dialog = gtk_dialog_new_with_buttons("changer fenetre",
+                                        GTK_WINDOW(app_data->window),
+                                        GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                        "OK", GTK_RESPONSE_ACCEPT,
+                                        "Cancel", GTK_RESPONSE_CANCEL,
+                                        NULL);
+    
+    content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    
+    // Create grid for form layout
+    grid = gtk_grid_new();
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+ 
+    
+    // Styling fields
+    // bg_color_label = gtk_label_new("Background Color:");
+    // GtkWidget *bg_color_button = gtk_color_button_new_with_rgba(NULL);
+    // GdkRGBA color;
+    // gdk_rgba_parse(&color, "#f0f0f0");
+    // gtk_color_button_set_rgba(GTK_COLOR_BUTTON(bg_color_button), &color);
+    // gtk_color_button_set_title(GTK_COLOR_BUTTON(bg_color_button), "Select Background Color");
+
+
+    GtkWidget *bgcolor_label = gtk_label_new("Background Color:");
+    GtkWidget *bgcolor_button = gtk_color_button_new();
+    // Set initial color to white
+    GdkRGBA color_white = {1.0, 1.0, 1.0, 1.0};
+    gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(bgcolor_button), &color_white);
+    
+    border_radius_label = gtk_label_new("Background image:");
+    border_radius_entry = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(border_radius_entry), "background.png");
+
+    
+    gtk_grid_attach(GTK_GRID(grid), bgcolor_label, 0, 9, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), bgcolor_button, 1, 9, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), border_radius_label, 0, 10, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), border_radius_entry, 1, 10, 1, 1);
+    
+    // Add grid to dialog
+    gtk_container_add(GTK_CONTAINER(content_area), grid);
+    gtk_widget_show_all(dialog);
+    
+    // Run dialog
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+    
+    if (response == GTK_RESPONSE_ACCEPT) {
+        // Get values from form
+        // Get styling values
+
+        GdkRGBA bgcolor_value;
+        char bgcolor[8]; // #RRGGBB format
+        gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(bgcolor_button), &bgcolor_value);
+
+        // Convert from RGBA to hex format
+        sprintf(bgcolor, "#%02X%02X%02X",
+                (int)(bgcolor_value.red * 255),
+                (int)(bgcolor_value.green * 255),
+                (int)(bgcolor_value.blue * 255));
+
+        // GdkRGBA bg_color_rgba;
+        // gtk_color_button_get_rgba(GTK_COLOR_BUTTON(bg_color_button), &bg_color_rgba);
+        // gchar *bg_color = gdk_rgba_to_string(&bg_color_rgba);
+        // const gchar *border_radius = gtk_entry_get_text(GTK_ENTRY(border_radius_entry));
+        const gchar *path1 = gtk_entry_get_text(GTK_ENTRY(border_radius_entry));
+
+        if(strlen(path1) == 0){
+            printf("preview area nom %s", gtk_widget_get_name(app_data->preview_frame));
+            gtk_widget_override_background_color(app_data->preview_frame, GTK_STATE_FLAG_NORMAL,&bgcolor_value);
+            // gtk_widget_destroy(app_data->back);
+        }
+        else {
+            gtk_widget_override_background_color(app_data->preview_frame, GTK_STATE_FLAG_NORMAL,&bgcolor_value);
+
+            gchar path[300];
+            g_strlcpy(path, path1, sizeof(path));
+            // dimension dim = {900, 700};
+            // coordonnees cord = {400, 250};
+            MonImage *image = init_image(path, (dimension) {1000, 1500}, (coordonnees){0, 0});
+            creer_image(image);
+            app_data->back = image->Image;
+            // gtk_widget_add_events(image->Image, GDK_BUTTON_PRESS_MASK);
+            add_widget_to_container_by_type(image->Image, app_data->preview_area, image->cord.x, image->cord.y, image->dim.width, image->dim.height);
+        }
+        // Apply CSS styling
+        // if (styled_box->background_color || styled_box->border_radius || styled_box->border) {
+            // GtkStyleContext *context = gtk_widget_get_style_context(app_data->preview_area);
+            // GtkCssProvider *provider = gtk_css_provider_new();
+            
+            // // Create CSS string
+            // gchar *css = g_strdup_printf(
+            //     "#preview_area { background-color: red;}"
+            // );
+            
+            // // gchar *css = g_strdup_printf(
+            // //     "#preview_area { background-color: %s;}",
+            // //     bg_color
+            // // );
+            
+            // // Load and apply CSS
+            // GError *error = NULL;
+            // if (!gtk_css_provider_load_from_data(provider, css, -1, &error)) {
+            //     g_print("CSS error: %s\n", error->message);
+            //     g_error_free(error);
+            // }
+            
+            // gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider),
+            //                             GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+            
+            // g_object_unref(provider);
+            // g_free(css);
+        // }
+
+        
+        // Update container selection dropdown
+        // update_container_combo(app_data);
+        
+        // Show the styled box
+        gtk_widget_show(app_data->preview_area);
+        gtk_widget_show_all(app_data->preview_area);
+    }
+    
+    gtk_widget_destroy(dialog);
+}
 #endif /* CONTAINERS_H */
