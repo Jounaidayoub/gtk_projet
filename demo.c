@@ -14,26 +14,169 @@
 #include "widget_props.h"  // Add the widget properties header
 #include "entry_editing.h"  // Include this header last
 
+AppData app_data;
+
 void run_demo(GtkWidget *widget, gpointer data) {
     // Initialisation de GTK
-    AppData* a = (AppData*) data;
-    GtkWidget *current_window = GTK_WIDGET(a->window);
-    gtk_widget_destroy(current_window);
+        // Création du dialogue
+        AppData *app_data = (AppData *)data;
+        GtkWidget *dialog;
+        GtkWidget *content_area;
+        GtkWidget *grid;
+        GtkWidget *orientation_label, *spacing_label, *name_label;
+        GtkWidget *name_entry, *spacing_entry;
+        GtkWidget *orientation_combo;
+        GtkWidget *x_label, *y_label, *width_label, *height_label;
+        GtkWidget *x_entry, *y_entry, *width_entry, *height_entry;
+        GtkWidget *bg_color_label, *bg_color_entry;
+        GtkWidget *border_radius_label, *border_radius_entry;
+        GtkWidget *border_label, *border_entry;
+        GtkWidget *homogeneous_check;
+        gint response;
+        
+        // Create dialog
+        dialog = gtk_dialog_new_with_buttons("changer fenetre",
+                                            GTK_WINDOW(app_data->window),
+                                            GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                            "OK", GTK_RESPONSE_ACCEPT,
+                                            "Cancel", GTK_RESPONSE_CANCEL,
+                                            NULL);
+        
+        content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+        
+        // Create grid for form layout
+        grid = gtk_grid_new();
+        gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+        gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+        gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+     
+        
+        // Styling fields
+        // bg_color_label = gtk_label_new("Background Color:");
+        // GtkWidget *bg_color_button = gtk_color_button_new_with_rgba(NULL);
+        // GdkRGBA color;
+        // gdk_rgba_parse(&color, "#f0f0f0");
+        // gtk_color_button_set_rgba(GTK_COLOR_BUTTON(bg_color_button), &color);
+        // gtk_color_button_set_title(GTK_COLOR_BUTTON(bg_color_button), "Select Background Color");
+    
 
-    FILE *file = fopen("demo.html", "r");
-    if (!file) {
-        printf("ERREUR d'ouverture du fichier !!");
-    }
-    creer_object(file, 0);
+        border_radius_label = gtk_label_new("Fichier:");
+        border_radius_entry = gtk_entry_new();
+        gtk_entry_set_text(GTK_ENTRY(border_radius_entry), "data.html");
+    
+        
+        gtk_grid_attach(GTK_GRID(grid), border_radius_label, 0, 10, 1, 1);
+        gtk_grid_attach(GTK_GRID(grid), border_radius_entry, 1, 10, 1, 1);
+        
+        // Add grid to dialog
+        gtk_container_add(GTK_CONTAINER(content_area), grid);
+        gtk_widget_show_all(dialog);
+        
+        // Run dialog
+        response = gtk_dialog_run(GTK_DIALOG(dialog));
+        
+        if (response == GTK_RESPONSE_ACCEPT) {
+            AppData* a = (AppData*) data;
+            GtkWidget *current_window = GTK_WIDGET(a->window);
+            gtk_widget_destroy(current_window);
+            const gchar *path1 = gtk_entry_get_text(GTK_ENTRY(border_radius_entry));
+
+            FILE *file = fopen(path1, "r");
+            if (!file) {
+                printf("ERREUR d'ouverture du fichier !!");
+            }
+            creer_object(file, 0);
+        }
+
+        gtk_widget_destroy(dialog);
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
 }
+
+
+
+void creerCommande(char* label, coordonnees* c, dimension* d, GCallback c_handler){
+
+    GtkWidget *button = gtk_button_new_with_label(label);
+    gtk_widget_set_size_request(button, d->width, d->height);
+    //add_btn_normal_clicked
+    g_signal_connect(button, "clicked", G_CALLBACK(c_handler), &app_data);
+    if(app_data.left_panel){
+        if(c == NULL){
+            gtk_box_pack_start(GTK_BOX(app_data.left_panel->box), button, FALSE, FALSE, 2);
+            gtk_widget_show_all(app_data.left_panel->box);
+        }
+        else{
+            gtk_fixed_put(GTK_FIXED(app_data.left_panel->fixed), button, c->x, c->y);
+            gtk_widget_show_all(app_data.left_panel->fixed);
+        }
+    }
+
+}
+
+void generate_buttons() {
+    const char *labels[] = {
+        "Normal", "Radio", "Checkbox", "Toggle", "Spin", "Switch", "Label",
+        "Basic Entry", "Password Entry", "ComboBox", "Box", "Styled Box",
+        "Image", "Text View", "Menu Bar", "Changer"
+    };
+
+    GCallback callbacks[] = {
+        G_CALLBACK(add_btn_normal_clicked),
+        G_CALLBACK(add_btn_radio_clicked),
+        G_CALLBACK(show_properties_dialog_btn_checkbox),
+        G_CALLBACK(show_properties_dialog_btn_toggle),
+        G_CALLBACK(show_properties_dialog_btn_spin),
+        G_CALLBACK(show_properties_dialog_btn_switch),
+        G_CALLBACK(show_properties_dialog_label),
+        G_CALLBACK(add_basic_entry_clicked),
+        G_CALLBACK(add_password_entry_clicked),
+        G_CALLBACK(show_create_combobox_dialog),
+        G_CALLBACK(create_box_container),
+        G_CALLBACK(create_styled_box_container),
+        G_CALLBACK(add_image_clicked),
+        G_CALLBACK(show_create_textview_dialog),
+        G_CALLBACK(add_menu_bar_clicked),
+        G_CALLBACK(changer_clicked)
+    };
+
+    coordonnees default_coords = {0, 0}; // Default coordinates
+    dimension default_dim = {100, 30};  // Default dimensions
+
+    for (int i = 0; i < sizeof(labels) / sizeof(labels[0]); i++) {
+        creerCommande((char *)labels[i], NULL, &default_dim, callbacks[i]);
+    }
+    //Creer une commande dans une position fixée
+    creerCommande("hello", cord(300, 200), dim(200, 100), callbacks[0]);
+
+}
+
 
 int main(int argc, char *argv[]) {
     // Initialize GTK
     gtk_init(&argc, &argv);
     
     // App data structure to hold our widgets
-    AppData app_data;
+    // AppData app_data;
     // Initialize container management in AppData
     app_data.containers = NULL;
     app_data.selected_container = NULL;
@@ -80,9 +223,13 @@ int main(int argc, char *argv[]) {
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
     gtk_widget_set_size_request(left_panel_scroll, 220, -1);
     
-    GtkWidget *left_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-    gtk_container_add(GTK_CONTAINER(left_panel_scroll), left_panel);
-    
+    CustomSidebar* side = custom_sidebar_new();
+    GtkWidget *left_panel = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);//to delete
+    // gtk_container_add(GTK_CONTAINER(left_panel_scroll), left_panel);
+    // gtk_container_add(GTK_CONTAINER(left_panel_scroll), side->box);
+    gtk_container_add(GTK_CONTAINER(left_panel_scroll), side->fixed);
+    // app_data.left_panel = left_panel;
+    app_data.left_panel = side;
     // Create sections in left panel
     GtkWidget *widgets_frame = gtk_frame_new("Widgets-buttons");
     GtkWidget *widgets_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
@@ -176,9 +323,13 @@ int main(int argc, char *argv[]) {
     gtk_box_pack_start(GTK_BOX(containers_box), changer_btn, FALSE, FALSE, 2);
     
     // Add all sections to left panel
-    gtk_box_pack_start(GTK_BOX(left_panel), widgets_frame, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(left_panel), entries_frame, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(left_panel), containers_frame, FALSE, FALSE, 0);
+    // gtk_box_pack_start(GTK_BOX(left_panel), widgets_frame, FALSE, FALSE, 0);
+    // gtk_box_pack_start(GTK_BOX(left_panel), entries_frame, FALSE, FALSE, 0);
+    // gtk_box_pack_start(GTK_BOX(left_panel), containers_frame, FALSE, FALSE, 0);
+    
+    gtk_box_pack_start(GTK_BOX(side->box), widgets_frame, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(side->box), entries_frame, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(side->box), containers_frame, FALSE, FALSE, 0);
     
     // Create hierarchy section
     // GtkWidget *hierarchy_frame = gtk_frame_new("UI Hierarchy");
@@ -217,7 +368,8 @@ int main(int argc, char *argv[]) {
     GtkWidget *placeholder_label = gtk_label_new("Arbre view will appear here");
     gtk_container_add(GTK_CONTAINER(arbre_scroll), placeholder_label);
     gtk_container_add(GTK_CONTAINER(arbre_frame), arbre_scroll);
-    gtk_box_pack_start(GTK_BOX(left_panel), arbre_frame, TRUE, TRUE, 0);
+    // gtk_box_pack_start(GTK_BOX(left_panel), arbre_frame, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(side->box), arbre_frame, TRUE, TRUE, 0);
     
     // Store these widgets in app_data for later updating
     app_data.arbre_scroll = arbre_scroll;
@@ -236,7 +388,8 @@ int main(int argc, char *argv[]) {
     gtk_box_pack_start(GTK_BOX(container_box), app_data.container_combo, FALSE, FALSE, 2);
     
     // Add container selection after the container buttons
-    gtk_box_pack_start(GTK_BOX(left_panel), container_frame, FALSE, FALSE, 0);
+    // gtk_box_pack_start(GTK_BOX(left_panel), container_frame, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(side->box), container_frame, FALSE, FALSE, 0);
     
     // Pack left panel into main box
     gtk_box_pack_start(GTK_BOX(main_box), left_panel_scroll, FALSE, FALSE, 0);
@@ -304,7 +457,7 @@ int main(int argc, char *argv[]) {
     gtk_container_set_border_width(GTK_CONTAINER(button_box), 5);
     
     GtkWidget *export_button = gtk_button_new_with_label("Export XML");
-    GtkWidget *run_button = gtk_button_new_with_label("Run Demo");
+    GtkWidget *run_button = gtk_button_new_with_label("Load");
     GtkWidget *debug_button = gtk_button_new_with_label("Debug Tree Structure");
     GtkWidget *exit_button = gtk_button_new_with_label("Exit");
     
@@ -328,6 +481,12 @@ int main(int argc, char *argv[]) {
     // Add properties panel to the main box
     gtk_box_pack_start(GTK_BOX(main_box), properties_frame, FALSE, FALSE, 0);
     
+
+
+
+    generate_buttons();
+
+
     // Show all widgets
     gtk_widget_show_all(maFenetre->window);
     

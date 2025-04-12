@@ -5,6 +5,26 @@
 #include "global.h"
 #include "containers_list.h"  
 
+//leftpanel
+typedef struct {
+    GtkWidget *fixed;
+    GtkWidget *box;
+} CustomSidebar;
+
+CustomSidebar* custom_sidebar_new() {
+    CustomSidebar *sidebar = g_malloc(sizeof(CustomSidebar));
+
+    sidebar->fixed = gtk_fixed_new();
+    sidebar->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+
+    // Give a name so you can find it later if needed
+    gtk_widget_set_name(sidebar->box, "auto_box");
+
+    // Place the box inside the fixed container
+    gtk_fixed_put(GTK_FIXED(sidebar->fixed), sidebar->box, 0, 0);
+
+    return sidebar;
+}
 // Define the AppData struct with the same name as forward declared elsewhere
 typedef struct _AppData {
     GtkWidget *window;
@@ -32,6 +52,7 @@ typedef struct _AppData {
     GtkWidget *xml_text_view;    // TextView to display generated XML
     GtkWidget* preview_frame;
     GtkWidget* back;
+    CustomSidebar* left_panel;
     // char** argv;
     // int argc;
 } AppData;
