@@ -114,21 +114,55 @@ void run_demo(GtkWidget *widget, gpointer data) {
 
 
 
-void creerCommande(char* label, coordonnees* c, dimension* d, GCallback c_handler){
+GtkWidget *creerCommande(char* label, coordonnees* c, dimension* d, GCallback c_handler){
+    //Creation du sidebar s'il ne l'est pas
+    if(app_data.left_panel == NULL){
+        app_data.left_panel = custom_sidebar_new();
+    }
+    //Dimension par défaut en cas d'abscence d'une
+    if(d == NULL){
+        d = malloc(sizeof(dimension));
+        d->width = 50;
+        d->height = 50;
+    }
+    if(label == NULL){
+        perror("La création de commande a échoué, veuillez entrez un label à la commande");
+        return NULL;
+    }
+    //Creation du commande avec une mnemonic en ajustant sa taille
+    GtkWidget *button = gtk_button_new_with_mnemonic(label);
+    gtk_widget_set_size_request(button, d->width, d->height);
+    //Associer le callback
+    g_signal_connect(button, "clicked", G_CALLBACK(c_handler), &app_data);
+
+    //Ajouter la commande au conteneur
+    if(c == NULL){
+        gtk_box_pack_start(GTK_BOX(app_data.left_panel->box), button, FALSE, FALSE, 2);
+        gtk_widget_show_all(app_data.left_panel->box);
+        }
+    else{
+        gtk_fixed_put(GTK_FIXED(app_data.left_panel->fixed), button, c->x, c->y);
+        gtk_widget_show_all(app_data.left_panel->fixed);
+    }
+
+    return (GtkWidget *) button;
+}
+
+void creerCommandeDansPropertyPanel(char* label, coordonnees* c, dimension* d, GCallback c_handler){
 
     GtkWidget *button = gtk_button_new_with_mnemonic(label);
     gtk_widget_set_size_request(button, d->width, d->height);
     //add_btn_normal_clicked
     g_signal_connect(button, "clicked", G_CALLBACK(c_handler), &app_data);
     if(app_data.left_panel){
-        if(c == NULL){
-            gtk_box_pack_start(GTK_BOX(app_data.left_panel->box), button, FALSE, FALSE, 2);
-            gtk_widget_show_all(app_data.left_panel->box);
-        }
-        else{
-            gtk_fixed_put(GTK_FIXED(app_data.left_panel->fixed), button, c->x, c->y);
-            gtk_widget_show_all(app_data.left_panel->fixed);
-        }
+        // if(c == NULL){
+            gtk_box_pack_start(GTK_BOX(app_data.properties_panel), button, FALSE, FALSE, 2);
+            gtk_widget_show_all(app_data.properties_panel);
+        // }
+        // else{
+            // gtk_fixed_put(GTK_FIXED(app_data.left_panel->fixed), button, c->x, c->y);
+            // gtk_widget_show_all(app_data.left_panel->fixed);
+        // }
     }
 
 }
@@ -367,6 +401,7 @@ int main(int argc, char *argv[]) {
     creerCommande("_Debug Tree Structure", cord(250, 150), dim(50, 50), G_CALLBACK(on_show_arbre_clicked));
     creerCommande("_Exit", cord(250, 200), dim(50, 50), G_CALLBACK(gtk_main_quit));
     creerCommande("_Test Arbre Functions", cord(250, 250), dim(50, 50), G_CALLBACK(test_arbre_functions));
+    creerCommandeDansPropertyPanel("hello_gtk", cord(250, 250), dim(50, 50), G_CALLBACK(open_dialog));
 
 
     // gtk_box_pack_end(GTK_BOX(app_data.properties_panel), button_box, FALSE, FALSE, 0);
