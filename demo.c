@@ -113,6 +113,23 @@ void run_demo(GtkWidget *widget, gpointer data) {
 }
 
 
+/**************************************
+ * NOM: creerCommande
+ * ENTRÉS: 
+ *       label (char*): Le texte affiché sur le bouton de commande.
+ *       c (coordonnees*): Les coordonnées pour positionner le bouton (peut être NULL).
+ *       d (dimension*): Les dimensions du bouton (peut être NULL, des dimensions par défaut seront utilisées).
+ *       c_handler (GCallback): Le callback associé à l'événement "clicked" du bouton.
+ * SORTIS: 
+ *       GtkWidget*: Un pointeur vers le widget bouton créé, ou NULL en cas d'erreur.
+ * DESCRIPTION: 
+ *       Cette fonction crée un bouton de commande et l'ajoute au panneau latéral gauche 
+ *       de l'application. Si le panneau latéral n'existe pas, il est créé. 
+ *       Le bouton peut être positionné soit dans un conteneur `GtkBox` (par défaut) 
+ *       soit dans un conteneur `GtkFixed` si des coordonnées sont fournies.
+ *       La fonction gère également les dimensions par défaut si elles ne sont pas spécifiées.
+ *       !: Un label est obligatoire pour créer le bouton, sinon une erreur est signalée.
+ ***************************************/
 
 GtkWidget *creerCommande(char* label, coordonnees* c, dimension* d, GCallback c_handler){
     //Creation du sidebar s'il ne l'est pas
@@ -121,9 +138,7 @@ GtkWidget *creerCommande(char* label, coordonnees* c, dimension* d, GCallback c_
     }
     //Dimension par défaut en cas d'abscence d'une
     if(d == NULL){
-        d = malloc(sizeof(dimension));
-        d->width = 50;
-        d->height = 50;
+        d = creer_dimension(50, 30);
     }
     if(label == NULL){
         perror("La création de commande a échoué, veuillez entrez un label à la commande");
@@ -396,11 +411,14 @@ int main(int argc, char *argv[]) {
     
 
     //Add those buttons to left sidebar
-    creerCommande("_Export XML", cord(250, 50), dim(50, 50), G_CALLBACK(export_to_xml));
-    creerCommande("_Load", cord(250, 100), dim(50, 50), G_CALLBACK(run_demo));
-    creerCommande("_Debug Tree Structure", cord(250, 150), dim(50, 50), G_CALLBACK(on_show_arbre_clicked));
-    creerCommande("_Exit", cord(250, 200), dim(50, 50), G_CALLBACK(gtk_main_quit));
-    creerCommande("_Test Arbre Functions", cord(250, 250), dim(50, 50), G_CALLBACK(test_arbre_functions));
+    int initial_y = 200;
+    int gap = 60;
+    creerCommande("_Export XML", cord(250, initial_y), dim(200, 50), G_CALLBACK(export_to_xml));
+    creerCommande("_Load", cord(250, initial_y + gap), dim(200, 50), G_CALLBACK(run_demo));
+    creerCommande("_Debug Tree Structure", cord(250, initial_y + 2*gap), dim(200, 50), G_CALLBACK(on_show_arbre_clicked));
+    creerCommande("_Exit", cord(250, initial_y + 3*gap), dim(200, 50), G_CALLBACK(gtk_main_quit));
+    creerCommande("_Test Arbre Functions", cord(250, initial_y + 4*gap), dim(200, 50), G_CALLBACK(test_arbre_functions));
+    
     creerCommandeDansPropertyPanel("hello_gtk", cord(250, 250), dim(50, 50), G_CALLBACK(open_dialog));
 
 
